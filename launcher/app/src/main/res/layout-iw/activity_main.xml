@@ -125,7 +125,10 @@
             android:fontFamily="@string/font_light"
             android:letterSpacing="-0.02"
             android:includeFontPadding="false"
-            android:singleLine="true" />
+            android:singleLine="true" android:shadowColor="#99000000"
+            android:shadowDy="1"
+            android:shadowRadius="5"
+            />
 
         <!-- Cinematic shelf only: when the app was last opened, and the dock position dots. -->
         <TextView
@@ -176,94 +179,9 @@
                 android:layout_alignParentEnd="true"
                 android:layout_toEndOf="@+id/topButtons"
                 android:layout_marginStart="16dp"
-                android:orientation="horizontal"
-                android:gravity="right|bottom">
+                android:orientation="vertical"
+                android:gravity="right">
 
-                <!-- As tall as the clock and centred on it, so three lines (date, weather, place) stay inside its height. -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="top"
-                    android:paddingTop="12dp"
-                    android:orientation="vertical">
-
-                    <!-- Shamsi date ("27 Mehr 1405"), shown when shamsi_date is on. -->
-                    <TextView
-                        android:id="@+id/shamsiDate"
-                        android:gravity="right"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:ellipsize="end"
-                        android:textColor="#E6FFFFFF"
-                        android:textSize="17sp"
-                        android:fontFamily="@string/font_regular"
-                        android:letterSpacing="0.02"
-                        android:includeFontPadding="false"
-                        android:visibility="gone" />
-
-                    <TextClock
-                        android:id="@+id/date"
-                        android:gravity="right"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:ellipsize="end"
-                        android:format12Hour="@string/date_format"
-                        android:format24Hour="@string/date_format"
-                        android:textColor="#A6FFFFFF"
-                        android:textSize="13sp"
-                        android:fontFamily="@string/font_regular"
-                        android:letterSpacing="0.14"
-                        android:textAllCaps="true" />
-
-                        <!-- Lunar date ("Lunar 13/9 · Year of the Horse"), shown when lunar_date is on. -->
-                        <TextView
-                            android:id="@+id/lunarDate"
-                            android:gravity="right"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:singleLine="true"
-                            android:ellipsize="end"
-                            android:textColor="#80FFFFFF"
-                            android:textSize="14sp"
-                            android:fontFamily="@font/outfit_regular"
-                            android:letterSpacing="0.14"
-                            android:textAllCaps="true"
-                            android:visibility="gone" />
-
-                        <!-- One line from a local provider (weather_provider), see WeatherLine. -->
-                        <TextView
-                            android:id="@+id/weatherLine"
-                            android:gravity="right"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:maxLines="2"
-                            android:lineSpacingExtra="0dp"
-                            android:ellipsize="end"
-                            android:textColor="#D9FFFFFF"
-                            android:textSize="15sp"
-                            android:fontFamily="@font/outfit_regular"
-                            android:letterSpacing="0.04"
-                            android:visibility="gone" />
-
-                        <TextView
-                            android:id="@+id/nowPlaying"
-                            android:gravity="right"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:maxLines="2"
-                            android:lineSpacingExtra="0dp"
-                            android:ellipsize="end"
-                            android:textColor="#D9FFFFFF"
-                            android:textSize="15sp"
-                            android:fontFamily="@font/outfit_regular"
-                            android:letterSpacing="0.04"
-                            android:visibility="gone" />
-                </LinearLayout>
 
                 <View
                     android:id="@+id/clockDivider"
@@ -273,7 +191,8 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="8dp"
-                    android:background="#33FFFFFF" />
+                    android:background="#33FFFFFF"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -294,7 +213,10 @@
                         android:textSize="12sp"
                         android:fontFamily="@string/font_medium"
                         android:letterSpacing="0"
-                        android:textAllCaps="true" />
+                        android:textAllCaps="true" android:shadowColor="#99000000"
+                        android:shadowDy="1"
+                        android:shadowRadius="5"
+                        />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -317,7 +239,10 @@
                             android:fontFamily="@string/font_medium"
                             android:letterSpacing="0"
                             android:ellipsize="none"
-                            android:textAllCaps="true" />
+                            android:textAllCaps="true" android:shadowColor="#99000000"
+                            android:shadowDy="1"
+                            android:shadowRadius="5"
+                            />
 
                         <TextClock
                             android:id="@+id/clock"
@@ -330,9 +255,113 @@
                             android:textSize="52sp"
                             android:fontFamily="@string/font_light"
                             android:letterSpacing="-0.04"
-                            android:includeFontPadding="false" />
+                            android:includeFontPadding="false" android:shadowColor="#99000000"
+                            android:shadowDy="1"
+                            android:shadowRadius="5"
+                            />
                     </LinearLayout>
 
+                </LinearLayout>
+
+                <!-- Under the clock: the date, then the weather with its place, then now playing. -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="right"
+                    android:orientation="vertical">
+
+                    <!-- Shamsi date ("27 Mehr 1405"), shown when shamsi_date is on. -->
+                    <TextView
+                        android:id="@+id/shamsiDate"
+                        android:gravity="right"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="#E6FFFFFF"
+                        android:textSize="17sp"
+                        android:fontFamily="@string/font_regular"
+                        android:letterSpacing="0.02"
+                        android:includeFontPadding="false"
+                        android:visibility="gone" android:shadowColor="#99000000"
+                        android:shadowDy="1"
+                        android:shadowRadius="5"
+                        />
+
+                    <TextClock
+                        android:id="@+id/date"
+                        android:gravity="right"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:format12Hour="@string/date_format"
+                        android:format24Hour="@string/date_format"
+                        android:textColor="#A6FFFFFF"
+                        android:textSize="13sp"
+                        android:fontFamily="@string/font_regular"
+                        android:letterSpacing="0.14"
+                        android:textAllCaps="true" android:shadowColor="#99000000"
+                        android:shadowDy="1"
+                        android:shadowRadius="5"
+                        />
+
+                        <!-- Lunar date ("Lunar 13/9 · Year of the Horse"), shown when lunar_date is on. -->
+                        <TextView
+                            android:id="@+id/lunarDate"
+                            android:gravity="right"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:textColor="#80FFFFFF"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/outfit_regular"
+                            android:letterSpacing="0.14"
+                            android:textAllCaps="true"
+                            android:visibility="gone" android:shadowColor="#99000000"
+                            android:shadowDy="1"
+                            android:shadowRadius="5"
+                            />
+
+                        <!-- One line from a local provider (weather_provider), see WeatherLine. -->
+                        <TextView
+                            android:id="@+id/weatherLine"
+                            android:gravity="right"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:maxLines="2"
+                            android:lineSpacingExtra="0dp"
+                            android:ellipsize="end"
+                            android:textColor="#D9FFFFFF"
+                            android:textSize="15sp"
+                            android:fontFamily="@font/outfit_regular"
+                            android:letterSpacing="0.04"
+                            android:visibility="gone" android:shadowColor="#99000000"
+                            android:shadowDy="1"
+                            android:shadowRadius="5"
+                            />
+
+                        <TextView
+                            android:id="@+id/nowPlaying"
+                            android:gravity="right"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:maxLines="2"
+                            android:lineSpacingExtra="0dp"
+                            android:ellipsize="end"
+                            android:textColor="#D9FFFFFF"
+                            android:textSize="15sp"
+                            android:fontFamily="@font/outfit_regular"
+                            android:letterSpacing="0.04"
+                            android:visibility="gone" android:shadowColor="#99000000"
+                            android:shadowDy="1"
+                            android:shadowRadius="5"
+                            />
                 </LinearLayout>
             </LinearLayout>
 
