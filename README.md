@@ -571,8 +571,9 @@ and a wallpaper.
     row of this page, Left and Right change the value without opening anything.
   - Layout: **Apps per row** 4, 5, 6 or 7; **Rows below dock** 0 to 3, how many rows of tiles stay visible
     under the dock band; **Dock band opacity** 100%, 70%, 50% or 30%. The last two only do anything while the
-    dock is its own row (`dock_row`, on by default).
-  - Clock and pills: **Greeting** on or off (`show_greeting`), **Date in white** (`header_white`), **Wi-Fi
+    dock is its own row (`dock_row`, on by default). **Tile shape**: Rounded, Square or Pill (`tile_shape`).
+  - Clock and pills: **Greeting** on or off (`show_greeting`), **Clock weight** Thin, Light or Bold, **Hour
+    format** Auto, 12-hour or 24-hour, **Seconds** on or off, **Date in white** (`header_white`), **Wi-Fi
     pill** as Label, Icon only or Hidden (`icon_only_buttons`, `show_network_pill`), **Wi-Fi status colour**
     (`wifi_status_color`) and, with `weather_provider` set, **Weather** on or off for the line under the date.
     Each overrides the theme's key until Follow theme or another theme.
@@ -641,7 +642,8 @@ tools/tv.py 'settings put secure screensaver_components com.gathin.tvhome/.Clock
 - `HOME_KEY_SERVICE=1` also fixes sticks whose Home key sends ALL_APPS, and opens Settings from the remote's
   **gear** button, even one Android does not map (scancodes or keycodes in config.xml).
 - With `settings_key_panel` the gear opens a [small quick settings panel](docs/quick-settings-panel.jpg)
-  over Home or any app: TV settings, Display, Network, Apps and Launcher settings.
+  over Home or any app: TV settings, Display, Network, Apps and Launcher settings. On Home the panel also
+  answers a `settings_key_keycodes` button without the helper, a tile's own menu first.
 
 </details>
 

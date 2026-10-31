@@ -46,4 +46,6 @@ the rules. Keys from before this rule are on its wanted list; a screenshot for o
 | `settings_menu_on_click` | Fire TV Stick 4K Max: OK on the Settings pill drops the launcher's menu, TV settings as its second row | <img src="switches/settings_menu_on_click.jpg" width="320" alt="settings_menu_on_click"> |
 | `weather_provider` | Fire TV Stick 4K Max with the weather add-on installed: its "12° · Cloudy" line under the date, read from the add-on's content provider | <img src="switches/weather_provider.jpg" width="320" alt="weather_provider"> |
 | `wallpaper_motion` | Fire TV Stick 4K Max: Home mid-breath, the Sweden picture a few percent in; the motion itself is slow, 45 s there and back | <img src="switches/wallpaper_motion.jpg" width="320" alt="wallpaper_motion"> |
+| `tile_shape` | Fire TV Stick 4K Max: `pill` tiles, the dock band and focus glass rounded to match | <img src="switches/tile_shape.jpg" width="320" alt="tile_shape"> |
+| `now_playing` | Fire TV Stick 4K Max: "▶ Playing on Stremio" with the title under the weather line while Stremio plays behind Home | <img src="switches/now_playing.jpg" width="320" alt="now_playing"> |
 | `header_mood` | Fire TV Stick 4K Max: the weather line in the condition's tint (rain, cool blue) under the clock | <img src="switches/header_mood.jpg" width="320" alt="header_mood"> |

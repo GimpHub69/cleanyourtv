@@ -57,6 +57,12 @@ final class Config {
     static final String WALLPAPER_CYCLE_KEY = "wallpaper_cycle";
     /** The Wallpaper motion row in Launcher settings, over config.xml wallpaper_motion. */
     static final String WALLPAPER_MOTION_KEY = "wallpaper_motion";
+    /** Clock rows: weight 0 thin, 1 light, 2 bold (absent: the layout's light); hours 0 auto, 12 or 24; seconds shown. */
+    static final String CLOCK_WEIGHT_KEY = "clock_weight";
+    static final String CLOCK_HOURS_KEY = "clock_hours";
+    static final String CLOCK_SECONDS_KEY = "clock_seconds";
+    /** The Tile shape row's choice over config tile_shape. */
+    static final String TILE_SHAPE_KEY = "tile_shape";
     /**
      * Counts the changes made in Launcher settings. Home remembers the count it was built with and rebuilds on
      * resume when it differs, however the settings were left (see MainActivity#onResume).
@@ -131,6 +137,13 @@ final class Config {
     final boolean wallpaperMotion;
     /** The weather line tinted by the condition and the clock warm after sunset (config.xml header_mood). */
     final boolean headerMood;
+    /** Clock rows chosen on the TV: weight -1 as the layout, 0 thin, 1 light, 2 bold; hours 0 auto, 12 or 24; seconds shown. */
+    final int clockWeight, clockHours;
+    final boolean clockSeconds;
+    /** "rounded", "square" or "pill" (config.xml tile_shape, a theme, or the Tile shape row). */
+    final String tileShape;
+    /** A "Playing on …" line under the clock from the TV's media sessions (config.xml now_playing). */
+    final boolean nowPlaying;
     /** Names under every tile, dimmed until focused (config.xml always_show_names); the dock band grows for them. */
     final boolean alwaysShowNames;
     /** Reorder button in the top bar (config.xml reorder_button); the Settings long-press menu offers it either way. */
@@ -278,8 +291,13 @@ final class Config {
                    List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, boolean fadeRows, int homeIdleClockMinutes,
                    boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
                    boolean handleViewInputs, boolean tileMenu, boolean dockEvenPadding, boolean cinematicDots, boolean cinematicWhiteFocus, boolean wifiStatusColor, int cinematicScrim, int cinematicArt,
-                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome, boolean wallpaperMotion, boolean headerMood) {
+                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome, boolean wallpaperMotion, boolean headerMood, int clockWeight, int clockHours, boolean clockSeconds, String tileShape, boolean nowPlaying) {
         this.headerMood = headerMood;
+        this.clockWeight = clockWeight;
+        this.clockHours = clockHours;
+        this.clockSeconds = clockSeconds;
+        this.tileShape = tileShape;
+        this.nowPlaying = nowPlaying;
         this.wallpaperCycleOnHome = wallpaperCycleOnHome;
         this.wallpaperMotion = wallpaperMotion && animations && !reducedMotion;
         this.homeHook = homeHook;
@@ -440,6 +458,8 @@ final class Config {
         String weatherProvider = res.getString(R.string.weather_provider).trim();
         boolean wallpaperMotion = res.getBoolean(R.bool.wallpaper_motion);
         boolean headerMood = res.getBoolean(R.bool.header_mood);
+        String tileShape = res.getString(R.string.tile_shape).trim();
+        boolean nowPlaying = res.getBoolean(R.bool.now_playing);
         boolean reorderButton = res.getBoolean(R.bool.reorder_button);
         boolean showNetworkPill = res.getBoolean(R.bool.show_network_pill);
         boolean showInputsPill = res.getBoolean(R.bool.show_inputs_pill);
@@ -539,6 +559,8 @@ final class Config {
             weatherProvider = string(json, "weather_provider", weatherProvider);
             wallpaperMotion = bool(json, "wallpaper_motion", wallpaperMotion);
             headerMood = bool(json, "header_mood", headerMood);
+            tileShape = string(json, "tile_shape", tileShape);
+            nowPlaying = bool(json, "now_playing", nowPlaying);
             reorderButton = bool(json, "reorder_button", reorderButton);
             showNetworkPill = bool(json, "show_network_pill", showNetworkPill);
             showInputsPill = bool(json, "show_inputs_pill", showInputsPill);
@@ -619,6 +641,10 @@ final class Config {
         wifiStatusColor = choices.getBoolean(WIFI_COLOR_KEY, wifiStatusColor);
         boolean weatherLine = choices.getBoolean(WEATHER_KEY, true);
         wallpaperMotion = choices.getBoolean(WALLPAPER_MOTION_KEY, wallpaperMotion);
+        int clockWeight = choices.getInt(CLOCK_WEIGHT_KEY, -1);
+        int clockHours = choices.getInt(CLOCK_HOURS_KEY, 0);
+        boolean clockSeconds = choices.getBoolean(CLOCK_SECONDS_KEY, false);
+        tileShape = choices.getString(TILE_SHAPE_KEY, tileShape);
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
         // A theme can also switch the wallpaper off while the file is still there.
@@ -692,7 +718,7 @@ final class Config {
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, restoreKeyServices, wallpaperEnabled, wallpaper,
                 wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow, fadeRows,
-                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome, wallpaperMotion, headerMood);
+                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome, wallpaperMotion, headerMood, clockWeight, clockHours, clockSeconds, tileShape, nowPlaying);
     }
 
     /**
@@ -736,12 +762,12 @@ final class Config {
             SharedPreferences.Editor editor = choices.edit();
             if (!"absent".equals(token)) editor.remove("columns").remove("animations")
                     .remove("advanced_effects").remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY)
-                    .remove(DOCK_OPACITY_KEY).remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY).remove(WALLPAPER_MOTION_KEY);
+                    .remove(DOCK_OPACITY_KEY).remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY).remove(WALLPAPER_MOTION_KEY).remove(CLOCK_WEIGHT_KEY).remove(CLOCK_HOURS_KEY).remove(CLOCK_SECONDS_KEY).remove(TILE_SHAPE_KEY);
             editor.putString(THEME_SIGNATURE_KEY, signature).commit();
         } else if (!seen.equals(signature)) {
             choices.edit().remove("columns").remove("animations").remove("advanced_effects")
                     .remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY).remove(DOCK_OPACITY_KEY)
-                    .remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY).remove(WALLPAPER_MOTION_KEY)
+                    .remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY).remove(WALLPAPER_MOTION_KEY).remove(CLOCK_WEIGHT_KEY).remove(CLOCK_HOURS_KEY).remove(CLOCK_SECONDS_KEY).remove(TILE_SHAPE_KEY)
                     .putString(THEME_SIGNATURE_KEY, signature).commit();
         }
     }

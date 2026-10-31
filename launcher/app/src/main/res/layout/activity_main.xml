@@ -237,7 +237,7 @@
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_weight="1"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:gravity="top"
                         android:paddingTop="12dp"
                         android:orientation="vertical">
@@ -293,6 +293,21 @@
                         <!-- One line from a local provider (weather_provider: "12° · Cloudy"), see WeatherLine. -->
                         <TextView
                             android:id="@+id/weatherLine"
+                            android:gravity="left"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:maxLines="2"
+                            android:lineSpacingExtra="0dp"
+                            android:ellipsize="end"
+                            android:textColor="#D9FFFFFF"
+                            android:textSize="15sp"
+                            android:fontFamily="@font/outfit_regular"
+                            android:letterSpacing="0.04"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/nowPlaying"
                             android:gravity="left"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

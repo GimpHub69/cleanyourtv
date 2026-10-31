@@ -188,6 +188,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView stats;
     /** weather_provider's line under the date (WeatherLine); null URI when off. */
     private TextView weatherLine;
+    /** now_playing: the "Playing on …" line under the clock, refreshed with the weather. */
+    private TextView nowPlaying;
+    private boolean nowPlayingOn;
     private String weatherUri;
     /** header_mood: the weather line tinted, the clock warm and the greeting dimmer after sunset. */
     private boolean headerMood;
@@ -368,6 +371,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             updateGreeting();
             updateRace();
             if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine, headerMood);
+            if (nowPlayingOn) NowPlaying.refresh(MainActivity.this, nowPlaying);
             // The pill follows the network callbacks and each return to Home; only the diya's flame follows the
             // signal level, so only it needs this minute's binder calls (about 7 ms on the UI thread).
             if (festive) updateWifiLabel();
@@ -486,6 +490,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         weatherLine = findViewById(R.id.weatherLine);
         weatherUri = cfg.weatherLine ? cfg.weatherProvider : null;
         headerMood = cfg.headerMood;
+        AppAdapter.tileShape = cfg.tileShape;
+        ClockStyle.apply(findViewById(R.id.clock), cfg.clockWeight, cfg.clockHours, cfg.clockSeconds);
+        nowPlaying = findViewById(R.id.nowPlaying);
+        nowPlayingOn = cfg.nowPlaying;
         lunarDate = findViewById(R.id.lunarDate);
         lunar = cfg.lunarDate;
         lunarOffset = Lunar.offsetFor(cfg.lunarUtcOffset, Locale.getDefault());
@@ -503,6 +511,18 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         hiddenApps = new HashSet<>(cfg.hiddenApps);
 
         grid = findViewById(R.id.grid);
+        // A layout pass can move the focused tile without a scroll (a reload that parks the dock, a header that grew):
+        // the glass would stay where the tile was. Place it again when the tile is no longer under it.
+        grid.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            View focus = getCurrentFocus();
+            int at = focusedTilePosition();
+            if (focus == null || at < 0 || !glassShown || focus.getWidth() == 0) return;
+            Rect rect = new Rect(0, 0, focus.getWidth(), focus.getHeight());
+            root.offsetDescendantRectToMyCoords(focus, rect);
+            float h = focus.getHeight() * adapter.focusScale() + 12f * density;
+            float y = rect.exactCenterY() - h / 2f - (advancedEffects ? 4f * density : 0f);
+            if (Math.abs(y - glassTargetY) > density) onTileFocused(at, focus);
+        });
         rtlAppGrid = getResources().getBoolean(R.bool.rtl_app_grid);
         // Mirror only the app grid; the header and other locales keep their own layouts.
         // single_row: one span laid out sideways, so the same adapter, glass and dock band serve a scrolling row.
@@ -954,6 +974,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         updateGreeting();
         updateRace();
         if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine, headerMood);
+        if (nowPlayingOn) NowPlaying.refresh(MainActivity.this, nowPlaying);
         // The network and Inputs pills keep their state while Home is in the background, and callbacks update them
         // when the network or the inputs change, so this refresh only catches anything missed. Its binder calls
         // (about 7 ms on a TCL C755, most of it WifiManager.getConnectionInfo) would hold up the first frame back
@@ -1241,7 +1262,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (handleSettingsKey(event)) return true;
         if (tileMenuEnabled && !reordering && openPopup == null && cardPrompt == null
                 && event.getKeyCode() == KeyEvent.KEYCODE_MENU) {
             int position = focusedTilePosition();
@@ -1253,6 +1273,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 return true;
             }
         }
+        // After the tile menu: a Settings keycode that is also Menu (82, a Fire TV remote) keeps the tile menu on a tile.
+        if (handleSettingsKey(event)) return true;
         if (!reordering) return super.dispatchKeyEvent(event);
         if (dockEditing) return dispatchDockEdit(event);
         boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
@@ -1631,7 +1653,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             lp.height = (int) h;
             glass.setLayoutParams(lp);
             // GlassView draws its slab inset by pad, i.e. exactly over the zoomed tile: same corners as the tile.
-            glass.setRadius(AppAdapter.cornerRadius(card.getWidth(), density) * scale);
+            glass.setRadius(AppAdapter.cornerRadius(card.getWidth(), card.getHeight(), density) * scale);
         }
         glassCardW = card.getWidth();
         glassTargetX = x;

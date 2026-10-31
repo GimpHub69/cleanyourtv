@@ -145,11 +145,13 @@
          a temporary `Log.d` in the helper's `onKeyEvent`: `getKeyCode()`, `getScanCode()`, `getDeviceId()`, read
          after a HOME_KEY_SERVICE=1 rebuild. Leave empty to omit. -->
     <integer-array name="settings_key_keycodes">
+        <!-- AFTKRT: the Fire TV remote's Menu button (82) on Home, where a tile keeps its tile menu first. -->
+        <item>82</item>
     </integer-array>
     <!-- What those Settings buttons open: false, the TV's Settings; true, a small glass panel at the top right
          with TV settings, Display, Network, Apps (re-enable an app) and Launcher settings, over whatever is on screen.
          Both keys can also be set from a theme's config.json ("settings_key_keycodes": [83]). -->
-    <bool name="settings_key_panel">false</bool>
+    <bool name="settings_key_panel">true</bool>
 
     <!-- A force stop of the launcher (Settings, a cleaner app, am force-stop) takes HomeKeyService and InputKeyService
          off the enabled list. true: Home puts the helpers that were running back when it starts; one turned off in
@@ -250,6 +252,16 @@
          (warm for a clear day, cool for rain), and after sunset the clock turns slightly warm and the greeting dims.
          Off by default; a theme can set "header_mood": true. -->
     <bool name="header_mood">true</bool>
+    <!-- The tiles' corners: "rounded" (16dp, the default), "square" (3dp) or "pill" (half the tile's height); the
+         dock band and the focus glass follow. Can also be set with "tile_shape" in a theme; the Tile shape row in
+         Launcher settings overrides it on the TV. -->
+    <string name="tile_shape">rounded</string>
+    <!-- A line under the clock while an app plays or is paused ("Playing on Stremio", the title under it when the
+         app names one), from the TV's media sessions on each return to Home and each minute. Android hands those
+         only to an allowed notification listener, so the launcher declares one that reads no notifications; allow
+         it over ADB with `cmd notification allow_listener com.gathin.tvhome/.NowPlaying` (undo: disallow_listener).
+         Off by default; a theme can set "now_playing": true. -->
+    <bool name="now_playing">true</bool>
     <string name="weather_provider" translatable="false">content://io.github.sumyabazar1.weather/now</string>
     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows
          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can

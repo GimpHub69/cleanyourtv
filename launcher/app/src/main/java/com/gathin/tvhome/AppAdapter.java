@@ -844,15 +844,25 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return Color.HSVToColor(hsv);
     }
 
-    /** Corner radius for a tile of this width: 16dp at the design width, proportionally less when smaller. */
-    static float cornerRadius(int tileWidthPx, float density) {
-        return 16f * density * Math.min(1f, tileWidthPx / (DESIGN_W_DP * density));
+    /** config tile_shape, set by Home before its tiles lay out: "rounded", "square" or "pill". */
+    static String tileShape = "rounded";
+
+    /**
+     * Corner radius for a tile of this size: 16dp at the design width, proportionally less when smaller; 3dp for
+     * square tiles, half the height for pills. The dock band and the focus glass take the same.
+     */
+    static float cornerRadius(int tileWidthPx, int tileHeightPx, float density) {
+        if ("pill".equals(tileShape)) return Math.min(tileWidthPx, tileHeightPx) / 2f;
+        float dp = "square".equals(tileShape) ? 3f : 16f;
+        return dp * density * Math.min(1f, tileWidthPx / (DESIGN_W_DP * density));
     }
 
     static final class Holder extends RecyclerView.ViewHolder {
         final View card;
         /** item_app.xml's tile_bg: the dark card behind an icon tile, or behind a banner that has transparent parts. */
         final Drawable cardBackground;
+        /** The corner last set on cardBackground (tile_shape). */
+        float bgRadius = -1f;
         final ImageView banner;
         final ImageView icon;
         final TextView label;
@@ -868,7 +878,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                boolean reducedMotion, float restNameAlpha, boolean overshoot) {
             super(v);
             card = v.findViewById(R.id.card);
-            cardBackground = card.getBackground();
+            cardBackground = card.getBackground().mutate();
             banner = v.findViewById(R.id.banner);
             icon = v.findViewById(R.id.icon);
             label = v.findViewById(R.id.label);
@@ -884,7 +894,14 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 @Override
                 public void getOutline(View view, Outline outline) {
                     // 16dp at the design width, scaled down with the tile so small tiles keep the same shape.
-                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius(view.getWidth(), density));
+                    float radius = cornerRadius(view.getWidth(), view.getHeight(), density);
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), radius);
+                    // tile_bg's own 16dp corners would show inside a square or pill clip. Only on a change: setting it
+                    // invalidates the view, which asks for the outline again.
+                    if (radius != bgRadius && cardBackground instanceof GradientDrawable) {
+                        bgRadius = radius;
+                        ((GradientDrawable) cardBackground).setCornerRadius(radius);
+                    }
                 }
             });
             card.setClipToOutline(true);

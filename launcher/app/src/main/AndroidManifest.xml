@@ -205,6 +205,18 @@
 
         <!-- Screensaver: pick it in Settings, or `settings put secure screensaver_components
              com.gathin.tvhome/.ClockDream` over adb. -->
+        <!-- now_playing: the key to the TV's media sessions, which Android hands only to an allowed notification
+             listener. Reads no notifications. Allow: cmd notification allow_listener com.gathin.tvhome/.NowPlaying -->
+        <service
+            android:name=".NowPlaying"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
         <service
             android:name=".ClockDream"
             android:label="@string/dream_name"

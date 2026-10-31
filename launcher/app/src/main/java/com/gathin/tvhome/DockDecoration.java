@@ -84,7 +84,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
         boolean any = false;
-        int cardWidth = 0;
+        int cardWidth = 0, cardHeight = 0;
         for (int i = 0; i < parent.getChildCount(); i++) {
             View child = parent.getChildAt(i);
             int pos = parent.getChildAdapterPosition(child);
@@ -97,6 +97,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             float r = l + card.getWidth();
             float b = t + card.getHeight();
             cardWidth = card.getWidth();
+            cardHeight = card.getHeight();
             if (!any) {
                 rect.set(l, t, r, b);
                 any = true;
@@ -113,7 +114,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         // outwards and still keeps about the band's top margin from its rounded end.
         float sidePad = 22 * density;
         float side = Math.max(0f, Math.min(sidePad, Math.min(rect.left, parent.getWidth() - rect.right) - density));
-        float radius = AppAdapter.cornerRadius(cardWidth, density);
+        float radius = AppAdapter.cornerRadius(cardWidth, cardHeight, density);
         if (evenPadding) {
             // The same padding on all four sides, so the band's corners are concentric with the tiles' everywhere.
             int inner = parent.getWidth() - parent.getPaddingLeft() - parent.getPaddingRight();

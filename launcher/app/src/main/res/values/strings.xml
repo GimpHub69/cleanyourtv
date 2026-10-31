@@ -179,4 +179,22 @@
     <!-- Cinematic top shelf (cinematic_home): the line under the focused dock app's name; %1$s is when it was
          last opened, e.g. "5 minutes ago" or "yesterday, 9:40 pm". -->
     <string name="last_opened">Last opened %1$s</string>
+    <!-- Clock rows in Launcher settings (on-TV choices): the time's weight, its hour format, seconds. -->
+    <string name="clock_weight_state">Clock weight: %1$s</string>
+    <string name="clock_thin">Thin</string>
+    <string name="clock_light">Light</string>
+    <string name="clock_bold">Bold</string>
+    <string name="clock_hours_state">Hour format: %1$s</string>
+    <string name="clock_hours_auto">Auto</string>
+    <string name="clock_hours_12">12-hour</string>
+    <string name="clock_hours_24">24-hour</string>
+    <string name="clock_seconds_state">Seconds: %1$s</string>
+    <string name="tile_shape_state">Tile shape: %1$s</string>
+    <string name="shape_rounded">Rounded</string>
+    <string name="shape_square">Square</string>
+    <string name="shape_pill">Pill</string>
+    <string name="quick_settings">Quick settings</string>
+    <!-- now_playing, under the clock while an app plays or is paused; %1$s is the app. -->
+    <string name="now_playing">▶ Playing on %1$s</string>
+    <string name="now_paused">⏸ Paused on %1$s</string>
 </resources>

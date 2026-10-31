@@ -216,12 +216,17 @@
                     <TextView android:id="@+id/dock50" style="@style/SettingsColumnChoice" android:text="50%" />
                     <TextView android:id="@+id/dock30" style="@style/SettingsColumnChoice" android:text="30%" />
                 </LinearLayout>
+
+                <TextView android:id="@+id/tileShapeChoice" style="@style/SettingsRow" android:layout_marginTop="12dp" />
             </LinearLayout>
 
             <TextView style="@style/SettingsSection" android:text="@string/section_header" />
 
             <LinearLayout style="@style/SettingsGroup">
                 <TextView android:id="@+id/greetingChoice" style="@style/SettingsRow" />
+                <TextView android:id="@+id/clockWeightChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
+                <TextView android:id="@+id/clockHoursChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
+                <TextView android:id="@+id/clockSecondsChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
                 <TextView android:id="@+id/headerWhiteChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
                 <TextView android:id="@+id/wifiPillChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
                 <TextView android:id="@+id/wifiColorChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />

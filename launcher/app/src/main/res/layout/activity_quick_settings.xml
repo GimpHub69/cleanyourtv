@@ -9,15 +9,22 @@
     <LinearLayout
         android:id="@+id/panel"
         android:layout_width="wrap_content"
-        android:minWidth="220dp"
+        android:minWidth="300dp"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_marginTop="105dp"
+        android:layout_marginTop="136dp"
         android:layout_marginEnd="56dp"
         android:orientation="vertical"
-        android:background="@drawable/glass_panel"
-        android:padding="6dp"
+        android:background="@drawable/settings_group_bg"
+        android:padding="8dp"
         android:elevation="12dp">
+
+        <TextView
+            style="@style/SettingsSection"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="6dp"
+            android:paddingStart="12dp"
+            android:text="@string/quick_settings" />
 
         <LinearLayout
             android:id="@+id/rows"

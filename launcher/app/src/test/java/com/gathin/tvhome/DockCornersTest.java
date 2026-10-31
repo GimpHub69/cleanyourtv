@@ -27,8 +27,23 @@ public class DockCornersTest {
             float gap = INNER / (float) columns - tile;
             float pad = DockDecoration.evenPaddingPx(INNER, columns, tile, Float.MAX_VALUE);
             assertEquals("columns " + columns, gap, pad, 0.001f);
-            float radius = DockDecoration.radiusPx(AppAdapter.cornerRadius(tile, DENSITY), pad);
-            assertEquals("columns " + columns, pad, radius - AppAdapter.cornerRadius(tile, DENSITY), 0.001f);
+            float radius = DockDecoration.radiusPx(AppAdapter.cornerRadius(tile, tile * 101 / 180, DENSITY), pad);
+            assertEquals("columns " + columns, pad, radius - AppAdapter.cornerRadius(tile, tile * 101 / 180, DENSITY), 0.001f);
+        }
+    }
+
+    /** tile_shape: square tiles keep a 3dp corner, pills take half the shorter side, rounded stays 16dp. */
+    @Test
+    public void shapesChangeTheRadius() {
+        try {
+            AppAdapter.tileShape = "square";
+            assertEquals(3f * DENSITY, AppAdapter.cornerRadius((int) (180 * DENSITY), (int) (101 * DENSITY), DENSITY), 0.001f);
+            AppAdapter.tileShape = "pill";
+            assertEquals(101 * DENSITY / 2f, AppAdapter.cornerRadius((int) (180 * DENSITY), (int) (101 * DENSITY), DENSITY), 0.001f);
+            AppAdapter.tileShape = "rounded";
+            assertEquals(16f * DENSITY, AppAdapter.cornerRadius((int) (180 * DENSITY), (int) (101 * DENSITY), DENSITY), 0.001f);
+        } finally {
+            AppAdapter.tileShape = "rounded";
         }
     }
 }

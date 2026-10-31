@@ -67,6 +67,13 @@ public final class LauncherSettingsActivity extends Activity {
     /** 0 label, 1 icon only, 2 hidden (Config.WIFI_PILL_KEY). */
     private int wifiPill;
     private boolean wifiColor;
+    private TextView clockWeightChoice, clockHoursChoice, clockSecondsChoice, tileShapeChoice;
+    /** -1 as the layout, 0 thin, 1 light, 2 bold (Config.CLOCK_WEIGHT_KEY); 0 auto, 12 or 24; seconds shown. */
+    private int clockWeight, clockHours;
+    private boolean clockSeconds;
+    private static final String[] SHAPES = {"rounded", "square", "pill"};
+    private String tileShape;
+    private android.widget.TextClock previewClock;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -87,6 +94,7 @@ public final class LauncherSettingsActivity extends Activity {
         previewWeather = findViewById(R.id.previewWeather);
         previewWifi = findViewById(R.id.previewWifi);
         previewDock = findViewById(R.id.previewDock);
+        previewClock = findViewById(R.id.previewClock);
         previewWallpaper.post(this::loadPreviewPicture);
 
         // Appearance: the Theme row shows only where a theme is stored on the TV (ThemeSwitch).
@@ -166,6 +174,24 @@ public final class LauncherSettingsActivity extends Activity {
         };
         greetingChoice.setOnClickListener(v -> toggleGreeting.run());
         stepKeys(greetingChoice, toggleGreeting, toggleGreeting);
+        clockWeightChoice = findViewById(R.id.clockWeightChoice);
+        clockWeightChoice.setOnClickListener(v -> stepClockWeight(1));
+        stepKeys(clockWeightChoice, () -> stepClockWeight(-1), () -> stepClockWeight(1));
+        clockHoursChoice = findViewById(R.id.clockHoursChoice);
+        clockHoursChoice.setOnClickListener(v -> stepClockHours(1));
+        stepKeys(clockHoursChoice, () -> stepClockHours(-1), () -> stepClockHours(1));
+        clockSecondsChoice = findViewById(R.id.clockSecondsChoice);
+        Runnable toggleSeconds = () -> {
+            clockSeconds = !clockSeconds;
+            choices.edit().putBoolean(Config.CLOCK_SECONDS_KEY, clockSeconds).apply();
+            changed();
+            refresh();
+        };
+        clockSecondsChoice.setOnClickListener(v -> toggleSeconds.run());
+        stepKeys(clockSecondsChoice, toggleSeconds, toggleSeconds);
+        tileShapeChoice = findViewById(R.id.tileShapeChoice);
+        tileShapeChoice.setOnClickListener(v -> stepShape(1));
+        stepKeys(tileShapeChoice, () -> stepShape(-1), () -> stepShape(1));
         headerWhiteChoice = findViewById(R.id.headerWhiteChoice);
         Runnable toggleWhite = () -> {
             headerWhite = !headerWhite;
@@ -285,6 +311,33 @@ public final class LauncherSettingsActivity extends Activity {
         refresh();
     }
 
+    private void stepClockWeight(int by) {
+        // Light is both the layout's own (-1) and choice 1, so the row cycles thin, light, bold.
+        int at = clockWeight < 0 ? 1 : clockWeight;
+        clockWeight = ((at + by) % 3 + 3) % 3;
+        choices.edit().putInt(Config.CLOCK_WEIGHT_KEY, clockWeight).apply();
+        changed();
+        refresh();
+    }
+
+    private void stepClockHours(int by) {
+        int at = clockHours == 12 ? 1 : clockHours == 24 ? 2 : 0;
+        at = ((at + by) % 3 + 3) % 3;
+        clockHours = at == 1 ? 12 : at == 2 ? 24 : 0;
+        choices.edit().putInt(Config.CLOCK_HOURS_KEY, clockHours).apply();
+        changed();
+        refresh();
+    }
+
+    private void stepShape(int by) {
+        int at = 0;
+        for (int i = 0; i < SHAPES.length; i++) if (SHAPES[i].equals(tileShape)) at = i;
+        tileShape = SHAPES[((at + by) % SHAPES.length + SHAPES.length) % SHAPES.length];
+        choices.edit().putString(Config.TILE_SHAPE_KEY, tileShape).apply();
+        changed();
+        refresh();
+    }
+
     /** Built-in, then the stored themes, applied as the picker would. */
     private void stepTheme(int by) {
         if (themes.isEmpty()) return;
@@ -322,6 +375,10 @@ public final class LauncherSettingsActivity extends Activity {
         wifiPill = !config.showNetworkPill ? 2 : config.iconOnlyButtons ? 1 : 0;
         wifiColor = config.wifiStatusColor;
         weather = config.weatherLine;
+        clockWeight = config.clockWeight;
+        clockHours = config.clockHours;
+        clockSeconds = config.clockSeconds;
+        tileShape = config.tileShape;
         cycle = choices.getInt(Config.WALLPAPER_CYCLE_KEY, 0);
         motion = choices.getBoolean(Config.WALLPAPER_MOTION_KEY, config.wallpaperMotion);
         previewPicture = config.wallpapers.isEmpty() ? null : config.wallpapers.get(0);
@@ -339,6 +396,7 @@ public final class LauncherSettingsActivity extends Activity {
 
     /** The preview follows every choice: greeting, date colour, pill form, weather line, dock slots. */
     private void updatePreview() {
+        ClockStyle.apply(previewClock, clockWeight, clockHours, clockSeconds);
         previewGreeting.setVisibility(greeting ? View.VISIBLE : View.GONE);
         previewDate.setTextColor(headerWhite ? 0xFFFFFFFF : 0xA6FFFFFF);
         previewWeather.setVisibility(weather && weatherChoice.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
@@ -350,7 +408,10 @@ public final class LauncherSettingsActivity extends Activity {
         previewDock.removeAllViews();
         for (int i = 0; i < columns; i++) {
             View tile = new View(this);
-            tile.setBackgroundResource(R.drawable.settings_choice_bg);
+            android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable();
+            shape.setColor(0xFF242B34);
+            shape.setCornerRadius("pill".equals(tileShape) ? 99 * dp : "square".equals(tileShape) ? dp : 5 * dp);
+            tile.setBackground(shape);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1);
             lp.setMarginStart((int) (3 * dp));
             lp.setMarginEnd((int) (3 * dp));
@@ -494,6 +555,13 @@ public final class LauncherSettingsActivity extends Activity {
         String theme = choices.getString(THEME_CHOICE_KEY, null);
         themeChoice.setText(getString(R.string.theme_state, theme != null ? ThemeSwitch.title(theme) : getString(R.string.theme_builtin)));
         greetingChoice.setText(getString(R.string.greeting_state, onOff(greeting)));
+        clockWeightChoice.setText(getString(R.string.clock_weight_state, getString(clockWeight == 0 ? R.string.clock_thin
+                : clockWeight == 2 ? R.string.clock_bold : R.string.clock_light)));
+        clockHoursChoice.setText(getString(R.string.clock_hours_state, getString(clockHours == 12 ? R.string.clock_hours_12
+                : clockHours == 24 ? R.string.clock_hours_24 : R.string.clock_hours_auto)));
+        clockSecondsChoice.setText(getString(R.string.clock_seconds_state, onOff(clockSeconds)));
+        tileShapeChoice.setText(getString(R.string.tile_shape_state, getString("pill".equals(tileShape) ? R.string.shape_pill
+                : "square".equals(tileShape) ? R.string.shape_square : R.string.shape_rounded)));
         headerWhiteChoice.setText(getString(R.string.header_white_state, onOff(headerWhite)));
         wifiPillChoice.setText(getString(R.string.wifi_pill_state, getString(wifiPill == 2 ? R.string.wifi_pill_hidden
                 : wifiPill == 1 ? R.string.wifi_pill_icon : R.string.wifi_pill_label)));
@@ -524,7 +592,9 @@ public final class LauncherSettingsActivity extends Activity {
                 || choices.contains(Config.HEADER_WHITE_KEY) || choices.contains(Config.WIFI_PILL_KEY)
                 || choices.contains(Config.WIFI_COLOR_KEY) || choices.contains(Config.WEATHER_KEY)
                 || choices.contains(Config.WALLPAPER_SET_KEY) || choices.contains(Config.WALLPAPER_CYCLE_KEY)
-                || choices.contains(Config.WALLPAPER_MOTION_KEY);
+                || choices.contains(Config.WALLPAPER_MOTION_KEY) || choices.contains(Config.CLOCK_WEIGHT_KEY)
+                || choices.contains(Config.CLOCK_HOURS_KEY) || choices.contains(Config.CLOCK_SECONDS_KEY)
+                || choices.contains(Config.TILE_SHAPE_KEY);
     }
 
     private void open(Intent intent) {
