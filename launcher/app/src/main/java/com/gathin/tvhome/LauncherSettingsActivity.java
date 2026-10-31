@@ -28,6 +28,9 @@ public final class LauncherSettingsActivity extends Activity {
     private static final int[] DOCK_OPACITIES = {100, 70, 50, 30};
     private final TextView[] dockChoices = new TextView[DOCK_OPACITIES.length];
     private TextView wallpaperChoice;
+    private TextView themeChoice;
+    /** The stored theme applied from the Theme row (ThemeSwitch); the label's memory, not what Config reads. */
+    static final String THEME_CHOICE_KEY = "theme_choice";
     private TextView animationsChoice;
     private TextView advancedChoice;
     private TextView followThemeChoice;
@@ -99,6 +102,12 @@ public final class LauncherSettingsActivity extends Activity {
             reverseRow(rowChoices);
             reverseRow(dockChoices);
         }
+        // Themes stored on the TV (ThemeSwitch): the row shows only where there is one to pick.
+        themeChoice = findViewById(R.id.themeChoice);
+        if (!ThemeSwitch.themes(Config.dir(this)).isEmpty()) {
+            themeChoice.setVisibility(View.VISIBLE);
+            themeChoice.setOnClickListener(v -> showThemePicker());
+        }
         wallpaperChoice = findViewById(R.id.wallpaperChoice);
         wallpaperChoice.setOnClickListener(v -> showWallpaperPicker());
         animationsChoice = findViewById(R.id.animationsChoice);
@@ -158,6 +167,32 @@ public final class LauncherSettingsActivity extends Activity {
         LinearLayout row = (LinearLayout) views[0].getParent();
         row.removeAllViews();
         for (int i = views.length - 1; i >= 0; i--) row.addView(views[i]);
+    }
+
+    /** The stored themes by folder name; applying one does on the TV what tools/theme.sh does over adb. */
+    private void showThemePicker() {
+        File dir = Config.dir(this);
+        List<File> themes = ThemeSwitch.themes(dir);
+        String[] labels = new String[themes.size()];
+        String current = choices.getString(THEME_CHOICE_KEY, null);
+        int checked = -1;
+        for (int i = 0; i < themes.size(); i++) {
+            labels[i] = themes.get(i).getName();
+            if (labels[i].equals(current)) checked = i;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.theme_label)
+                .setSingleChoiceItems(labels, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (!ThemeSwitch.apply(dir, themes.get(which))) {
+                        Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
+                    }
+                    choices.edit().putString(THEME_CHOICE_KEY, labels[which]).apply();
+                    changed();
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void showWallpaperPicker() {
@@ -285,6 +320,8 @@ public final class LauncherSettingsActivity extends Activity {
                 getString(advancedEffects ? R.string.on : R.string.off)));
         advancedChoice.setEnabled(animations);
         advancedChoice.setAlpha(animations ? 1f : 0.5f);
+        String theme = choices.getString(THEME_CHOICE_KEY, null);
+        themeChoice.setText(getString(R.string.theme_state, theme != null ? theme : getString(R.string.theme_builtin)));
         String wallpaperCurrent = choices.getString(Config.WALLPAPER_CHOICE_KEY, null);
         wallpaperChoice.setText(getString(R.string.wallpaper_state,
                 "none".equals(wallpaperCurrent) ? getString(R.string.wallpaper_none)

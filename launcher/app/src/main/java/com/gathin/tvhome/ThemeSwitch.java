@@ -1,0 +1,80 @@
+package com.gathin.tvhome;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * The Theme row in Launcher settings: themes kept on the TV under {@code <files>/themes/<name>/}, each a folder as
+ * in the repo's themes/ (config.json, an optional wallpaper.jpg or wallpapers/ collection with captions.txt), put
+ * there with {@code content write} through ThemeProvider. Applying one does on the TV what tools/theme.sh does
+ * over adb: the current theme files go, the chosen theme's are copied in and theme_revision gets a new token,
+ * so Config clears the on-TV choices as after a push. Home rebuilds through the settings change count.
+ */
+final class ThemeSwitch {
+    private ThemeSwitch() {}
+
+    /** The theme folders under {@code dir/themes} that carry a config.json, by name. */
+    static List<File> themes(File dir) {
+        List<File> out = new ArrayList<>();
+        File[] entries = dir == null ? null : new File(dir, ThemeFiles.THEMES).listFiles();
+        if (entries == null) return out;
+        for (File f : entries) {
+            if (f.isDirectory() && ThemeFiles.themeName(f.getName()) && new File(f, Config.FILE_NAME).isFile()) out.add(f);
+        }
+        Collections.sort(out);
+        return out;
+    }
+
+    /** Replaces the theme in {@code dir} with {@code theme}'s files; false when a copy failed (the rest still went in). */
+    static boolean apply(File dir, File theme) {
+        if (dir == null || theme == null) return false;
+        File wallpapers = new File(dir, ThemeFiles.WALLPAPERS);
+        delete(new File(dir, Config.FILE_NAME));
+        delete(new File(dir, Config.WALLPAPER_NAME));
+        File[] old = wallpapers.listFiles();
+        if (old != null) for (File f : old) if (ThemeFiles.collectionImage(f.getName()) || WallpaperCaptions.FILE_NAME.equals(f.getName())) delete(f);
+        boolean ok = copy(new File(theme, Config.FILE_NAME), new File(dir, Config.FILE_NAME));
+        File single = new File(theme, Config.WALLPAPER_NAME);
+        if (single.isFile()) ok &= copy(single, new File(dir, Config.WALLPAPER_NAME));
+        File[] pictures = new File(theme, ThemeFiles.WALLPAPERS).listFiles();
+        if (pictures != null) {
+            wallpapers.mkdirs();
+            for (File f : pictures) {
+                if (ThemeFiles.collectionImage(f.getName()) || WallpaperCaptions.FILE_NAME.equals(f.getName())) {
+                    ok &= copy(f, new File(wallpapers, f.getName()));
+                }
+            }
+        }
+        try (OutputStream out = new FileOutputStream(new File(dir, "theme_revision"))) {
+            out.write(UUID.randomUUID().toString().replace("-", "").getBytes(StandardCharsets.US_ASCII));
+        } catch (IOException e) {
+            ok = false;
+        }
+        return ok;
+    }
+
+    private static void delete(File f) {
+        if (f.isFile()) f.delete();
+    }
+
+    private static boolean copy(File from, File to) {
+        if (!from.isFile()) return false;
+        try (InputStream in = new FileInputStream(from); OutputStream out = new FileOutputStream(to)) {
+            byte[] buf = new byte[64 * 1024];
+            int n;
+            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+}

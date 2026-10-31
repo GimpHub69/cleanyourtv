@@ -12,6 +12,11 @@ TV_HOST=192.168.1.50 tools/theme.sh --reset                # back to the built-i
 powershell -ExecutionPolicy Bypass -File tools\theme.ps1 -TvHost 192.168.1.50 themes\aurora
 ```
 
+Themes can also live on the TV: `content write --uri content://com.gathin.tvhome.theme/themes/<name>/config.json`
+(and `wallpaper.jpg`, `wallpapers/<picture>`, `wallpapers/captions.txt`, `CREDITS.md`) stores a theme folder under
+the launcher's files, and a **Theme** row then appears in Launcher settings that applies one of them exactly as
+`theme.sh` does, with no computer; `content delete --uri .../themes/<name>` removes a stored theme.
+
 `tools/manage.py list themes` and `list switches` list them from this file, `show <name>` gives one with its
 screenshot, and `manage.py set <switch> <value> --theme <your folder>` writes a key into a theme of your own and
 pushes it with `theme.sh`.
@@ -117,6 +122,7 @@ A new key needs one there in the same pull request.
 | `gamepad_passthrough` | bool | `true` makes the key helpers stop filtering keys while a game controller is connected, so games see its buttons (Steam Link with an Xbox controller); the remote buttons above do nothing until it disconnects. Needs `key_filter` on. A voice remote that reports a joystick does not count. Off by default |
 | `consume_volume_keys` | bool | `true` makes the key helpers swallow Volume Up/Down and repeat a held one themselves (after 500 ms, every 60 ms). Use it on firmware that applies a volume key both before the helper and when the helper hands it back, so one tap moves two steps (TCL G03 / BeyondTV4, Android 11, #1100). Needs `key_filter` on. Off by default |
 | `stock_home_redirect` | string | Stock launcher package; if the firmware turns it back on (XGIMI), its home screen is sent straight back here (`HOME_KEY_SERVICE=1`) |
+| `home_hook` | bool | Fire OS only: `HomeHookService` (an accessibility service, `com.gathin.tvhome/.HomeHookService` in `enabled_accessibility_services`) covers Amazon's home screen whenever it comes up and starts this launcher over it through an alarm, which needs `settings put global alarm_manager_constants min_futurity=0` on Android 11. Hold-HOME and Amazon's settings grid are untouched. Off by default: the service then does nothing. A port of dumbtv's Guard (MIT, `launcher/NOTICE`) |
 | `race_calendar` | list of races | F1 race-weekend mode: from 12 hours before a weekend's first session until 4 hours after the race starts, a panel under the clock shows the next session with a countdown (or the live one) and the weekend's session times in the TV's time zone. Write it with `tools/race_calendar.py <theme folder>`, which fetches the season from the free Jolpica API; the launcher itself never goes online |
 | `home_idle_clock_minutes` | 0 to 1440 | Minutes Home may sit untouched before it shows the clock screensaver (a thin clock and date drifting over a slow glow, as the system "Clock" screensaver does). Any key returns to Home. It starts only from Home, never over Live TV or an app; 0 is off (default) |
 | `clock_wallpaper` | bool | The clock screensaver over Home's wallpaper instead of black with a coloured glow; the clock still moves every minute (`false` by default) |

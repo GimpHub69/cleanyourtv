@@ -197,6 +197,16 @@
          straight back here. A theme's config.json can set it too. Leave empty to omit. -->
     <string name="stock_home_redirect" translatable="false"></string>
 
+    <!-- Fire OS HOME takeover (HomeHookService, a port of dumbtv's Guard; see launcher/NOTICE). Fire OS keeps HOME
+         bound to Amazon's protected launcher and handles the HOME key before any accessibility filter sees it, so
+         with this on, and com.gathin.tvhome/.HomeHookService in enabled_accessibility_services, every appearance
+         of Amazon's home screen is covered and replaced with this launcher through an alarm-fired start, which
+         gets past the five-second app-switch delay. Needs `settings put global alarm_manager_constants
+         min_futurity=0` (Android 11) so the alarm fires at once; the undo clears both. Hold-HOME, Amazon's
+         settings grid and every other screen are left alone. Off by default: the service then binds and does
+         nothing. A theme can set "home_hook": true. -->
+    <bool name="home_hook">true</bool>
+
     <!-- Show the Solar Hijri (Shamsi) date used in Iran and Afghanistan, e.g. "27 Mehr 1405", above the
          Gregorian date. -->
     <bool name="shamsi_date">false</bool>

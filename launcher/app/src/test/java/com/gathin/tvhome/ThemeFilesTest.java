@@ -44,6 +44,23 @@ public class ThemeFilesTest {
         assertNull(ThemeFiles.path(Arrays.asList("wallpapers", "sub", "dusk.jpg")));
     }
 
+    @Test public void storedThemesHoldTheSameFilesAndTheirCredits() {
+        assertEquals("themes/sweden/config.json", ThemeFiles.path(Arrays.asList("themes", "sweden", "config.json")));
+        assertEquals("themes/aurora/wallpaper.jpg", ThemeFiles.path(Arrays.asList("themes", "aurora", "wallpaper.jpg")));
+        assertEquals("themes/sweden/wallpapers/001.jpg", ThemeFiles.path(Arrays.asList("themes", "sweden", "wallpapers", "001.jpg")));
+        assertEquals("themes/sweden/wallpapers/captions.txt", ThemeFiles.path(Arrays.asList("themes", "sweden", "wallpapers", "captions.txt")));
+        assertEquals("themes/sweden/CREDITS.md", ThemeFiles.path(Arrays.asList("themes", "sweden", "CREDITS.md")));
+        assertNull(ThemeFiles.path(Arrays.asList("themes", "sweden", "cards.json")));
+        assertNull(ThemeFiles.path(Arrays.asList("themes", "sweden", "run.sh")));
+        assertNull(ThemeFiles.path(Arrays.asList("themes", "..", "config.json")));
+        assertNull(ThemeFiles.path(Arrays.asList("themes", "a b", "config.json")));
+        assertNull(ThemeFiles.path(Arrays.asList("themes", "sweden", "wallpapers", "run.sh")));
+        assertNull(ThemeFiles.path(Arrays.asList("themes", "sweden")));
+        assertTrue(ThemeFiles.isTheme(Arrays.asList("themes", "sweden")));
+        assertFalse(ThemeFiles.isTheme(Arrays.asList("themes", "..")));
+        assertFalse(ThemeFiles.isTheme(Arrays.asList("themes", "sweden", "config.json")));
+    }
+
     @Test public void onlyTheBareFolderIsTheCollection() {
         assertTrue(ThemeFiles.isCollection(Collections.singletonList("wallpapers")));
         assertFalse(ThemeFiles.isCollection(Arrays.asList("wallpapers", "dusk.jpg")));

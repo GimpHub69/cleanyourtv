@@ -44,6 +44,18 @@ public class ThemeProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         File dir = Config.dir(getContext());
+        if (dir != null && ThemeFiles.isTheme(uri.getPathSegments())) {
+            // A stored theme goes as a whole: its files, its wallpapers folder, then the folder itself.
+            File theme = new File(new File(dir, ThemeFiles.THEMES), uri.getPathSegments().get(1));
+            int n = 0;
+            File[] files = theme.listFiles();
+            if (files != null) for (File f : files) {
+                File[] inner = f.listFiles();
+                if (inner != null) for (File g : inner) if (g.delete()) n++;
+                if (f.delete()) n++;
+            }
+            return theme.delete() ? n + 1 : n;
+        }
         if (dir != null && ThemeFiles.isCollection(uri.getPathSegments())) {
             File[] images = new File(dir, ThemeFiles.WALLPAPERS).listFiles((d, name) -> ThemeFiles.collectionImage(name));
             int n = 0;

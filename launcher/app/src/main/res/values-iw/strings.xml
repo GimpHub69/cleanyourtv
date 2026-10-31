@@ -144,4 +144,9 @@
     <string name="race_countdown_hours">%1$d שע׳ %2$d דק׳</string>
     <string name="race_countdown_days">%1$d ימ׳ %2$d שע׳</string>
     <string name="last_opened">פתיחה אחרונה: %1$s</string>
+    <string name="theme_label">ערכת נושא</string>
+    <string name="theme_state">ערכת נושא: %1$s</string>
+    <string name="theme_builtin">מובנית</string>
+    <string name="home_hook_name">השתלטות על מסך הבית של Fire TV</string>
+    <string name="home_hook_description">ב-Fire TV, מחליף את מסך הבית של אמזון במשגר הזה בכל פעם שהוא מופיע.</string>
 </resources>
