@@ -1,6 +1,7 @@
 package com.gathin.tvhome;
 
 import android.content.Context;
+import android.os.SystemClock;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -53,8 +54,23 @@ final class WallpaperPlayer {
     private boolean loading;
     /** next(): the coming update() picks a new picture whatever the interval says (Cycle wallpaper: each return to Home). */
     private boolean force;
-    /** wallpaper_motion: the picture breathes while Home is in front; null when off. */
-    private final android.animation.ObjectAnimator motion;
+    /** wallpaper_motion: the picture breathes while Home is in front. */
+    private final boolean motion;
+    /** One scale step every half second: 4 % there and back over 90 s is under a pixel a step, and a 60 fps animator
+     *  cost the launcher 30 % of a core on a Fire TV stick for the same movement. */
+    private static final long BREATH_STEP_MS = 500, BREATH_HALF_MS = 45_000;
+    private final Runnable breathe = new Runnable() {
+        @Override
+        public void run() {
+            if (!active || closed) return;
+            long t = SystemClock.uptimeMillis() % (2 * BREATH_HALF_MS);
+            float phase = t < BREATH_HALF_MS ? t / (float) BREATH_HALF_MS : (2 * BREATH_HALF_MS - t) / (float) BREATH_HALF_MS;
+            float scale = 1f + 0.04f * (1f - (float) Math.cos(phase * Math.PI)) / 2f;
+            image.setScaleX(scale);
+            image.setScaleY(scale);
+            root.postDelayed(this, BREATH_STEP_MS);
+        }
+    };
     private String displayed = "";
     /** wallpaper_captions: the shown picture's name from wallpapers/captions.txt; null when off or there are none. */
     private final TextView caption;
@@ -91,17 +107,7 @@ final class WallpaperPlayer {
         height = metrics.heightPixels;
         image = new ImageView(context);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        if (config.wallpaperMotion) {
-            motion = android.animation.ObjectAnimator.ofPropertyValuesHolder(image,
-                    android.animation.PropertyValuesHolder.ofFloat(View.SCALE_X, 1f, 1.04f),
-                    android.animation.PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f, 1.04f));
-            motion.setDuration(45_000L);
-            motion.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
-            motion.setRepeatMode(android.animation.ValueAnimator.REVERSE);
-            motion.setRepeatCount(android.animation.ValueAnimator.INFINITE);
-        } else {
-            motion = null;
-        }
+        motion = config.wallpaperMotion;
         image.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         names = config.wallpaperCaptions && config.wallpaperEnabled && !files.isEmpty()
                 ? WallpaperCaptions.read(files.get(0).getParentFile()) : Collections.emptyMap();
@@ -146,9 +152,9 @@ final class WallpaperPlayer {
     void start() {
         active = true;
         update();
-        if (motion != null && image.getParent() != null) {
-            if (motion.isPaused()) motion.resume();
-            else if (!motion.isStarted()) motion.start();
+        if (motion && image.getParent() != null) {
+            root.removeCallbacks(breathe);
+            root.post(breathe);
         }
     }
 
@@ -159,7 +165,7 @@ final class WallpaperPlayer {
     }
 
     void stop() {
-        if (motion != null && motion.isStarted()) motion.pause();
+        if (motion) root.removeCallbacks(breathe);
         active = false;
     }
 
