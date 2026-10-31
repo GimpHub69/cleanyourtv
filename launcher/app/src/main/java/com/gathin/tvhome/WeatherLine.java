@@ -20,17 +20,20 @@ final class WeatherLine {
 
     static void refresh(ContentResolver resolver, String uri, TextView line) {
         new Thread(() -> {
-            String text = null, place = null;
-            try (Cursor c = resolver.query(Uri.parse(uri), new String[]{"text", "place"}, null, null, null)) {
+            String text = null, place = null, glyph = null;
+            try (Cursor c = resolver.query(Uri.parse(uri), new String[]{"text", "place", "glyph"}, null, null, null)) {
                 if (c != null && c.moveToFirst()) {
-                    int t = c.getColumnIndex("text"), p = c.getColumnIndex("place");
+                    int t = c.getColumnIndex("text"), p = c.getColumnIndex("place"), g = c.getColumnIndex("glyph");
                     text = t >= 0 ? c.getString(t) : null;
                     place = p >= 0 ? c.getString(p) : null;
+                    glyph = g >= 0 ? c.getString(g) : null;
                 }
             } catch (RuntimeException ignored) {
                 // The provider is not installed or refused: no line.
             }
-            final String weather = text == null || text.trim().isEmpty() ? null : text.trim();
+            // The condition's emoji (the provider's glyph column) before the words, when it has one.
+            final String weather = text == null || text.trim().isEmpty() ? null
+                    : (glyph == null || glyph.trim().isEmpty() ? "" : glyph.trim() + " ") + text.trim();
             final String where = place == null || place.trim().isEmpty() ? null : place.trim();
             line.post(() -> {
                 if (weather == null) {

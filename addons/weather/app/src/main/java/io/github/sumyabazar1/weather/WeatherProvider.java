@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class WeatherProvider extends ContentProvider {
     private static final String CACHE = "now";
-    private static final String[] COLUMNS = {"text", "temp_c", "sky", "place", "updated"};
+    private static final String[] COLUMNS = {"text", "temp_c", "sky", "place", "updated", "glyph"};
     private static final AtomicBoolean fetching = new AtomicBoolean();
 
     @Override
@@ -35,10 +35,11 @@ public final class WeatherProvider extends ContentProvider {
         MatrixCursor out = new MatrixCursor(COLUMNS);
         if (!place.contains("lat")) return out;
         long updated = cache.getLong("updated", 0);
-        if (System.currentTimeMillis() - updated > Forecast.REFRESH_MS) refresh(place, cache);
+        // Older than the refresh interval, or cached by a build without the glyph column: fetch again.
+        if (System.currentTimeMillis() - updated > Forecast.REFRESH_MS || !cache.contains("glyph")) refresh(place, cache);
         if (updated > 0) {
             out.addRow(new Object[]{cache.getString("text", ""), cache.getInt("temp_c", 0),
-                    cache.getString("sky", ""), place.getString("name", ""), updated});
+                    cache.getString("sky", ""), place.getString("name", ""), updated, cache.getString("glyph", "")});
         }
         return out;
     }
@@ -53,7 +54,7 @@ public final class WeatherProvider extends ContentProvider {
                 Forecast.Report r = Forecast.fetch(lat, lon, Forecast.MIN_DAYS);
                 String sky = getContext().getString(Forecast.sky(r.code, r.day));
                 cache.edit().putString("text", String.format(Locale.ROOT, "%d° · %s", r.tempC, sky))
-                        .putInt("temp_c", r.tempC).putString("sky", sky)
+                        .putInt("temp_c", r.tempC).putString("sky", sky).putString("glyph", glyph(r.code, r.day))
                         .putLong("updated", System.currentTimeMillis()).apply();
             } catch (Exception ignored) {
                 // Offline or refused: the cached row stays, the next query tries again.
@@ -61,6 +62,18 @@ public final class WeatherProvider extends ContentProvider {
                 fetching.set(false);
             }
         }, "weather-now").start();
+    }
+
+    /** The condition as one emoji, by the WMO code Open-Meteo gives (after snowIfCold): the "glyph" column. */
+    static String glyph(int code, boolean day) {
+        if (code == 0) return day ? "\u2600\uFE0F" : "\uD83C\uDF19";            // sun, moon
+        if (code <= 2) return day ? "\uD83C\uDF24\uFE0F" : "\u2601\uFE0F";     // sun behind cloud, cloud
+        if (code == 3) return "\u2601\uFE0F";
+        if (code == 45 || code == 48) return "\uD83C\uDF2B\uFE0F";               // fog
+        if (code >= 71 && code <= 77 || code == 85 || code == 86) return "\uD83C\uDF28\uFE0F"; // snow cloud
+        if (code >= 95) return "\u26C8\uFE0F";                                    // thunder
+        if (code >= 51) return "\uD83C\uDF27\uFE0F";                             // rain cloud
+        return "\u2601\uFE0F";
     }
 
     @Override public String getType(Uri uri) { return "vnd.android.cursor.item/vnd.weather.now"; }
