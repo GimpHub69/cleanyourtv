@@ -28,8 +28,9 @@ public final class LauncherSettingsActivity extends Activity {
     private SharedPreferences choices;
     private final TextView[] columnChoices = new TextView[4];
     private final TextView[] rowChoices = new TextView[4];
-    private static final int[] DOCK_OPACITIES = {100, 70, 50, 30};
-    private final TextView[] dockChoices = new TextView[DOCK_OPACITIES.length];
+    /** Dock band opacity, 0 to 100 in steps of 10: the row steps it, the bar under it shows the level. */
+    private TextView dockOpacityChoice;
+    private android.widget.ProgressBar dockOpacityBar;
     private TextView themeChoice;
     private TextView wallpaperChoice;
     private TextView cycleChoice;
@@ -144,24 +145,15 @@ public final class LauncherSettingsActivity extends Activity {
                 refresh();
             });
         }
-        int[] dockIds = {R.id.dock100, R.id.dock70, R.id.dock50, R.id.dock30};
-        for (int i = 0; i < dockIds.length; i++) {
-            final int value = DOCK_OPACITIES[i];
-            dockChoices[i] = findViewById(dockIds[i]);
-            dockChoices[i].setOnClickListener(v -> {
-                if (dockOpacity == value) return;
-                dockOpacity = value;
-                choices.edit().putInt(Config.DOCK_OPACITY_KEY, value).apply();
-                changed();
-                refresh();
-            });
-        }
+        dockOpacityChoice = findViewById(R.id.dockOpacityChoice);
+        dockOpacityBar = findViewById(R.id.dockOpacityBar);
+        dockOpacityChoice.setOnClickListener(v -> stepOpacity(10));
+        stepKeys(dockOpacityChoice, () -> stepOpacity(-10), () -> stepOpacity(10));
         // Keep the numeric choices increasing in the Hebrew reading direction. Reorder the
         // actual views so D-pad focus follows their positions without changing the saved values.
         if (getResources().getBoolean(R.bool.rtl_app_grid)) {
             reverseRow(columnChoices);
             reverseRow(rowChoices);
-            reverseRow(dockChoices);
         }
 
         // Clock and pills: on-TV choices over the theme's keys, until Follow theme or another theme.
@@ -307,6 +299,15 @@ public final class LauncherSettingsActivity extends Activity {
     private void stepPill(int by) {
         wifiPill = ((wifiPill + by) % 3 + 3) % 3;
         choices.edit().putInt(Config.WIFI_PILL_KEY, wifiPill).apply();
+        changed();
+        refresh();
+    }
+
+    /** 0 to 100 in steps of 10, wrapping; a theme's odd value rounds to the nearest step first. */
+    private void stepOpacity(int by) {
+        int at = Math.round(dockOpacity / 10f) * 10 + by;
+        dockOpacity = ((at % 110) + 110) % 110;
+        choices.edit().putInt(Config.DOCK_OPACITY_KEY, dockOpacity).apply();
         changed();
         refresh();
     }
@@ -549,9 +550,8 @@ public final class LauncherSettingsActivity extends Activity {
         for (int i = 0; i < rowChoices.length; i++) {
             rowChoices[i].setSelected(rowsBelowDock == i);
         }
-        for (int i = 0; i < dockChoices.length; i++) {
-            dockChoices[i].setSelected(dockOpacity == DOCK_OPACITIES[i]);
-        }
+        dockOpacityChoice.setText(getString(R.string.dock_opacity_state, dockOpacity + "%"));
+        dockOpacityBar.setProgress(dockOpacity);
         String theme = choices.getString(THEME_CHOICE_KEY, null);
         themeChoice.setText(getString(R.string.theme_state, theme != null ? ThemeSwitch.title(theme) : getString(R.string.theme_builtin)));
         greetingChoice.setText(getString(R.string.greeting_state, onOff(greeting)));

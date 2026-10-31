@@ -570,7 +570,7 @@ and a wallpaper.
     with reduced motion or animations off. On every
     row of this page, Left and Right change the value without opening anything.
   - Layout: **Apps per row** 4, 5, 6 or 7; **Rows below dock** 0 to 3, how many rows of tiles stay visible
-    under the dock band; **Dock band opacity** 100%, 70%, 50% or 30%. The last two only do anything while the
+    under the dock band; **Dock band opacity** 0% to 100% in steps of 10%, with a bar under the row. The last two only do anything while the
     dock is its own row (`dock_row`, on by default). **Tile shape**: Rounded, Square or Pill (`tile_shape`).
   - Clock and pills: **Greeting** on or off (`show_greeting`), **Clock weight** Thin, Light or Bold, **Hour
     format** Auto, 12-hour or 24-hour, **Seconds** on or off, **Date in white** (`header_white`), **Wi-Fi

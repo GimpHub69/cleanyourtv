@@ -46,7 +46,8 @@
     <string name="launcher_settings">הגדרות מסך הבית</string>
     <string name="native_settings">הגדרות היצרן</string>
     <string name="columns_label">אפליקציות בשורה</string>
-    <string name="dock_opacity_label">עוצמת הרקע בשורת המועדפים</string>
+    <string name="dock_opacity_label">אטימות פס המעגן</string>
+    <string name="dock_opacity_state">אטימות פס המעגן: %1$s</string>
     <string name="animations_state">הנפשות: %1$s</string>
     <string name="advanced_effects">אפקטים מתקדמים</string>
     <string name="advanced_effects_state">אפקטים מתקדמים: %1$s</string>

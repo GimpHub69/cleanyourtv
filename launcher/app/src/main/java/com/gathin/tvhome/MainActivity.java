@@ -520,7 +520,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             Rect rect = new Rect(0, 0, focus.getWidth(), focus.getHeight());
             root.offsetDescendantRectToMyCoords(focus, rect);
             float h = focus.getHeight() * adapter.focusScale() + 12f * density;
-            float y = rect.exactCenterY() - h / 2f - (advancedEffects ? 4f * density : 0f);
+            float y = rect.exactCenterY() - h / 2f - (advancedEffects ? 3f * density : 0f);
             if (Math.abs(y - glassTargetY) > density) onTileFocused(at, focus);
         });
         rtlAppGrid = getResources().getBoolean(R.bool.rtl_app_grid);
@@ -1645,7 +1645,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         float w = card.getWidth() * scale + 2 * pad;
         float h = card.getHeight() * scale + 2 * pad;
         float x = r.exactCenterX() - w / 2f;
-        float y = r.exactCenterY() - h / 2f - (advancedEffects ? 4f * density : 0f);
+        float y = r.exactCenterY() - h / 2f - (advancedEffects ? 3f * density : 0f);
 
         ViewGroup.LayoutParams lp = glass.getLayoutParams();
         if (lp.width != (int) w || lp.height != (int) h || card.getWidth() != glassCardW) {

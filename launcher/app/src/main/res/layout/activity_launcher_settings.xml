@@ -197,25 +197,19 @@
                     <TextView android:id="@+id/rows3" style="@style/SettingsColumnChoice" android:text="3" />
                 </LinearLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:paddingStart="18dp"
-                    android:text="@string/dock_opacity_label"
-                    android:textColor="#FFFFFFFF"
-                    android:textSize="20sp" />
+                <TextView android:id="@+id/dockOpacityChoice" style="@style/SettingsRow" android:layout_marginTop="12dp" />
 
-                <LinearLayout
+                <ProgressBar
+                    android:id="@+id/dockOpacityBar"
+                    style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:orientation="horizontal">
-                    <TextView android:id="@+id/dock100" style="@style/SettingsColumnChoice" android:text="100%" />
-                    <TextView android:id="@+id/dock70" style="@style/SettingsColumnChoice" android:text="70%" />
-                    <TextView android:id="@+id/dock50" style="@style/SettingsColumnChoice" android:text="50%" />
-                    <TextView android:id="@+id/dock30" style="@style/SettingsColumnChoice" android:text="30%" />
-                </LinearLayout>
+                    android:layout_height="6dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginEnd="18dp"
+                    android:max="100"
+                    android:progressTint="#FF4DAE6D"
+                    android:progressBackgroundTint="#FF2E3640" />
 
                 <TextView android:id="@+id/tileShapeChoice" style="@style/SettingsRow" android:layout_marginTop="12dp" />
             </LinearLayout>

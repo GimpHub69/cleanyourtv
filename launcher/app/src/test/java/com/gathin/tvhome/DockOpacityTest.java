@@ -17,9 +17,9 @@ public class DockOpacityTest {
     }
 
     @Test public void anOutOfRangeChoiceIsIgnored() {
-        // Below 30 the band would vanish and the dock lose its shape; the theme key has the same floor.
-        assertEquals(80, Config.chosenDockOpacity(0, 80));
-        assertEquals(80, Config.chosenDockOpacity(29, 80));
+        // 0 (no band) to 100; the row steps by 10. Anything else is a stale or corrupt value.
+        assertEquals(0, Config.chosenDockOpacity(0, 80));
+        assertEquals(80, Config.chosenDockOpacity(-5, 80));
         assertEquals(80, Config.chosenDockOpacity(101, 80));
     }
 }
