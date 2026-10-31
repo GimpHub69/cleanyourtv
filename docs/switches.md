@@ -48,4 +48,5 @@ the rules. Keys from before this rule are on its wanted list; a screenshot for o
 | `wallpaper_motion` | Fire TV Stick 4K Max: Home mid-breath, the Sweden picture a few percent in; the motion itself is slow, 45 s there and back | <img src="switches/wallpaper_motion.jpg" width="320" alt="wallpaper_motion"> |
 | `tile_shape` | Fire TV Stick 4K Max: `pill` tiles, the dock band and focus glass rounded to match | <img src="switches/tile_shape.jpg" width="320" alt="tile_shape"> |
 | `now_playing` | Fire TV Stick 4K Max: "▶ Playing on Stremio" with the title under the weather line while Stremio plays behind Home | <img src="switches/now_playing.jpg" width="320" alt="now_playing"> |
+| `header_scrim` | Fire TV Stick 4K Max: the top of the Ruska sky darkened behind the clock and the lines under it | <img src="switches/header_scrim.jpg" width="320" alt="header_scrim"> |
 | `header_mood` | Fire TV Stick 4K Max: the weather line in the condition's tint (rain, cool blue) under the clock | <img src="switches/header_mood.jpg" width="320" alt="header_mood"> |

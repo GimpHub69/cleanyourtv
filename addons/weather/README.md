@@ -33,7 +33,7 @@ Set in `app/src/main/res/values/options.xml` before building. With the defaults 
 ## The weather for the launcher
 
 The app also answers `content://io.github.sumyabazar1.weather/now` with one row: `text` ("12° · Cloudy"), `temp_c`,
-`sky`, `place`, `updated` (epoch milliseconds) `glyph` (the condition as one emoji) and `color` (a tint for it, `#RRGGBB`), from its own cache. A query older than 30 minutes starts one fetch
+`sky`, `place` ("Vienna, Austria"), `updated` (epoch milliseconds) `glyph` (the condition as one emoji) and `color` (a tint for it, `#RRGGBB`), from its own cache. A query older than 30 minutes starts one fetch
 in the background, so the next query is fresh; no row until a city has been chosen. The Clean Your TV launcher's
 `weather_provider` key points at it and shows `text` under the clock. Any app on the TV can read it (no permission):
 it is the city name and the weather the app already shows.

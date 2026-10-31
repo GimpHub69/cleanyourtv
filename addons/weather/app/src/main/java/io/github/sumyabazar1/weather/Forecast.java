@@ -37,12 +37,15 @@ final class Forecast {
     static final class Place {
         final String name;
         final String detail;
+        /** The country alone, for the provider's place column ("Vienna, Austria"). */
+        final String country;
         final double latitude;
         final double longitude;
 
-        Place(String name, String detail, double latitude, double longitude) {
+        Place(String name, String detail, String country, double latitude, double longitude) {
             this.name = name;
             this.detail = detail;
+            this.country = country;
             this.latitude = latitude;
             this.longitude = longitude;
         }
@@ -104,7 +107,7 @@ final class Forecast {
             StringBuilder detail = new StringBuilder(r.optString("admin1"));
             String country = r.optString("country");
             if (!country.isEmpty()) detail.append(detail.length() > 0 ? ", " : "").append(country);
-            out.add(new Place(r.getString("name"), detail.toString(), r.getDouble("latitude"), r.getDouble("longitude")));
+            out.add(new Place(r.getString("name"), detail.toString(), country, r.getDouble("latitude"), r.getDouble("longitude")));
         }
         return out;
     }

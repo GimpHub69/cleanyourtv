@@ -494,6 +494,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ClockStyle.apply(findViewById(R.id.clock), cfg.clockWeight, cfg.clockHours, cfg.clockSeconds);
         nowPlaying = findViewById(R.id.nowPlaying);
         nowPlayingOn = cfg.nowPlaying;
+        if (cfg.headerScrim) findViewById(R.id.headerScrim).setVisibility(View.VISIBLE);
         lunarDate = findViewById(R.id.lunarDate);
         lunar = cfg.lunarDate;
         lunarOffset = Lunar.offsetFor(cfg.lunarUtcOffset, Locale.getDefault());

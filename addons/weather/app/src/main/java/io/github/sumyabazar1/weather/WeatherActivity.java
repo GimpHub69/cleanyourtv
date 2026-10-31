@@ -229,6 +229,7 @@ public final class WeatherActivity extends Activity {
                     Forecast.Place p = places.get(which);
                     place.edit()
                             .putString("name", p.name)
+                            .putString("country", p.country)
                             .putLong("lat", Double.doubleToRawLongBits(p.latitude))
                             .putLong("lon", Double.doubleToRawLongBits(p.longitude))
                             .apply();

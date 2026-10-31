@@ -262,6 +262,9 @@
          it over ADB with `cmd notification allow_listener com.gathin.tvhome/.NowPlaying` (undo: disallow_listener).
          Off by default; a theme can set "now_playing": true. -->
     <bool name="now_playing">true</bool>
+    <!-- A dark fade over the top of the wallpaper (340dp, black 70 % at the edge to clear), so the clock, date and
+         weather read on a light picture. Off by default; a theme can set "header_scrim": true. -->
+    <bool name="header_scrim">true</bool>
     <string name="weather_provider" translatable="false">content://io.github.sumyabazar1.weather/now</string>
     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows
          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can

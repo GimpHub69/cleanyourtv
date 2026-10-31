@@ -36,10 +36,12 @@ public final class WeatherProvider extends ContentProvider {
         if (!place.contains("lat")) return out;
         long updated = cache.getLong("updated", 0);
         // Older than the refresh interval, or cached by a build without the glyph column: fetch again.
-        if (System.currentTimeMillis() - updated > Forecast.REFRESH_MS || !cache.contains("color")) refresh(place, cache);
+        if (System.currentTimeMillis() - updated > Forecast.REFRESH_MS || !cache.contains("color") || !place.contains("country")) refresh(place, cache);
         if (updated > 0) {
+            String country = place.getString("country", "");
+            String where = place.getString("name", "") + (country.isEmpty() ? "" : ", " + country);
             out.addRow(new Object[]{cache.getString("text", ""), cache.getInt("temp_c", 0),
-                    cache.getString("sky", ""), place.getString("name", ""), updated, cache.getString("glyph", ""), cache.getString("color", "")});
+                    cache.getString("sky", ""), where, updated, cache.getString("glyph", ""), cache.getString("color", "")});
         }
         return out;
     }
@@ -50,6 +52,20 @@ public final class WeatherProvider extends ContentProvider {
         double lat = Double.longBitsToDouble(place.getLong("lat", 0));
         double lon = Double.longBitsToDouble(place.getLong("lon", 0));
         new Thread(() -> {
+            // A city chosen by an older build has no country saved: the nearest search result for its name fills it in.
+            if (!place.contains("country")) {
+                String country = "";
+                try {
+                    Forecast.Place best = null;
+                    for (Forecast.Place p : Forecast.search(place.getString("name", ""))) {
+                        if (best == null || Math.hypot(p.latitude - lat, p.longitude - lon) < Math.hypot(best.latitude - lat, best.longitude - lon)) best = p;
+                    }
+                    if (best != null && Math.hypot(best.latitude - lat, best.longitude - lon) < 0.5) country = best.country;
+                } catch (Exception ignored) {
+                    // Offline: try again on the next query.
+                }
+                if (!country.isEmpty()) place.edit().putString("country", country).apply();
+            }
             try {
                 Forecast.Report r = Forecast.fetch(lat, lon, Forecast.MIN_DAYS);
                 String sky = getContext().getString(Forecast.sky(r.code, r.day));
