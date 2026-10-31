@@ -51,6 +51,8 @@ final class WallpaperPlayer {
     private boolean active;
     private boolean closed;
     private boolean loading;
+    /** next(): the coming update() picks a new picture whatever the interval says (Cycle wallpaper: each return to Home). */
+    private boolean force;
     private String displayed = "";
     /** wallpaper_captions: the shown picture's name from wallpapers/captions.txt; null when off or there are none. */
     private final TextView caption;
@@ -133,6 +135,12 @@ final class WallpaperPlayer {
         update();
     }
 
+    /** Another picture now: Cycle wallpaper "each return to Home" (MainActivity.onResume). */
+    void next() {
+        force = true;
+        update();
+    }
+
     void stop() {
         active = false;
     }
@@ -172,9 +180,10 @@ final class WallpaperPlayer {
         List<File> playable = playable();
         File selected = WallpaperRotation.find(playable, previous);
         long changed = preferences.getLong("changed", 0);
-        if (selected == null || WallpaperRotation.due(changed, System.currentTimeMillis(), interval)) {
+        if (selected == null || force || WallpaperRotation.due(changed, System.currentTimeMillis(), interval)) {
             selected = WallpaperRotation.pick(playable, previous, order, random);
         }
+        force = false;
         if (selected == null || selected.getName().equals(displayed)) return;
         File next = selected;
         loading = true;

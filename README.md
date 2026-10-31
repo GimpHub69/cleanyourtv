@@ -559,9 +559,13 @@ and a wallpaper.
     the launcher's theme provider, the same files as a folder in `themes/`, its `screenshot.jpg` included): a
     picker with the stored themes down the left and the focused one's screenshot on the right. OK applies it
     as `tools/theme.sh` would, without a computer; **Built-in** at the top is the plain `config.xml` look, as
-    `theme.sh --reset` leaves it. **Wallpaper**: one picture from the theme's collection (or its
-    `wallpaper.jpg`), **None**, or **Theme default**. A pick holds that picture and stops the rotation until
-    you choose Theme default, press Follow theme, or push the theme again.
+    `theme.sh --reset` leaves it. **Wallpaper**: a picker like the theme's, with the picture on the right as
+    you move: **Theme default**, **None**, then every picture on the TV, grouped as the current theme's, each
+    stored theme's and the Custom folder (`content write` into `custom/<picture>` through the theme provider).
+    A pick holds that picture until you choose Theme default, press Follow theme, or push the theme again.
+    **Cycle wallpaper**: Off, every 5 or 15 minutes, every hour, time of day (the theme's own groups; hourly
+    for a group without them) or each return to Home, through the group of the picture last picked (the
+    theme's own pictures until one is picked).
   - Layout: **Apps per row** 4, 5, 6 or 7; **Rows below dock** 0 to 3, how many rows of tiles stay visible
     under the dock band; **Dock band opacity** 100%, 70%, 50% or 30%. The last two only do anything while the
     dock is its own row (`dock_row`, on by default).

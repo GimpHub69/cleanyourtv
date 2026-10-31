@@ -51,6 +51,10 @@ final class Config {
     static final String WIFI_COLOR_KEY = "wifi_status_color";
     /** The Weather row in Launcher settings: false hides the weather_provider line. */
     static final String WEATHER_KEY = "weather_line";
+    /** The wallpaper picker's group the Cycle row rotates through: a folder under the theme directory, "" for the theme's own. */
+    static final String WALLPAPER_SET_KEY = "wallpaper_set";
+    /** Cycle wallpaper: 0 off, minutes, -1 time of day, -2 each return to Home. */
+    static final String WALLPAPER_CYCLE_KEY = "wallpaper_cycle";
     /**
      * Counts the changes made in Launcher settings. Home remembers the count it was built with and rebuilds on
      * resume when it differs, however the settings were left (see MainActivity#onResume).
@@ -119,6 +123,8 @@ final class Config {
     final String weatherProvider;
     /** The weather_provider line is shown: a provider is set and the Weather row is on. */
     final boolean weatherLine;
+    /** Cycle wallpaper "each return to Home": Home shows the next picture of the set on every resume. */
+    final boolean wallpaperCycleOnHome;
     /** Names under every tile, dimmed until focused (config.xml always_show_names); the dock band grows for them. */
     final boolean alwaysShowNames;
     /** Reorder button in the top bar (config.xml reorder_button); the Settings long-press menu offers it either way. */
@@ -266,7 +272,8 @@ final class Config {
                    List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, boolean fadeRows, int homeIdleClockMinutes,
                    boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
                    boolean handleViewInputs, boolean tileMenu, boolean dockEvenPadding, boolean cinematicDots, boolean cinematicWhiteFocus, boolean wifiStatusColor, int cinematicScrim, int cinematicArt,
-                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine) {
+                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome) {
+        this.wallpaperCycleOnHome = wallpaperCycleOnHome;
         this.homeHook = homeHook;
         this.settingsMenuOnClick = settingsMenuOnClick;
         this.weatherProvider = weatherProvider;
@@ -628,6 +635,38 @@ final class Config {
             wallpaper = chosen.isEmpty() ? null : chosen.get(0);
             wallpaperEnabled = !chosen.isEmpty();
         }
+        // The wallpaper picker's wider choices: a picture of a stored theme or of the Custom folder (a path with a
+        // slash), and the Cycle row, which rotates through that picture's group, or the theme's own pictures.
+        boolean cycleOnHome = false;
+        if (dir != null && wallpaperChoice != null && wallpaperChoice.indexOf('/') > 0) {
+            File picked = new File(dir, wallpaperChoice);
+            if (picked.isFile()) {
+                wallpapers.clear();
+                wallpapers.add(picked);
+                wallpaper = picked;
+                wallpaperEnabled = true;
+            }
+        }
+        int cycle = choices.getInt(WALLPAPER_CYCLE_KEY, 0);
+        String set = choices.getString(WALLPAPER_SET_KEY, null);
+        if (dir != null && cycle != 0 && !WallpaperRotation.CHOICE_NONE.equals(wallpaperChoice)) {
+            List<File> pool = new ArrayList<>();
+            if (set == null || set.isEmpty() || ThemeFiles.WALLPAPERS.equals(set)) {
+                pool.addAll(WallpaperRotation.images(new File(dir, ThemeFiles.WALLPAPERS)));
+                File single = new File(dir, WALLPAPER_NAME);
+                if (pool.isEmpty() && single.isFile()) pool.add(single);
+            } else {
+                for (File f : WallpaperRotation.images(new File(dir, set))) if (!ThemeFiles.SCREENSHOT.equals(f.getName())) pool.add(f);
+                wallpaperMoods = Collections.emptyMap();   // the theme's time-of-day groups name its own pictures
+            }
+            if (!pool.isEmpty()) {
+                wallpapers = pool;
+                wallpaper = pool.get(0);
+                wallpaperEnabled = true;
+                rotationMinutes = cycle > 0 ? cycle : cycle == -1 ? 60 : 0;
+                cycleOnHome = cycle == -2;
+            }
+        }
         // A festive skin comes only from a theme; config.xml has no festival.
         Festival festival = json == null ? Festival.NONE : Festival.parse(string(json, "festival", ""),
                 string(json, "festival_until", ""), string(json, "greeting", ""), string(json, "accent_color", ""));
@@ -640,7 +679,7 @@ final class Config {
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, restoreKeyServices, wallpaperEnabled, wallpaper,
                 wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow, fadeRows,
-                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine);
+                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome);
     }
 
     /**
@@ -684,12 +723,12 @@ final class Config {
             SharedPreferences.Editor editor = choices.edit();
             if (!"absent".equals(token)) editor.remove("columns").remove("animations")
                     .remove("advanced_effects").remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY)
-                    .remove(DOCK_OPACITY_KEY).remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY);
+                    .remove(DOCK_OPACITY_KEY).remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY);
             editor.putString(THEME_SIGNATURE_KEY, signature).commit();
         } else if (!seen.equals(signature)) {
             choices.edit().remove("columns").remove("animations").remove("advanced_effects")
                     .remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY).remove(DOCK_OPACITY_KEY)
-                    .remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY)
+                    .remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY)
                     .putString(THEME_SIGNATURE_KEY, signature).commit();
         }
     }

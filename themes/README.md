@@ -17,7 +17,9 @@ Themes can also live on the TV: `content write --uri content://com.gathin.tvhome
 preview) stores a theme folder under the launcher's files, and a **Theme** row then appears in Launcher settings: a
 picker that previews each stored theme from its screenshot and applies the chosen one exactly as `theme.sh` does,
 with no computer, or **Built-in** for the plain look as `theme.sh --reset` leaves it;
-`content delete --uri .../themes/<name>` removes a stored theme.
+`content delete --uri .../themes/<name>` removes a stored theme. Pictures of your own go in the same way under
+`custom/<picture>` (`content write --uri content://com.gathin.tvhome.theme/custom/beach.jpg < beach.jpg`): they
+show as the Custom group of the Wallpaper picker in Launcher settings, which also lists every stored theme's pictures.
 
 `tools/manage.py list themes` and `list switches` list them from this file, `show <name>` gives one with its
 screenshot, and `manage.py set <switch> <value> --theme <your folder>` writes a key into a theme of your own and

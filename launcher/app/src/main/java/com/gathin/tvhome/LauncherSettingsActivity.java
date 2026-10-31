@@ -32,6 +32,10 @@ public final class LauncherSettingsActivity extends Activity {
     private final TextView[] dockChoices = new TextView[DOCK_OPACITIES.length];
     private TextView themeChoice;
     private TextView wallpaperChoice;
+    private TextView cycleChoice;
+    /** Cycle wallpaper, in the order the row cycles: off, 5 and 15 minutes, an hour, time of day, each return to Home. */
+    private static final int[] CYCLES = {0, 5, 15, 60, -1, -2};
+    private int cycle;
     private TextView greetingChoice;
     private TextView headerWhiteChoice;
     private TextView wifiPillChoice;
@@ -87,6 +91,17 @@ public final class LauncherSettingsActivity extends Activity {
         themeChoice.setOnClickListener(v -> showThemePicker());
         wallpaperChoice = findViewById(R.id.wallpaperChoice);
         wallpaperChoice.setOnClickListener(v -> showWallpaperPicker());
+        cycleChoice = findViewById(R.id.cycleChoice);
+        cycleChoice.setOnClickListener(v -> {
+            int at = 0;
+            for (int i = 0; i < CYCLES.length; i++) if (CYCLES[i] == cycle) at = i;
+            cycle = CYCLES[(at + 1) % CYCLES.length];
+            choices.edit().putInt(Config.WALLPAPER_CYCLE_KEY, cycle).apply();
+            changed();
+            readCurrent(Config.load(this));
+            loadPreviewPicture();
+            refresh();
+        });
 
         int[] ids = {R.id.columns4, R.id.columns5, R.id.columns6, R.id.columns7};
         for (int i = 0; i < ids.length; i++) {
@@ -206,7 +221,9 @@ public final class LauncherSettingsActivity extends Activity {
                     .remove("advanced_effects").remove(Config.WALLPAPER_CHOICE_KEY)
                     .remove(Config.DOCK_OPACITY_KEY).remove(OpenOnStart.KEY)
                     .remove(Config.GREETING_KEY).remove(Config.HEADER_WHITE_KEY)
-                    .remove(Config.WIFI_PILL_KEY).remove(Config.WIFI_COLOR_KEY).remove(Config.WEATHER_KEY).commit();
+                    .remove(Config.WIFI_PILL_KEY).remove(Config.WIFI_COLOR_KEY).remove(Config.WEATHER_KEY)
+                    .remove(Config.WALLPAPER_SET_KEY).remove(Config.WALLPAPER_CYCLE_KEY).commit();
+            loadPreviewPicture();
             readCurrent(Config.load(this));
             changed();
             refresh();
@@ -235,6 +252,7 @@ public final class LauncherSettingsActivity extends Activity {
         wifiPill = !config.showNetworkPill ? 2 : config.iconOnlyButtons ? 1 : 0;
         wifiColor = config.wifiStatusColor;
         weather = config.weatherLine;
+        cycle = choices.getInt(Config.WALLPAPER_CYCLE_KEY, 0);
         previewPicture = config.wallpapers.isEmpty() ? null : config.wallpapers.get(0);
     }
 
@@ -291,40 +309,21 @@ public final class LauncherSettingsActivity extends Activity {
         });
     }
 
+    /** Every picture on the TV with a preview (WallpaperPicker); a pick holds it and sets the Cycle row's group. */
     private void showWallpaperPicker() {
         File dir = Config.dir(this);
-        List<File> images = new java.util.ArrayList<>(WallpaperRotation.images(
-                dir == null ? null : new File(dir, "wallpapers")));
-        // A theme with a single wallpaper.jpg offers that picture too (Config maps the choice back to it).
-        File single = dir == null ? null : new File(dir, Config.WALLPAPER_NAME);
-        if (single != null && single.isFile()) images.add(0, single);
-        String[] labels = new String[images.size() + 1];
-        for (int i = 0; i < images.size(); i++) labels[i] = images.get(i).getName();
-        labels[images.size()] = getString(R.string.wallpaper_none);
-        String current = choices.getString(Config.WALLPAPER_CHOICE_KEY, null);
-        int checked = "none".equals(current) ? images.size()
-                : indexOf(images, current);
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.wallpaper_label)
-                .setSingleChoiceItems(labels, checked, (dialog, which) -> {
-                    dialog.dismiss();
-                    if (which == images.size()) {
-                        choices.edit().putString(Config.WALLPAPER_CHOICE_KEY, "none").apply();
-                    } else {
-                        choices.edit().putString(Config.WALLPAPER_CHOICE_KEY,
-                                images.get(which).getName()).apply();
-                    }
-                    changed();
-                    Toast.makeText(this, R.string.wallpaper_applied, Toast.LENGTH_SHORT).show();
-                    refresh();
-                })
-                .setNeutralButton(R.string.wallpaper_theme_default, (dialog, which) -> {
-                    choices.edit().remove(Config.WALLPAPER_CHOICE_KEY).apply();
-                    changed();
-                    refresh();
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        if (dir == null) return;
+        WallpaperPicker.show(this, dir, ThemeSwitch.themes(dir), choices.getString(Config.WALLPAPER_CHOICE_KEY, null), (choice, set) -> {
+            SharedPreferences.Editor edit = choices.edit();
+            if (choice == null) edit.remove(Config.WALLPAPER_CHOICE_KEY).remove(Config.WALLPAPER_SET_KEY);
+            else edit.putString(Config.WALLPAPER_CHOICE_KEY, choice);
+            if (set != null) edit.putString(Config.WALLPAPER_SET_KEY, set);
+            edit.apply();
+            changed();
+            readCurrent(Config.load(this));
+            loadPreviewPicture();
+            refresh();
+        });
     }
 
     /** Off, then every app with a TV entry point by name. Saved at once; it is read on the next boot. */
@@ -429,8 +428,10 @@ public final class LauncherSettingsActivity extends Activity {
         String wallpaperCurrent = choices.getString(Config.WALLPAPER_CHOICE_KEY, null);
         wallpaperChoice.setText(getString(R.string.wallpaper_state,
                 "none".equals(wallpaperCurrent) ? getString(R.string.wallpaper_none)
-                        : wallpaperCurrent != null ? wallpaperCurrent
+                        : wallpaperCurrent != null ? wallpaperCurrent.substring(wallpaperCurrent.lastIndexOf('/') + 1)
                         : getString(R.string.wallpaper_theme_default)));
+        cycleChoice.setText(getString(R.string.wallpaper_cycle_state, getString(cycle == 0 ? R.string.off : cycle == 5 ? R.string.cycle_5
+                : cycle == 15 ? R.string.cycle_15 : cycle == 60 ? R.string.cycle_hour : cycle == -1 ? R.string.cycle_day : R.string.cycle_home)));
         openOnStartChoice.setText(getString(R.string.open_on_start_state, openOnStartLabel()));
         followThemeChoice.setSelected(!hasOnTvChoices());
         updatePreview();
@@ -442,7 +443,8 @@ public final class LauncherSettingsActivity extends Activity {
                 || choices.contains(Config.WALLPAPER_CHOICE_KEY) || choices.contains(Config.DOCK_OPACITY_KEY)
                 || choices.contains(OpenOnStart.KEY) || choices.contains(Config.GREETING_KEY)
                 || choices.contains(Config.HEADER_WHITE_KEY) || choices.contains(Config.WIFI_PILL_KEY)
-                || choices.contains(Config.WIFI_COLOR_KEY) || choices.contains(Config.WEATHER_KEY);
+                || choices.contains(Config.WIFI_COLOR_KEY) || choices.contains(Config.WEATHER_KEY)
+                || choices.contains(Config.WALLPAPER_SET_KEY) || choices.contains(Config.WALLPAPER_CYCLE_KEY);
     }
 
     private void open(Intent intent) {

@@ -85,6 +85,14 @@
     <string name="wifi_pill_hidden">Hidden</string>
     <string name="wifi_color_state">Wi-Fi status colour: %1$s</string>
     <string name="weather_state">Weather: %1$s</string>
+    <string name="wallpaper_cycle_state">Cycle wallpaper: %1$s</string>
+    <string name="cycle_5">Every 5 minutes</string>
+    <string name="cycle_15">Every 15 minutes</string>
+    <string name="cycle_hour">Every hour</string>
+    <string name="cycle_day">Time of day</string>
+    <string name="cycle_home">Each return to Home</string>
+    <string name="wallpaper_group_current">Current theme</string>
+    <string name="wallpaper_custom">Custom</string>
     <string name="preview_weather" translatable="false">12° · Cloudy</string>
     <string name="theme_label">Theme</string>
     <string name="theme_state">Theme: %1$s</string>

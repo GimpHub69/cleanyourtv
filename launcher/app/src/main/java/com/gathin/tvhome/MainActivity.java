@@ -134,6 +134,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private RecyclerView grid;
     private FrameLayout root;
     private WallpaperPlayer wallpaperPlayer;
+    /** Cycle wallpaper "each return to Home": the next picture on every resume after the first (Config.wallpaperCycleOnHome). */
+    private boolean wallpaperCycleOnHome, resumedOnce;
     private GlassView glass;
     private View ambient;
     private TextView heroName;
@@ -419,6 +421,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // the theme's background, so launch looks the same.
         getWindow().setBackgroundDrawable(null);
         wallpaperPlayer = new WallpaperPlayer(this, root, cfg);
+        wallpaperCycleOnHome = cfg.wallpaperCycleOnHome;
         sky = findViewById(R.id.sky);
         sky.setIntensity(cfg.skyIntensity);
         glass = findViewById(R.id.glass);
@@ -962,6 +965,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (showStats) startStats();
         sky.update();
         wallpaperPlayer.start();
+        if (wallpaperCycleOnHome && resumedOnce) wallpaperPlayer.next();
+        resumedOnce = true;
         handler.postDelayed(minuteTick, MINUTE_MS);
         if (festive && diya != null) {
             diya.start();

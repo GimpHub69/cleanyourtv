@@ -35,6 +35,10 @@ final class ThemeFiles {
             return Config.FILE_NAME.equals(name) || "wallpaper.jpg".equals(name) || "theme_revision".equals(name)
                     ? name : null;
         }
+        // The Custom group of the wallpaper picker: custom/<picture>, written through ThemeProvider.
+        if (segments.size() == 2 && WallpaperPicker.CUSTOM.equals(segments.get(0)) && collectionImage(segments.get(1))) {
+            return WallpaperPicker.CUSTOM + "/" + segments.get(1);
+        }
         if (segments.size() == 2 && WALLPAPERS.equals(segments.get(0))
                 && (collectionImage(segments.get(1)) || WallpaperCaptions.FILE_NAME.equals(segments.get(1)))) {
             return WALLPAPERS + "/" + segments.get(1);
