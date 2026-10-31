@@ -44,3 +44,4 @@ the rules. Keys from before this rule are on its wanted list; a screenshot for o
 | `uniform_tiles` | <img src="switches/uniform_tiles.jpg" width="320" alt="uniform_tiles on a TV"> |
 | `home_hook` | Fire TV Stick 4K Max (Fire OS 8.1.8.5): the launcher's Home a moment after the remote's HOME button, which Fire OS had routed to Amazon's home screen; HomeHookService covered it and started this launcher over it | <img src="switches/home_hook.jpg" width="320" alt="home_hook"> |
 | `settings_menu_on_click` | Fire TV Stick 4K Max: OK on the Settings pill drops the launcher's menu, TV settings as its second row | <img src="switches/settings_menu_on_click.jpg" width="320" alt="settings_menu_on_click"> |
+| `weather_provider` | Fire TV Stick 4K Max with the weather add-on installed: its "12° · Cloudy" line under the date, read from the add-on's content provider | <img src="switches/weather_provider.jpg" width="320" alt="weather_provider"> |

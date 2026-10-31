@@ -231,6 +231,21 @@
                             android:letterSpacing="0.14"
                             android:textAllCaps="true"
                             android:visibility="gone" />
+
+                        <!-- One line from a local provider (weather_provider), see WeatherLine. -->
+                        <TextView
+                            android:id="@+id/weatherLine"
+                            android:gravity="right"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:singleLine="true"
+                            android:ellipsize="end"
+                            android:textColor="#D9FFFFFF"
+                            android:textSize="16sp"
+                            android:fontFamily="@font/outfit_regular"
+                            android:letterSpacing="0.04"
+                            android:visibility="gone" />
                 </LinearLayout>
 
                 <View

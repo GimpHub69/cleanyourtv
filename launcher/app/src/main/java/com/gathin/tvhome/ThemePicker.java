@@ -83,7 +83,7 @@ final class ThemePicker {
     }
 
     /** The screenshot scaled down to about the preview's width, in 16-bit colour: one decode per focus change. */
-    private static Bitmap decode(File file, int width) {
+    static Bitmap decode(File file, int width) {
         BitmapFactory.Options o = new BitmapFactory.Options();
         o.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(file.getPath(), o);

@@ -30,5 +30,12 @@
             </intent-filter>
             <meta-data android:name="com.gathin.tvhome.card" android:resource="@xml/module_card" />
         </activity>
+
+        <!-- The weather now for other apps on the TV, from this app's cache (WeatherProvider); the launcher's
+             weather_provider key reads it for a line under the clock. -->
+        <provider
+            android:name=".WeatherProvider"
+            android:authorities="io.github.sumyabazar1.weather"
+            android:exported="true" />
     </application>
 </manifest>

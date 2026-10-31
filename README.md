@@ -551,7 +551,8 @@ and a wallpaper.
 
 - Click **Settings** for the TV's own settings (with `settings_menu_on_click`, OK drops the launcher's menu instead,
   with **TV settings** as a row). Hold OK on it and choose **Launcher settings**, or click it straight away with
-  `launcher_settings_button`. The launcher's own page is grouped into sections, top to bottom:
+  `launcher_settings_button`. The launcher's own page shows a preview of Home on the left (the wallpaper with a
+  small clock, pills and dock that follow the choices) and the options on the right, grouped top to bottom:
   - **Reorder apps**, only with `launcher_settings_button`: OK picks an app up, the arrows move it, Back
     places it, and Back again finishes.
   - Appearance: **Theme**, only when themes are stored on the TV (`content write` into `themes/<name>/` through
@@ -565,8 +566,9 @@ and a wallpaper.
     under the dock band; **Dock band opacity** 100%, 70%, 50% or 30%. The last two only do anything while the
     dock is its own row (`dock_row`, on by default).
   - Clock and pills: **Greeting** on or off (`show_greeting`), **Date in white** (`header_white`), **Wi-Fi
-    pill** as Label, Icon only or Hidden (`icon_only_buttons`, `show_network_pill`) and **Wi-Fi status colour**
-    (`wifi_status_color`). Each overrides the theme's key until Follow theme or another theme.
+    pill** as Label, Icon only or Hidden (`icon_only_buttons`, `show_network_pill`), **Wi-Fi status colour**
+    (`wifi_status_color`) and, with `weather_provider` set, **Weather** on or off for the line under the date.
+    Each overrides the theme's key until Follow theme or another theme.
   - Motion: **Animations** on or off, and **Advanced effects** (tile lift, icon zoom and smooth
     ambient-colour transitions; they may use more memory) once animations are on. **Open on start**, only
     with `open_on_start_choice`: Off, or an app that opens instead of Home the first time Home comes up after

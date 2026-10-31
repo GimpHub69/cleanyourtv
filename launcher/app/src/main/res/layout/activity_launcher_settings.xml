@@ -1,217 +1,246 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Launcher settings: grouped sections, each a rounded card of rows (SettingsSection, SettingsGroup). The rows'
-     labels and the README's list of them are checked by tests/test_launcher_settings_rows.py. -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Launcher settings: a live preview of Home on the left (the wallpaper with a small clock, pills and dock drawn
+     from the choices), the options on the right as grouped cards. The rows' labels and the README's list of them
+     are checked by tests/test_launcher_settings_rows.py. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FF0E1116"
-    android:fillViewport="true">
+    android:orientation="horizontal"
+    android:paddingStart="64dp"
+    android:paddingEnd="48dp"
+    android:paddingTop="36dp"
+    android:paddingBottom="24dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingStart="96dp"
-        android:paddingEnd="96dp"
-        android:paddingTop="34dp"
-        android:paddingBottom="38dp">
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.9"
+        android:layout_marginEnd="40dp"
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/outfit_light"
-            android:paddingStart="18dp"
-            android:paddingEnd="18dp"
             android:text="@string/launcher_settings"
             android:textColor="#FFFFFFFF"
-            android:textSize="36sp" />
+            android:textSize="34sp" />
 
-        <TextView
-            android:id="@+id/reorderChoice"
-            style="@style/SettingsRow"
-            android:layout_marginTop="20dp"
-            android:text="@string/reorder"
-            android:visibility="gone" />
+        <FrameLayout
+            android:id="@+id/preview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="28dp"
+            android:layout_marginBottom="28dp"
+            android:background="@drawable/settings_group_bg">
 
-        <TextView style="@style/SettingsSection" android:text="@string/section_appearance" />
-
-        <LinearLayout style="@style/SettingsGroup">
-
-            <TextView
-                android:id="@+id/themeChoice"
-                style="@style/SettingsRow" />
-
-            <TextView
-                android:id="@+id/wallpaperChoice"
-                style="@style/SettingsRow"
-                android:layout_marginTop="6dp" />
-        </LinearLayout>
-
-        <TextView style="@style/SettingsSection" android:text="@string/section_layout" />
-
-        <LinearLayout style="@style/SettingsGroup">
-
-            <TextView
+            <ImageView
+                android:id="@+id/previewWallpaper"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="18dp"
-                android:paddingTop="6dp"
-                android:text="@string/columns_label"
-                android:textColor="#FFFFFFFF"
-                android:textSize="20sp" />
+                android:layout_height="match_parent"
+                android:contentDescription="@string/wallpaper_label"
+                android:scaleType="centerCrop" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
+                android:layout_margin="14dp"
+                android:orientation="vertical">
 
-                <TextView android:id="@+id/columns4" style="@style/SettingsColumnChoice" android:text="4" />
-                <TextView android:id="@+id/columns5" style="@style/SettingsColumnChoice" android:text="5" />
-                <TextView android:id="@+id/columns6" style="@style/SettingsColumnChoice" android:text="6" />
-                <TextView android:id="@+id/columns7" style="@style/SettingsColumnChoice" android:text="7" />
+                <TextView
+                    android:id="@+id/previewGreeting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/outfit_light"
+                    android:letterSpacing="0.14"
+                    android:text="@string/good_morning"
+                    android:textAllCaps="true"
+                    android:textColor="#A6FFFFFF"
+                    android:textSize="6sp" />
+
+                <TextClock
+                    android:id="@+id/previewClock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/outfit_light"
+                    android:format12Hour="h:mm"
+                    android:format24Hour="HH:mm"
+                    android:includeFontPadding="false"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="22sp" />
+
+                <TextClock
+                    android:id="@+id/previewDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:format12Hour="@string/date_format_home"
+                    android:format24Hour="@string/date_format_home"
+                    android:letterSpacing="0.14"
+                    android:textAllCaps="true"
+                    android:textColor="#A6FFFFFF"
+                    android:textSize="6sp" />
+
+                <TextView
+                    android:id="@+id/previewWeather"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="@string/preview_weather"
+                    android:textColor="#D9FFFFFF"
+                    android:textSize="7sp" />
             </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:paddingStart="18dp"
-                android:text="@string/rows_below_dock_label"
-                android:textColor="#FFFFFFFF"
-                android:textSize="20sp" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="12dp"
                 android:orientation="horizontal">
 
-                <TextView android:id="@+id/rows0" style="@style/SettingsColumnChoice" android:text="0" />
-                <TextView android:id="@+id/rows1" style="@style/SettingsColumnChoice" android:text="1" />
-                <TextView android:id="@+id/rows2" style="@style/SettingsColumnChoice" android:text="2" />
-                <TextView android:id="@+id/rows3" style="@style/SettingsColumnChoice" android:text="3" />
-            </LinearLayout>
+                <View
+                    android:id="@+id/previewWifi"
+                    android:layout_width="30dp"
+                    android:layout_height="11dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/pill_bg" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:paddingStart="18dp"
-                android:text="@string/dock_opacity_label"
-                android:textColor="#FFFFFFFF"
-                android:textSize="20sp" />
+                <View
+                    android:layout_width="11dp"
+                    android:layout_height="11dp"
+                    android:background="@drawable/pill_bg" />
+            </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/previewDock"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView android:id="@+id/dock100" style="@style/SettingsColumnChoice" android:text="100%" />
-                <TextView android:id="@+id/dock70" style="@style/SettingsColumnChoice" android:text="70%" />
-                <TextView android:id="@+id/dock50" style="@style/SettingsColumnChoice" android:text="50%" />
-                <TextView android:id="@+id/dock30" style="@style/SettingsColumnChoice" android:text="30%" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <TextView style="@style/SettingsSection" android:text="@string/section_header" />
-
-        <LinearLayout style="@style/SettingsGroup">
-
-            <TextView
-                android:id="@+id/greetingChoice"
-                style="@style/SettingsRow" />
-
-            <TextView
-                android:id="@+id/headerWhiteChoice"
-                style="@style/SettingsRow"
-                android:layout_marginTop="6dp" />
-
-            <TextView
-                android:id="@+id/wifiPillChoice"
-                style="@style/SettingsRow"
-                android:layout_marginTop="6dp" />
-
-            <TextView
-                android:id="@+id/wifiColorChoice"
-                style="@style/SettingsRow"
-                android:layout_marginTop="6dp" />
-        </LinearLayout>
-
-        <TextView style="@style/SettingsSection" android:text="@string/section_motion" />
-
-        <LinearLayout style="@style/SettingsGroup">
-
-            <TextView
-                android:id="@+id/animationsChoice"
-                style="@style/SettingsRow" />
-
-            <TextView
-                android:id="@+id/advancedChoice"
-                style="@style/SettingsRow"
-                android:layout_marginTop="6dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="18dp"
-                android:paddingTop="8dp"
-                android:paddingEnd="18dp"
-                android:paddingBottom="6dp"
-                android:text="@string/advanced_effects_warning"
-                android:textColor="#FF9AA4AE"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/openOnStartChoice"
-                style="@style/SettingsRow"
-                android:layout_marginTop="6dp"
-                android:visibility="gone" />
-        </LinearLayout>
-
-        <TextView style="@style/SettingsSection" android:text="@string/section_system" />
-
-        <LinearLayout style="@style/SettingsGroup">
-
-            <TextView
-                android:id="@+id/followThemeChoice"
-                style="@style/SettingsRow"
-                android:text="@string/follow_theme" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="18dp"
-                android:paddingTop="8dp"
-                android:paddingEnd="18dp"
-                android:paddingBottom="6dp"
-                android:text="@string/follow_theme_hint"
-                android:textColor="#FF9AA4AE"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/defaultHomeChoice"
-                style="@style/SettingsRow"
-                android:layout_marginTop="6dp"
-                android:text="@string/home_settings" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="18dp"
-                android:paddingTop="8dp"
-                android:paddingEnd="18dp"
-                android:paddingBottom="6dp"
-                android:text="@string/home_settings_help"
-                android:textColor="#FF9AA4AE"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/tvSettingsChoice"
-                style="@style/SettingsRow"
-                android:layout_marginTop="6dp"
-                android:text="@string/tv_settings" />
-        </LinearLayout>
+                android:layout_height="46dp"
+                android:layout_gravity="bottom"
+                android:layout_margin="12dp"
+                android:background="@drawable/tile_bg"
+                android:orientation="horizontal"
+                android:padding="5dp" />
+        </FrameLayout>
     </LinearLayout>
-</ScrollView>
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.1"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
+
+            <TextView
+                android:id="@+id/reorderChoice"
+                style="@style/SettingsRow"
+                android:text="@string/reorder"
+                android:visibility="gone" />
+
+            <TextView style="@style/SettingsSection" android:layout_marginTop="0dp" android:text="@string/section_appearance" />
+
+            <LinearLayout style="@style/SettingsGroup">
+                <TextView android:id="@+id/themeChoice" style="@style/SettingsRow" />
+                <TextView android:id="@+id/wallpaperChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
+            </LinearLayout>
+
+            <TextView style="@style/SettingsSection" android:text="@string/section_layout" />
+
+            <LinearLayout style="@style/SettingsGroup">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="18dp"
+                    android:paddingTop="4dp"
+                    android:text="@string/columns_label"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="20sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/columns4" style="@style/SettingsColumnChoice" android:text="4" />
+                    <TextView android:id="@+id/columns5" style="@style/SettingsColumnChoice" android:text="5" />
+                    <TextView android:id="@+id/columns6" style="@style/SettingsColumnChoice" android:text="6" />
+                    <TextView android:id="@+id/columns7" style="@style/SettingsColumnChoice" android:text="7" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:paddingStart="18dp"
+                    android:text="@string/rows_below_dock_label"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="20sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/rows0" style="@style/SettingsColumnChoice" android:text="0" />
+                    <TextView android:id="@+id/rows1" style="@style/SettingsColumnChoice" android:text="1" />
+                    <TextView android:id="@+id/rows2" style="@style/SettingsColumnChoice" android:text="2" />
+                    <TextView android:id="@+id/rows3" style="@style/SettingsColumnChoice" android:text="3" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:paddingStart="18dp"
+                    android:text="@string/dock_opacity_label"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="20sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/dock100" style="@style/SettingsColumnChoice" android:text="100%" />
+                    <TextView android:id="@+id/dock70" style="@style/SettingsColumnChoice" android:text="70%" />
+                    <TextView android:id="@+id/dock50" style="@style/SettingsColumnChoice" android:text="50%" />
+                    <TextView android:id="@+id/dock30" style="@style/SettingsColumnChoice" android:text="30%" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView style="@style/SettingsSection" android:text="@string/section_header" />
+
+            <LinearLayout style="@style/SettingsGroup">
+                <TextView android:id="@+id/greetingChoice" style="@style/SettingsRow" />
+                <TextView android:id="@+id/headerWhiteChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
+                <TextView android:id="@+id/wifiPillChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
+                <TextView android:id="@+id/wifiColorChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
+                <TextView android:id="@+id/weatherChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" android:visibility="gone" />
+            </LinearLayout>
+
+            <TextView style="@style/SettingsSection" android:text="@string/section_motion" />
+
+            <LinearLayout style="@style/SettingsGroup">
+                <TextView android:id="@+id/animationsChoice" style="@style/SettingsRow" />
+                <TextView android:id="@+id/advancedChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
+                <TextView android:id="@+id/openOnStartChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" android:visibility="gone" />
+            </LinearLayout>
+
+            <TextView style="@style/SettingsSection" android:text="@string/section_system" />
+
+            <LinearLayout style="@style/SettingsGroup">
+                <TextView android:id="@+id/followThemeChoice" style="@style/SettingsRow" android:text="@string/follow_theme" />
+                <TextView android:id="@+id/defaultHomeChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" android:text="@string/home_settings" />
+                <TextView android:id="@+id/tvSettingsChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" android:text="@string/tv_settings" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

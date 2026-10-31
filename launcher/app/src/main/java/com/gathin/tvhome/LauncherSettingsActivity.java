@@ -10,6 +10,7 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +36,14 @@ public final class LauncherSettingsActivity extends Activity {
     private TextView headerWhiteChoice;
     private TextView wifiPillChoice;
     private TextView wifiColorChoice;
+    private TextView weatherChoice;
+    private boolean weather;
+    /** The preview of Home on the left: the wallpaper, a small header and dock drawn from the choices. */
+    private ImageView previewWallpaper;
+    private View previewGreeting, previewWeather, previewWifi;
+    private TextView previewDate;
+    private LinearLayout previewDock;
+    private File previewPicture;
     private TextView animationsChoice;
     private TextView advancedChoice;
     private TextView followThemeChoice;
@@ -63,6 +72,13 @@ public final class LauncherSettingsActivity extends Activity {
             finish();
         });
         readCurrent(config);
+        previewWallpaper = findViewById(R.id.previewWallpaper);
+        previewGreeting = findViewById(R.id.previewGreeting);
+        previewDate = findViewById(R.id.previewDate);
+        previewWeather = findViewById(R.id.previewWeather);
+        previewWifi = findViewById(R.id.previewWifi);
+        previewDock = findViewById(R.id.previewDock);
+        previewWallpaper.post(this::loadPreviewPicture);
 
         // Appearance: the Theme row shows only where a theme is stored on the TV (ThemeSwitch).
         themeChoice = findViewById(R.id.themeChoice);
@@ -138,6 +154,16 @@ public final class LauncherSettingsActivity extends Activity {
             changed();
             refresh();
         });
+        weatherChoice = findViewById(R.id.weatherChoice);
+        if (!config.weatherProvider.isEmpty()) {
+            weatherChoice.setVisibility(View.VISIBLE);
+            weatherChoice.setOnClickListener(v -> {
+                weather = !weather;
+                choices.edit().putBoolean(Config.WEATHER_KEY, weather).apply();
+                changed();
+                refresh();
+            });
+        }
         wifiColorChoice = findViewById(R.id.wifiColorChoice);
         wifiColorChoice.setOnClickListener(v -> {
             wifiColor = !wifiColor;
@@ -180,7 +206,7 @@ public final class LauncherSettingsActivity extends Activity {
                     .remove("advanced_effects").remove(Config.WALLPAPER_CHOICE_KEY)
                     .remove(Config.DOCK_OPACITY_KEY).remove(OpenOnStart.KEY)
                     .remove(Config.GREETING_KEY).remove(Config.HEADER_WHITE_KEY)
-                    .remove(Config.WIFI_PILL_KEY).remove(Config.WIFI_COLOR_KEY).commit();
+                    .remove(Config.WIFI_PILL_KEY).remove(Config.WIFI_COLOR_KEY).remove(Config.WEATHER_KEY).commit();
             readCurrent(Config.load(this));
             changed();
             refresh();
@@ -208,6 +234,39 @@ public final class LauncherSettingsActivity extends Activity {
         headerWhite = config.headerWhite;
         wifiPill = !config.showNetworkPill ? 2 : config.iconOnlyButtons ? 1 : 0;
         wifiColor = config.wifiStatusColor;
+        weather = config.weatherLine;
+        previewPicture = config.wallpapers.isEmpty() ? null : config.wallpapers.get(0);
+    }
+
+    /** The current wallpaper (a collection's first picture) scaled to the preview, off the main thread. */
+    private void loadPreviewPicture() {
+        final File picture = previewPicture;
+        final int width = previewWallpaper.getWidth();
+        new Thread(() -> {
+            final android.graphics.Bitmap bitmap = picture == null || width <= 0 ? null : ThemePicker.decode(picture, width);
+            previewWallpaper.post(() -> previewWallpaper.setImageBitmap(bitmap));
+        }, "preview").start();
+    }
+
+    /** The preview follows every choice: greeting, date colour, pill form, weather line, dock slots. */
+    private void updatePreview() {
+        previewGreeting.setVisibility(greeting ? View.VISIBLE : View.GONE);
+        previewDate.setTextColor(headerWhite ? 0xFFFFFFFF : 0xA6FFFFFF);
+        previewWeather.setVisibility(weather && weatherChoice.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
+        float dp = getResources().getDisplayMetrics().density;
+        previewWifi.setVisibility(wifiPill == 2 ? View.GONE : View.VISIBLE);
+        previewWifi.getLayoutParams().width = (int) ((wifiPill == 1 ? 11 : 30) * dp);
+        previewWifi.requestLayout();
+        previewDock.setAlpha(dockOpacity / 100f);
+        previewDock.removeAllViews();
+        for (int i = 0; i < columns; i++) {
+            View tile = new View(this);
+            tile.setBackgroundResource(R.drawable.settings_choice_bg);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1);
+            lp.setMarginStart((int) (3 * dp));
+            lp.setMarginEnd((int) (3 * dp));
+            previewDock.addView(tile, lp);
+        }
     }
 
     private void reverseRow(TextView[] views) {
@@ -227,6 +286,7 @@ public final class LauncherSettingsActivity extends Activity {
             changed();
             // The new theme's keys are in force now, and Config has cleared the on-TV choices for them.
             readCurrent(Config.load(this));
+            loadPreviewPicture();
             refresh();
         });
     }
@@ -361,6 +421,7 @@ public final class LauncherSettingsActivity extends Activity {
         wifiPillChoice.setText(getString(R.string.wifi_pill_state, getString(wifiPill == 2 ? R.string.wifi_pill_hidden
                 : wifiPill == 1 ? R.string.wifi_pill_icon : R.string.wifi_pill_label)));
         wifiColorChoice.setText(getString(R.string.wifi_color_state, onOff(wifiColor)));
+        weatherChoice.setText(getString(R.string.weather_state, onOff(weather)));
         animationsChoice.setText(getString(R.string.animations_state, onOff(animations)));
         advancedChoice.setText(getString(R.string.advanced_effects_state, onOff(advancedEffects)));
         advancedChoice.setEnabled(animations);
@@ -372,6 +433,7 @@ public final class LauncherSettingsActivity extends Activity {
                         : getString(R.string.wallpaper_theme_default)));
         openOnStartChoice.setText(getString(R.string.open_on_start_state, openOnStartLabel()));
         followThemeChoice.setSelected(!hasOnTvChoices());
+        updatePreview();
     }
 
     private boolean hasOnTvChoices() {
@@ -380,7 +442,7 @@ public final class LauncherSettingsActivity extends Activity {
                 || choices.contains(Config.WALLPAPER_CHOICE_KEY) || choices.contains(Config.DOCK_OPACITY_KEY)
                 || choices.contains(OpenOnStart.KEY) || choices.contains(Config.GREETING_KEY)
                 || choices.contains(Config.HEADER_WHITE_KEY) || choices.contains(Config.WIFI_PILL_KEY)
-                || choices.contains(Config.WIFI_COLOR_KEY);
+                || choices.contains(Config.WIFI_COLOR_KEY) || choices.contains(Config.WEATHER_KEY);
     }
 
     private void open(Intent intent) {

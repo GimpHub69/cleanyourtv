@@ -238,6 +238,11 @@
          Reorder apps) instead of opening the TV's Settings; holding OK opens the same menu either way. Off by default;
          a theme can set "settings_menu_on_click": true. -->
     <bool name="settings_menu_on_click">true</bool>
+    <!-- A content URI another app on this TV answers with a row whose "text" column is one short line, shown under
+         the date: the Weather add-on app answers content://io.github.sumyabazar1.weather/now with
+         "12° · Cloudy". Read on each return to Home and each minute, off the main thread; no network in the launcher.
+         Empty: no line. A theme can set "weather_provider". Launcher settings has a Weather row that turns the line off. -->
+    <string name="weather_provider" translatable="false">content://io.github.sumyabazar1.weather/now</string>
     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows
          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can
          also be set with "dock_glass": true in a theme's config.json. -->
