@@ -238,8 +238,8 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="4dp"
+                        android:gravity="top"
+                        android:paddingTop="12dp"
                         android:orientation="vertical">
 
                         <!-- Shamsi date ("27 Mehr 1405"), shown when shamsi_date is on. -->
@@ -296,7 +296,7 @@
                             android:gravity="left"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="3dp"
+                            android:layout_marginTop="2dp"
                             android:maxLines="2"
                             android:lineSpacingExtra="0dp"
                             android:ellipsize="end"

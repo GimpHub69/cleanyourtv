@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class WeatherProvider extends ContentProvider {
     private static final String CACHE = "now";
-    private static final String[] COLUMNS = {"text", "temp_c", "sky", "place", "updated", "glyph"};
+    private static final String[] COLUMNS = {"text", "temp_c", "sky", "place", "updated", "glyph", "color"};
     private static final AtomicBoolean fetching = new AtomicBoolean();
 
     @Override
@@ -36,10 +36,10 @@ public final class WeatherProvider extends ContentProvider {
         if (!place.contains("lat")) return out;
         long updated = cache.getLong("updated", 0);
         // Older than the refresh interval, or cached by a build without the glyph column: fetch again.
-        if (System.currentTimeMillis() - updated > Forecast.REFRESH_MS || !cache.contains("glyph")) refresh(place, cache);
+        if (System.currentTimeMillis() - updated > Forecast.REFRESH_MS || !cache.contains("color")) refresh(place, cache);
         if (updated > 0) {
             out.addRow(new Object[]{cache.getString("text", ""), cache.getInt("temp_c", 0),
-                    cache.getString("sky", ""), place.getString("name", ""), updated, cache.getString("glyph", "")});
+                    cache.getString("sky", ""), place.getString("name", ""), updated, cache.getString("glyph", ""), cache.getString("color", "")});
         }
         return out;
     }
@@ -54,7 +54,7 @@ public final class WeatherProvider extends ContentProvider {
                 Forecast.Report r = Forecast.fetch(lat, lon, Forecast.MIN_DAYS);
                 String sky = getContext().getString(Forecast.sky(r.code, r.day));
                 cache.edit().putString("text", String.format(Locale.ROOT, "%d° · %s", r.tempC, sky))
-                        .putInt("temp_c", r.tempC).putString("sky", sky).putString("glyph", glyph(r.code, r.day))
+                        .putInt("temp_c", r.tempC).putString("sky", sky).putString("glyph", glyph(r.code, r.day)).putString("color", color(r.code, r.day))
                         .putLong("updated", System.currentTimeMillis()).apply();
             } catch (Exception ignored) {
                 // Offline or refused: the cached row stays, the next query tries again.
@@ -74,6 +74,18 @@ public final class WeatherProvider extends ContentProvider {
         if (code >= 95) return "\u26C8\uFE0F";                                    // thunder
         if (code >= 51) return "\uD83C\uDF27\uFE0F";                             // rain cloud
         return "\u2601\uFE0F";
+    }
+
+    /** A tint for the condition, #RRGGBB: warm for clear days, cool for rain, pale for snow (the "color" column). */
+    static String color(int code, boolean day) {
+        if (code == 0) return day ? "#FFD98A" : "#B9C7FF";
+        if (code <= 2) return day ? "#FFE3B0" : "#C9D2E8";
+        if (code == 3) return "#CFD8DC";
+        if (code == 45 || code == 48) return "#B0BEC5";
+        if (code >= 71 && code <= 77 || code == 85 || code == 86) return "#E3F2FD";
+        if (code >= 95) return "#FFB74D";
+        if (code >= 51) return "#8EC3F5";
+        return "#CFD8DC";
     }
 
     @Override public String getType(Uri uri) { return "vnd.android.cursor.item/vnd.weather.now"; }

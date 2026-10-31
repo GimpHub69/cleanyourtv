@@ -189,6 +189,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** weather_provider's line under the date (WeatherLine); null URI when off. */
     private TextView weatherLine;
     private String weatherUri;
+    /** header_mood: the weather line tinted, the clock warm and the greeting dimmer after sunset. */
+    private boolean headerMood;
     private List<RaceWeekend.Race> raceCalendar;
     private View racePanel;
     private TextView raceKicker, raceHeadline, raceSessions;
@@ -365,7 +367,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         public void run() {
             updateGreeting();
             updateRace();
-            if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine);
+            if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine, headerMood);
             // The pill follows the network callbacks and each return to Home; only the diya's flame follows the
             // signal level, so only it needs this minute's binder calls (about 7 ms on the UI thread).
             if (festive) updateWifiLabel();
@@ -483,6 +485,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         shamsi = cfg.shamsiDate;
         weatherLine = findViewById(R.id.weatherLine);
         weatherUri = cfg.weatherLine ? cfg.weatherProvider : null;
+        headerMood = cfg.headerMood;
         lunarDate = findViewById(R.id.lunarDate);
         lunar = cfg.lunarDate;
         lunarOffset = Lunar.offsetFor(cfg.lunarUtcOffset, Locale.getDefault());
@@ -950,7 +953,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (openLiveTvAfterBoot()) return;
         updateGreeting();
         updateRace();
-        if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine);
+        if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine, headerMood);
         // The network and Inputs pills keep their state while Home is in the background, and callbacks update them
         // when the network or the inputs change, so this refresh only catches anything missed. Its binder calls
         // (about 7 ms on a TCL C755, most of it WifiManager.getConnectionInfo) would hold up the first frame back
@@ -1597,6 +1600,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     public void onTileFocused(int position, View card) {
         lastFocused = position;
         lastFocusedKey = adapter.keyAt(position);
+        // wallpaper_motion: a few pixels of parallax against the focused tile's place on the screen.
+        if (card.getWidth() > 0) {
+            int[] at = new int[2];
+            card.getLocationInWindow(at);
+            wallpaperPlayer.focusAt((at[0] + card.getWidth() / 2f) / Math.max(1, root.getWidth()));
+        }
         // Focus restored before the first layout (cold start): the tile has no size yet, and the glass
         // would be sized to 2*pad. Run again once the tile is laid out.
         if (card.getWidth() == 0) {
@@ -2419,7 +2428,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
     }
 
+    /** header_mood after sunset: the clock a shade warm, the greeting dimmer; by day both as the theme left them. */
+    private void nightTint() {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        int[] sun = WallpaperMood.sun(now.toLocalDate(), getString(R.string.latitude), getString(R.string.longitude), java.time.ZoneId.systemDefault());
+        boolean night = WallpaperMood.NIGHT.equals(WallpaperMood.timeOfDay(now.getHour() * 60 + now.getMinute(), sun[0], sun[1]));
+        ((TextView) findViewById(R.id.clock)).setTextColor(night ? 0xFFFFEEDC : 0xFFFFFFFF);
+        greeting.setAlpha(night ? 0.6f : 1f);
+    }
+
     private void updateGreeting() {
+        if (headerMood) nightTint();
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         int res;
         // Locale-specific day parts (app language on Android 13+).

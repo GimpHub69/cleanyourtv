@@ -60,6 +60,17 @@ final class ThemePicker {
             row.setBackgroundResource(R.drawable.settings_choice_bg);
             row.setFocusable(true);
             row.setSelected(theme == null ? current == null : theme.getName().equals(current));
+            // A swatch of the theme's background and accent colours before its name.
+            if (theme != null) {
+                int[] colors = ThemeSwitch.colors(theme);
+                android.graphics.drawable.GradientDrawable swatch = new android.graphics.drawable.GradientDrawable();
+                swatch.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+                swatch.setColor(colors[0]);
+                swatch.setStroke((int) (2 * dp), colors[1] != 0 ? colors[1] : 0x66FFFFFF);
+                swatch.setSize((int) (16 * dp), (int) (16 * dp));
+                row.setCompoundDrawablesRelativeWithIntrinsicBounds(swatch, null, null, null);
+                row.setCompoundDrawablePadding((int) (12 * dp));
+            }
             LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) (40 * dp));
             rlp.bottomMargin = (int) (6 * dp);
             rows.addView(row, rlp);
@@ -69,7 +80,7 @@ final class ThemePicker {
                 hint.setText(theme == null ? R.string.theme_builtin_hint : R.string.theme_pick_hint);
                 File shot = theme == null ? null : new File(theme, ThemeFiles.SCREENSHOT);
                 Bitmap bitmap = shot != null && shot.isFile() ? decode(shot, preview.getWidth()) : null;
-                preview.setImageBitmap(bitmap);
+                fadeIn(preview, bitmap);
                 preview.setContentDescription(bitmap == null ? activity.getString(R.string.theme_no_preview) : label);
             });
             row.setOnClickListener(v -> {
@@ -80,6 +91,14 @@ final class ThemePicker {
         }
         dialog.show();
         focusFirst.requestFocus();
+    }
+
+    /** The next preview fades in over the last, instead of a hard swap. */
+    static void fadeIn(ImageView preview, Bitmap bitmap) {
+        preview.animate().cancel();
+        preview.setAlpha(0f);
+        preview.setImageBitmap(bitmap);
+        preview.animate().alpha(1f).setDuration(220).start();
     }
 
     /** The screenshot scaled down to about the preview's width, in 16-bit colour: one decode per focus change. */

@@ -246,6 +246,10 @@
          never still. Off with reduced_motion or with animations off. Off by default; a theme can set
          "wallpaper_motion": true, and Launcher settings has a Wallpaper motion row. -->
     <bool name="wallpaper_motion">true</bool>
+    <!-- The header follows the weather and the hour: the weather line takes the provider's tint for the condition
+         (warm for a clear day, cool for rain), and after sunset the clock turns slightly warm and the greeting dims.
+         Off by default; a theme can set "header_mood": true. -->
+    <bool name="header_mood">true</bool>
     <string name="weather_provider" translatable="false">content://io.github.sumyabazar1.weather/now</string>
     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows
          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can

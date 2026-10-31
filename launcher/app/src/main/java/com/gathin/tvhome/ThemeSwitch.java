@@ -38,6 +38,22 @@ final class ThemeSwitch {
         return b.toString();
     }
 
+    /** A stored theme's background_color and accent_color from its config.json, opaque; black and 0 (none) when unreadable. */
+    static int[] colors(File theme) {
+        int[] out = {0xFF000000, 0};
+        try (InputStream in = new FileInputStream(new File(theme, Config.FILE_NAME))) {
+            byte[] buf = new byte[(int) Math.min(64 * 1024, new File(theme, Config.FILE_NAME).length())];
+            int n = in.read(buf);
+            org.json.JSONObject json = new org.json.JSONObject(new String(buf, 0, Math.max(0, n), StandardCharsets.UTF_8));
+            String bg = json.optString("background_color", ""), accent = json.optString("accent_color", "");
+            if (!bg.isEmpty()) out[0] = android.graphics.Color.parseColor(bg) | 0xFF000000;
+            if (!accent.isEmpty()) out[1] = android.graphics.Color.parseColor(accent) | 0xFF000000;
+        } catch (Exception ignored) {
+            // A theme without a readable config keeps the plain swatch.
+        }
+        return out;
+    }
+
     /** The theme folders under {@code dir/themes} that carry a config.json, by name. */
     static List<File> themes(File dir) {
         List<File> out = new ArrayList<>();

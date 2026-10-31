@@ -333,7 +333,7 @@ public final class LauncherSettingsActivity extends Activity {
         final int width = previewWallpaper.getWidth();
         new Thread(() -> {
             final android.graphics.Bitmap bitmap = picture == null || width <= 0 ? null : ThemePicker.decode(picture, width);
-            previewWallpaper.post(() -> previewWallpaper.setImageBitmap(bitmap));
+            previewWallpaper.post(() -> ThemePicker.fadeIn(previewWallpaper, bitmap));
         }, "preview").start();
     }
 

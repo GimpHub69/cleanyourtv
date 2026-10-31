@@ -135,7 +135,7 @@ final class WallpaperPicker {
                 if (!focused) return;
                 name.setText(e.label);
                 Bitmap bitmap = e.file != null && e.file.isFile() ? ThemePicker.decode(e.file, preview.getWidth()) : null;
-                preview.setImageBitmap(bitmap);
+                ThemePicker.fadeIn(preview, bitmap);
             });
             row.setOnClickListener(v -> {
                 dialog.dismiss();

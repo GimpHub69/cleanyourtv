@@ -65,7 +65,8 @@ final class WallpaperPlayer {
             if (!active || closed) return;
             long t = SystemClock.uptimeMillis() % (2 * BREATH_HALF_MS);
             float phase = t < BREATH_HALF_MS ? t / (float) BREATH_HALF_MS : (2 * BREATH_HALF_MS - t) / (float) BREATH_HALF_MS;
-            float scale = 1f + 0.04f * (1f - (float) Math.cos(phase * Math.PI)) / 2f;
+            // From 1.5 % to 5.5 %: the picture always overflows the screen by more than the parallax shift.
+            float scale = 1.015f + 0.04f * (1f - (float) Math.cos(phase * Math.PI)) / 2f;
             image.setScaleX(scale);
             image.setScaleY(scale);
             root.postDelayed(this, BREATH_STEP_MS);
@@ -156,6 +157,13 @@ final class WallpaperPlayer {
             root.removeCallbacks(breathe);
             root.post(breathe);
         }
+    }
+
+    /** wallpaper_motion: the picture slides a few pixels against the focused tile (0 left edge, 1 right edge). */
+    void focusAt(float fraction) {
+        if (!motion || image.getParent() == null) return;
+        float shift = (0.5f - Math.max(0f, Math.min(1f, fraction))) * 24f * root.getResources().getDisplayMetrics().density;
+        image.animate().translationX(shift).setDuration(600).start();
     }
 
     /** Another picture now: Cycle wallpaper "each return to Home" (MainActivity.onResume). */

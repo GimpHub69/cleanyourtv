@@ -18,15 +18,16 @@ import android.widget.TextView;
 final class WeatherLine {
     private WeatherLine() {}
 
-    static void refresh(ContentResolver resolver, String uri, TextView line) {
+    static void refresh(ContentResolver resolver, String uri, TextView line, boolean mood) {
         new Thread(() -> {
-            String text = null, place = null, glyph = null;
-            try (Cursor c = resolver.query(Uri.parse(uri), new String[]{"text", "place", "glyph"}, null, null, null)) {
+            String text = null, place = null, glyph = null, color = null;
+            try (Cursor c = resolver.query(Uri.parse(uri), new String[]{"text", "place", "glyph", "color"}, null, null, null)) {
                 if (c != null && c.moveToFirst()) {
-                    int t = c.getColumnIndex("text"), p = c.getColumnIndex("place"), g = c.getColumnIndex("glyph");
+                    int t = c.getColumnIndex("text"), p = c.getColumnIndex("place"), g = c.getColumnIndex("glyph"), k = c.getColumnIndex("color");
                     text = t >= 0 ? c.getString(t) : null;
                     place = p >= 0 ? c.getString(p) : null;
                     glyph = g >= 0 ? c.getString(g) : null;
+                    color = k >= 0 ? c.getString(k) : null;
                 }
             } catch (RuntimeException ignored) {
                 // The provider is not installed or refused: no line.
@@ -35,6 +36,12 @@ final class WeatherLine {
             final String weather = text == null || text.trim().isEmpty() ? null
                     : (glyph == null || glyph.trim().isEmpty() ? "" : glyph.trim() + " ") + text.trim();
             final String where = place == null || place.trim().isEmpty() ? null : place.trim();
+            Integer parsed = null;
+            try {
+                if (color != null && !color.trim().isEmpty()) parsed = android.graphics.Color.parseColor(color.trim());
+            } catch (IllegalArgumentException ignored) {
+            }
+            final Integer tint = parsed;
             line.post(() -> {
                 if (weather == null) {
                     line.setVisibility(View.GONE);
@@ -42,8 +49,10 @@ final class WeatherLine {
                 }
                 // The weather, then the place on a smaller, dimmer second line.
                 SpannableString shown = new SpannableString(where == null ? weather : weather + "\n" + where);
+                // header_mood: the condition's tint on the weather words.
+                if (mood && tint != null) shown.setSpan(new ForegroundColorSpan(tint), 0, weather.length(), 0);
                 if (where != null) {
-                    shown.setSpan(new RelativeSizeSpan(0.8f), weather.length() + 1, shown.length(), 0);
+                    shown.setSpan(new RelativeSizeSpan(0.75f), weather.length() + 1, shown.length(), 0);
                     shown.setSpan(new ForegroundColorSpan(0x99FFFFFF), weather.length() + 1, shown.length(), 0);
                 }
                 line.setText(shown);
