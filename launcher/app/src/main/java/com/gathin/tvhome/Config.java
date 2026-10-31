@@ -682,8 +682,9 @@ final class Config {
         // The wallpaper picker's wider choices: a picture of a stored theme or of the Custom folder (a path with a
         // slash), and the Cycle row, which rotates through that picture's group, or the theme's own pictures.
         boolean cycleOnHome = false;
-        if (dir != null && wallpaperChoice != null && wallpaperChoice.indexOf('/') > 0) {
-            File picked = new File(dir, wallpaperChoice);
+        if (dir != null && wallpaperChoice != null && wallpaperChoice.contains("/")) {
+            // A theme-folder path, or an absolute one for a picture of the TV's own (the picker's device group).
+            File picked = wallpaperChoice.startsWith("/") ? new File(wallpaperChoice) : new File(dir, wallpaperChoice);
             if (picked.isFile()) {
                 wallpapers.clear();
                 wallpapers.add(picked);
@@ -700,7 +701,8 @@ final class Config {
                 File single = new File(dir, WALLPAPER_NAME);
                 if (pool.isEmpty() && single.isFile()) pool.add(single);
             } else {
-                for (File f : WallpaperRotation.images(new File(dir, set))) if (!ThemeFiles.SCREENSHOT.equals(f.getName())) pool.add(f);
+                File folder = set.startsWith("/") ? new File(set) : new File(dir, set);
+                for (File f : WallpaperRotation.images(folder)) if (!ThemeFiles.SCREENSHOT.equals(f.getName())) pool.add(f);
                 wallpaperMoods = Collections.emptyMap();   // the theme's time-of-day groups name its own pictures
             }
             if (!pool.isEmpty()) {

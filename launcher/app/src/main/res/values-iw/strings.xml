@@ -166,6 +166,9 @@
     <string name="cycle_day">לפי שעת היום</string>
     <string name="cycle_home">בכל חזרה למסך הבית</string>
     <string name="wallpaper_group_current">ערכת הנושא הנוכחית</string>
+    <string name="wallpaper_device">תמונות בטלוויזיה הזו</string>
+    <string name="wallpaper_allow">אפשר גישה לתמונות שבטלוויזיה…</string>
+    <string name="wallpaper_device_empty">לא נמצאו תמונות: העתק תמונות אל Pictures, Download או DCIM</string>
     <string name="wallpaper_custom">מותאם אישית</string>
     <string name="theme_label">ערכת נושא</string>
     <string name="theme_state">ערכת נושא: %1$s</string>

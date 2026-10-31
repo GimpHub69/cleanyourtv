@@ -561,7 +561,9 @@ and a wallpaper.
     as `tools/theme.sh` would, without a computer; **Built-in** at the top is the plain `config.xml` look, as
     `theme.sh --reset` leaves it. **Wallpaper**: a picker like the theme's, with the picture on the right as
     you move: **Theme default**, **None**, then every picture on the TV, grouped as the current theme's, each
-    stored theme's and the Custom folder (`content write` into `custom/<picture>` through the theme provider).
+    stored theme's and the Custom folder (`content write` into `custom/<picture>` through the theme provider),
+    then **Pictures on this TV**: pictures in the TV's Pictures, Download and DCIM folders (and their first-level
+    folders), once you allow it from that row; a file manager, a downloader app or `adb push` puts them there.
     A pick holds that picture until you choose Theme default, press Follow theme, or push the theme again.
     **Cycle wallpaper**: Off, every 5 or 15 minutes, every hour, time of day (the theme's own groups; hourly
     for a group without them) or each return to Home, through the group of the picture last picked (the

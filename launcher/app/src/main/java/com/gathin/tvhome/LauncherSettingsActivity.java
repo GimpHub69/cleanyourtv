@@ -350,7 +350,15 @@ public final class LauncherSettingsActivity extends Activity {
         applyTheme(at == 0 ? null : themes.get(at - 1));
     }
 
-    /** Theme default, None, then every picture, as the picker lists them. */
+    @Override
+    public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(code, permissions, results);
+        if (code != 7) return;
+        pictures = null;
+        showWallpaperPicker();
+    }
+
+    /** Theme default, None, then every picture, as the picker lists them; the row that asks for pictures is skipped. */
     private void stepWallpaper(int by) {
         if (pictures == null) pictures = WallpaperPicker.entries(this, Config.dir(this), themes);
         String current = choices.getString(Config.WALLPAPER_CHOICE_KEY, null);
@@ -361,6 +369,7 @@ public final class LauncherSettingsActivity extends Activity {
         }
         int n = pictures.size();
         WallpaperPicker.Entry e = pictures.get(((at + by) % n + n) % n);
+        if (WallpaperPicker.DEVICE_ALLOW.equals(e.choice)) e = pictures.get(((at + 2 * by) % n + n) % n);
         applyWallpaper(e.choice, e.set);
     }
 
@@ -455,6 +464,11 @@ public final class LauncherSettingsActivity extends Activity {
     }
 
     private void applyWallpaper(String choice, String set) {
+        if (WallpaperPicker.DEVICE_ALLOW.equals(choice)) {
+            // The "Pictures on this TV" row: ask for the pictures, or list them again; the picker reopens after.
+            requestPermissions(new String[]{WallpaperPicker.DEVICE_PERMISSION}, 7);
+            return;
+        }
         SharedPreferences.Editor edit = choices.edit();
         if (choice == null) edit.remove(Config.WALLPAPER_CHOICE_KEY).remove(Config.WALLPAPER_SET_KEY);
         else edit.putString(Config.WALLPAPER_CHOICE_KEY, choice);

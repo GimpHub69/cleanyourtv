@@ -25,6 +25,11 @@ import java.util.List;
  */
 final class WallpaperPicker {
     static final String CUSTOM = "custom";
+    /** The choice of the row that asks for (or refreshes) the TV's own pictures; never saved. */
+    static final String DEVICE_ALLOW = "?";
+    /** The permission the device group needs on this Android. */
+    static final String DEVICE_PERMISSION = android.os.Build.VERSION.SDK_INT >= 33
+            ? "android.permission.READ_MEDIA_IMAGES" : android.Manifest.permission.READ_EXTERNAL_STORAGE;
 
     /** One row of the picker: a group header before it when it opens a group; file null for Theme default and None. */
     static final class Entry {
@@ -83,6 +88,31 @@ final class WallpaperPicker {
             out.add(new Entry(header, f.getName(), f, CUSTOM + "/" + f.getName(), CUSTOM));
             header = null;
         }
+        // The TV's own pictures (Pictures, Download, DCIM and their first-level folders), by absolute path, once the
+        // owner has allowed it; before that one row asks, after that an empty group says where to put pictures.
+        header = activity.getString(R.string.wallpaper_device);
+        if (activity.checkSelfPermission(DEVICE_PERMISSION) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            out.add(new Entry(header, activity.getString(R.string.wallpaper_allow), null, DEVICE_ALLOW, null));
+            return out;
+        }
+        int before = out.size();
+        for (String kind : new String[]{android.os.Environment.DIRECTORY_PICTURES, android.os.Environment.DIRECTORY_DOWNLOADS, android.os.Environment.DIRECTORY_DCIM}) {
+            File folder = android.os.Environment.getExternalStoragePublicDirectory(kind);
+            List<File> folders = new ArrayList<>();
+            folders.add(folder);
+            File[] subs = folder.listFiles(File::isDirectory);
+            if (subs != null) {
+                java.util.Arrays.sort(subs, java.util.Comparator.comparing(File::getName));
+                folders.addAll(java.util.Arrays.asList(subs));
+            }
+            for (File each : folders) {
+                for (File f : WallpaperRotation.images(each)) {
+                    out.add(new Entry(header, f.getName(), f, f.getAbsolutePath(), each.getAbsolutePath()));
+                    header = null;
+                }
+            }
+        }
+        if (out.size() == before) out.add(new Entry(header, activity.getString(R.string.wallpaper_device_empty), null, DEVICE_ALLOW, null));
         return out;
     }
 
