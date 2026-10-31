@@ -47,6 +47,27 @@
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
     </style>
+    <!-- A section caption in Launcher settings: small capitals above a grouped card. -->
+    <style name="SettingsSection">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">26dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:paddingStart">18dp</item>
+        <item name="android:paddingEnd">18dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textColor">#FF9AA4AE</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+    <!-- The grouped card around a section's rows. -->
+    <style name="SettingsGroup">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/settings_group_bg</item>
+        <item name="android:padding">8dp</item>
+    </style>
     <style name="SettingsColumnChoice" parent="SettingsRow">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>

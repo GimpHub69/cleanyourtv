@@ -22,6 +22,22 @@ import java.util.UUID;
 final class ThemeSwitch {
     private ThemeSwitch() {}
 
+    /** A folder name as a title: "nature-calm" reads "Nature Calm". The folder name stays the key. */
+    static String title(String folder) {
+        StringBuilder b = new StringBuilder();
+        boolean up = true;
+        for (char c : folder.toCharArray()) {
+            if (c == '-' || c == '_') {
+                b.append(' ');
+                up = true;
+            } else {
+                b.append(up ? Character.toUpperCase(c) : c);
+                up = false;
+            }
+        }
+        return b.toString();
+    }
+
     /** The theme folders under {@code dir/themes} that carry a config.json, by name. */
     static List<File> themes(File dir) {
         List<File> out = new ArrayList<>();

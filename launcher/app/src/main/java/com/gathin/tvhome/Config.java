@@ -43,6 +43,12 @@ final class Config {
     static final String ROWS_BELOW_DOCK_KEY = "rows_below_dock";
     static final String WALLPAPER_CHOICE_KEY = "wallpaper_choice";
     static final String DOCK_OPACITY_KEY = "dock_opacity";
+    /** On-TV choices from Launcher settings for the header: the greeting, the date in white, the Wi-Fi pill's form and colour. */
+    static final String GREETING_KEY = "show_greeting";
+    static final String HEADER_WHITE_KEY = "header_white";
+    /** 0 label, 1 icon only, 2 hidden; unset follows the theme. */
+    static final String WIFI_PILL_KEY = "wifi_pill";
+    static final String WIFI_COLOR_KEY = "wifi_status_color";
     /**
      * Counts the changes made in Launcher settings. Home remembers the count it was built with and rebuilds on
      * resume when it differs, however the settings were left (see MainActivity#onResume).
@@ -105,6 +111,8 @@ final class Config {
     final boolean topMenu;
     /** Direct launcher-settings header action; off by default (launcher_settings_button). */
     final boolean launcherSettingsButton;
+    /** OK on the Settings pill drops the launcher menu, with TV settings as a row (settings_menu_on_click). */
+    final boolean settingsMenuOnClick;
     /** Names under every tile, dimmed until focused (config.xml always_show_names); the dock band grows for them. */
     final boolean alwaysShowNames;
     /** Reorder button in the top bar (config.xml reorder_button); the Settings long-press menu offers it either way. */
@@ -252,8 +260,9 @@ final class Config {
                    List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, boolean fadeRows, int homeIdleClockMinutes,
                    boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
                    boolean handleViewInputs, boolean tileMenu, boolean dockEvenPadding, boolean cinematicDots, boolean cinematicWhiteFocus, boolean wifiStatusColor, int cinematicScrim, int cinematicArt,
-                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook) {
+                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick) {
         this.homeHook = homeHook;
+        this.settingsMenuOnClick = settingsMenuOnClick;
         this.handleViewInputs = handleViewInputs;
         this.tileMenu = tileMenu;
         this.inputKeycodes = inputKeycodes;
@@ -404,6 +413,7 @@ final class Config {
         boolean dockRow = res.getBoolean(R.bool.dock_row);
         boolean topMenu = res.getBoolean(R.bool.top_menu);
         boolean launcherSettingsButton = res.getBoolean(R.bool.launcher_settings_button);
+        boolean settingsMenuOnClick = res.getBoolean(R.bool.settings_menu_on_click);
         boolean reorderButton = res.getBoolean(R.bool.reorder_button);
         boolean showNetworkPill = res.getBoolean(R.bool.show_network_pill);
         boolean showInputsPill = res.getBoolean(R.bool.show_inputs_pill);
@@ -499,6 +509,7 @@ final class Config {
             dockRow = bool(json, "dock_row", dockRow);
             topMenu = bool(json, "top_menu", topMenu);
             launcherSettingsButton = bool(json, "launcher_settings_button", launcherSettingsButton);
+            settingsMenuOnClick = bool(json, "settings_menu_on_click", settingsMenuOnClick);
             reorderButton = bool(json, "reorder_button", reorderButton);
             showNetworkPill = bool(json, "show_network_pill", showNetworkPill);
             showInputsPill = bool(json, "show_inputs_pill", showInputsPill);
@@ -569,6 +580,14 @@ final class Config {
         if (chosenRows >= 0 && chosenRows <= 3) rowsBelow = chosenRows;
         animations = choices.getBoolean("animations", animations);
         advancedEffects = choices.getBoolean("advanced_effects", advancedEffects);
+        // Header choices made on the TV (Launcher settings), over the theme's, until Follow theme or a new theme.
+        showGreeting = choices.getBoolean(GREETING_KEY, showGreeting);
+        headerWhite = choices.getBoolean(HEADER_WHITE_KEY, headerWhite);
+        int wifiPill = choices.getInt(WIFI_PILL_KEY, -1);
+        if (wifiPill == 0) { showNetworkPill = true; iconOnlyButtons = false; }
+        else if (wifiPill == 1) { showNetworkPill = true; iconOnlyButtons = true; }
+        else if (wifiPill == 2) showNetworkPill = false;
+        wifiStatusColor = choices.getBoolean(WIFI_COLOR_KEY, wifiStatusColor);
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
         // A theme can also switch the wallpaper off while the file is still there.
@@ -610,7 +629,7 @@ final class Config {
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, restoreKeyServices, wallpaperEnabled, wallpaper,
                 wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow, fadeRows,
-                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook);
+                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick);
     }
 
     /**
@@ -654,11 +673,12 @@ final class Config {
             SharedPreferences.Editor editor = choices.edit();
             if (!"absent".equals(token)) editor.remove("columns").remove("animations")
                     .remove("advanced_effects").remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY)
-                    .remove(DOCK_OPACITY_KEY);
+                    .remove(DOCK_OPACITY_KEY).remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY);
             editor.putString(THEME_SIGNATURE_KEY, signature).commit();
         } else if (!seen.equals(signature)) {
             choices.edit().remove("columns").remove("animations").remove("advanced_effects")
                     .remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY).remove(DOCK_OPACITY_KEY)
+                    .remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY)
                     .putString(THEME_SIGNATURE_KEY, signature).commit();
         }
     }

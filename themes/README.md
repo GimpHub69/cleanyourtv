@@ -73,6 +73,7 @@ A new key needs one there in the same pull request.
 | `icon_only_inputs` | bool | The Inputs pill as a round icon button too, its label kept as the TalkBack description (`false` by default). Works with or without `icon_only_buttons` |
 | `top_menu` | bool | Inputs, Wi-Fi and Settings folded into one round gear, centred on the header: OK drops a menu with the three plus Reorder apps, hold OK keeps the launcher menu (`false` by default) |
 | `launcher_settings_button` | bool | Make the header Settings action open Launcher settings directly with a matching 22dp home icon; also changes the Settings row when `top_menu` is on. Hold OK keeps module-card and ordering tools. The settings page includes Reorder apps and TV settings (`false` by default) |
+| `settings_menu_on_click` | bool | OK on the Settings pill drops the launcher's own menu (Launcher settings, TV settings, Module cards, Edit dock, Reorder apps) instead of opening the TV's Settings; holding OK opens the same menu either way. Off by default |
 | `wifi_status_color` | bool | The Wi-Fi pill's icon green while the TV is online, white while it is not (`false` by default) |
 | `wifi_status_warnings` | bool | With `wifi_status_color`, the icon orange while connected without internet (a captive portal waiting for its login page) and red while offline, instead of white (`false` by default) |
 | `wifi_label_width` | 0 to 300 | With `icon_only_buttons`, keep the network name on the Wi-Fi pill up to this width in dp, cut with an ellipsis; 0 leaves only the icon |

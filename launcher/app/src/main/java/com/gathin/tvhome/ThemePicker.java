@@ -50,7 +50,7 @@ final class ThemePicker {
         View focusFirst = null;
         for (int i = -1; i < themes.size(); i++) {
             final File theme = i < 0 ? null : themes.get(i);
-            final String label = theme == null ? activity.getString(R.string.theme_builtin) : theme.getName();
+            final String label = theme == null ? activity.getString(R.string.theme_builtin) : ThemeSwitch.title(theme.getName());
             TextView row = new TextView(activity);
             row.setText(label);
             row.setTextColor(0xFFFFFFFF);
@@ -59,7 +59,7 @@ final class ThemePicker {
             row.setPadding((int) (16 * dp), 0, (int) (16 * dp), 0);
             row.setBackgroundResource(R.drawable.settings_choice_bg);
             row.setFocusable(true);
-            row.setSelected(theme == null ? current == null : label.equals(current));
+            row.setSelected(theme == null ? current == null : theme.getName().equals(current));
             LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) (40 * dp));
             rlp.bottomMargin = (int) (6 * dp);
             rows.addView(row, rlp);

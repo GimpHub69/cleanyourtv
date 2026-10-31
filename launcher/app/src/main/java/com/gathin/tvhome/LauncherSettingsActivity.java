@@ -22,15 +22,19 @@ import java.util.List;
 /** Remote-friendly settings owned by the launcher; system settings stay one row away. */
 public final class LauncherSettingsActivity extends Activity {
     static final String EXTRA_REORDER = "com.gathin.tvhome.extra.REORDER_FROM_SETTINGS";
+    /** The stored theme applied from the Theme row (ThemeSwitch); the label's memory, not what Config reads. */
+    static final String THEME_CHOICE_KEY = "theme_choice";
     private SharedPreferences choices;
     private final TextView[] columnChoices = new TextView[4];
     private final TextView[] rowChoices = new TextView[4];
     private static final int[] DOCK_OPACITIES = {100, 70, 50, 30};
     private final TextView[] dockChoices = new TextView[DOCK_OPACITIES.length];
-    private TextView wallpaperChoice;
     private TextView themeChoice;
-    /** The stored theme applied from the Theme row (ThemeSwitch); the label's memory, not what Config reads. */
-    static final String THEME_CHOICE_KEY = "theme_choice";
+    private TextView wallpaperChoice;
+    private TextView greetingChoice;
+    private TextView headerWhiteChoice;
+    private TextView wifiPillChoice;
+    private TextView wifiColorChoice;
     private TextView animationsChoice;
     private TextView advancedChoice;
     private TextView followThemeChoice;
@@ -40,6 +44,11 @@ public final class LauncherSettingsActivity extends Activity {
     private int dockOpacity;
     private boolean animations;
     private boolean advancedEffects;
+    private boolean greeting;
+    private boolean headerWhite;
+    /** 0 label, 1 icon only, 2 hidden (Config.WIFI_PILL_KEY). */
+    private int wifiPill;
+    private boolean wifiColor;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -53,11 +62,15 @@ public final class LauncherSettingsActivity extends Activity {
             setResult(RESULT_OK, new Intent().putExtra(EXTRA_REORDER, true));
             finish();
         });
-        columns = config.columns;
-        rowsBelowDock = config.rowsBelowDock;
-        dockOpacity = config.dockOpacity;
-        animations = config.animations;
-        advancedEffects = config.animations && config.advancedEffects;
+        readCurrent(config);
+
+        // Appearance: the Theme row shows only where a theme is stored on the TV (ThemeSwitch).
+        themeChoice = findViewById(R.id.themeChoice);
+        boolean themes = !ThemeSwitch.themes(Config.dir(this)).isEmpty();
+        themeChoice.setVisibility(themes ? View.VISIBLE : View.GONE);
+        themeChoice.setOnClickListener(v -> showThemePicker());
+        wallpaperChoice = findViewById(R.id.wallpaperChoice);
+        wallpaperChoice.setOnClickListener(v -> showWallpaperPicker());
 
         int[] ids = {R.id.columns4, R.id.columns5, R.id.columns6, R.id.columns7};
         for (int i = 0; i < ids.length; i++) {
@@ -102,14 +115,37 @@ public final class LauncherSettingsActivity extends Activity {
             reverseRow(rowChoices);
             reverseRow(dockChoices);
         }
-        // Themes stored on the TV (ThemeSwitch): the row shows only where there is one to pick.
-        themeChoice = findViewById(R.id.themeChoice);
-        if (!ThemeSwitch.themes(Config.dir(this)).isEmpty()) {
-            themeChoice.setVisibility(View.VISIBLE);
-            themeChoice.setOnClickListener(v -> showThemePicker());
-        }
-        wallpaperChoice = findViewById(R.id.wallpaperChoice);
-        wallpaperChoice.setOnClickListener(v -> showWallpaperPicker());
+
+        // Clock and pills: on-TV choices over the theme's keys, until Follow theme or another theme.
+        greetingChoice = findViewById(R.id.greetingChoice);
+        greetingChoice.setOnClickListener(v -> {
+            greeting = !greeting;
+            choices.edit().putBoolean(Config.GREETING_KEY, greeting).apply();
+            changed();
+            refresh();
+        });
+        headerWhiteChoice = findViewById(R.id.headerWhiteChoice);
+        headerWhiteChoice.setOnClickListener(v -> {
+            headerWhite = !headerWhite;
+            choices.edit().putBoolean(Config.HEADER_WHITE_KEY, headerWhite).apply();
+            changed();
+            refresh();
+        });
+        wifiPillChoice = findViewById(R.id.wifiPillChoice);
+        wifiPillChoice.setOnClickListener(v -> {
+            wifiPill = (wifiPill + 1) % 3;
+            choices.edit().putInt(Config.WIFI_PILL_KEY, wifiPill).apply();
+            changed();
+            refresh();
+        });
+        wifiColorChoice = findViewById(R.id.wifiColorChoice);
+        wifiColorChoice.setOnClickListener(v -> {
+            wifiColor = !wifiColor;
+            choices.edit().putBoolean(Config.WIFI_COLOR_KEY, wifiColor).apply();
+            changed();
+            refresh();
+        });
+
         animationsChoice = findViewById(R.id.animationsChoice);
         animationsChoice.setOnClickListener(v -> {
             animations = !animations;
@@ -142,13 +178,10 @@ public final class LauncherSettingsActivity extends Activity {
             if (!hasOnTvChoices()) return;
             choices.edit().remove("columns").remove(Config.ROWS_BELOW_DOCK_KEY).remove("animations")
                     .remove("advanced_effects").remove(Config.WALLPAPER_CHOICE_KEY)
-                    .remove(Config.DOCK_OPACITY_KEY).remove(OpenOnStart.KEY).commit();
-            Config current = Config.load(this);
-            columns = current.columns;
-            rowsBelowDock = current.rowsBelowDock;
-            dockOpacity = current.dockOpacity;
-            animations = current.animations;
-            advancedEffects = current.animations && current.advancedEffects;
+                    .remove(Config.DOCK_OPACITY_KEY).remove(OpenOnStart.KEY)
+                    .remove(Config.GREETING_KEY).remove(Config.HEADER_WHITE_KEY)
+                    .remove(Config.WIFI_PILL_KEY).remove(Config.WIFI_COLOR_KEY).commit();
+            readCurrent(Config.load(this));
             changed();
             refresh();
         });
@@ -160,7 +193,21 @@ public final class LauncherSettingsActivity extends Activity {
                 open(SystemSettings.intent(this, Settings.ACTION_SETTINGS)));
         refresh();
         if (config.launcherSettingsButton) reorderChoice.requestFocus();
-        else columnChoices[Math.max(0, Math.min(columns - 4, 3))].requestFocus();
+        else if (themes) themeChoice.requestFocus();
+        else wallpaperChoice.requestFocus();
+    }
+
+    /** The values in force now: the theme's, or the on-TV choices over them, as Config resolves them. */
+    private void readCurrent(Config config) {
+        columns = config.columns;
+        rowsBelowDock = config.rowsBelowDock;
+        dockOpacity = config.dockOpacity;
+        animations = config.animations;
+        advancedEffects = config.animations && config.advancedEffects;
+        greeting = config.showGreeting;
+        headerWhite = config.headerWhite;
+        wifiPill = !config.showNetworkPill ? 2 : config.iconOnlyButtons ? 1 : 0;
+        wifiColor = config.wifiStatusColor;
     }
 
     private void reverseRow(TextView[] views) {
@@ -178,6 +225,8 @@ public final class LauncherSettingsActivity extends Activity {
             if (theme == null) choices.edit().remove(THEME_CHOICE_KEY).apply();
             else choices.edit().putString(THEME_CHOICE_KEY, theme.getName()).apply();
             changed();
+            // The new theme's keys are in force now, and Config has cleared the on-TV choices for them.
+            readCurrent(Config.load(this));
             refresh();
         });
     }
@@ -291,6 +340,10 @@ public final class LauncherSettingsActivity extends Activity {
         refresh();
     }
 
+    private String onOff(boolean on) {
+        return getString(on ? R.string.on : R.string.off);
+    }
+
     private void refresh() {
         for (int i = 0; i < columnChoices.length; i++) {
             columnChoices[i].setSelected(columns == i + 4);
@@ -301,14 +354,17 @@ public final class LauncherSettingsActivity extends Activity {
         for (int i = 0; i < dockChoices.length; i++) {
             dockChoices[i].setSelected(dockOpacity == DOCK_OPACITIES[i]);
         }
-        animationsChoice.setText(getString(R.string.animations_state,
-                getString(animations ? R.string.on : R.string.off)));
-        advancedChoice.setText(getString(R.string.advanced_effects_state,
-                getString(advancedEffects ? R.string.on : R.string.off)));
+        String theme = choices.getString(THEME_CHOICE_KEY, null);
+        themeChoice.setText(getString(R.string.theme_state, theme != null ? ThemeSwitch.title(theme) : getString(R.string.theme_builtin)));
+        greetingChoice.setText(getString(R.string.greeting_state, onOff(greeting)));
+        headerWhiteChoice.setText(getString(R.string.header_white_state, onOff(headerWhite)));
+        wifiPillChoice.setText(getString(R.string.wifi_pill_state, getString(wifiPill == 2 ? R.string.wifi_pill_hidden
+                : wifiPill == 1 ? R.string.wifi_pill_icon : R.string.wifi_pill_label)));
+        wifiColorChoice.setText(getString(R.string.wifi_color_state, onOff(wifiColor)));
+        animationsChoice.setText(getString(R.string.animations_state, onOff(animations)));
+        advancedChoice.setText(getString(R.string.advanced_effects_state, onOff(advancedEffects)));
         advancedChoice.setEnabled(animations);
         advancedChoice.setAlpha(animations ? 1f : 0.5f);
-        String theme = choices.getString(THEME_CHOICE_KEY, null);
-        themeChoice.setText(getString(R.string.theme_state, theme != null ? theme : getString(R.string.theme_builtin)));
         String wallpaperCurrent = choices.getString(Config.WALLPAPER_CHOICE_KEY, null);
         wallpaperChoice.setText(getString(R.string.wallpaper_state,
                 "none".equals(wallpaperCurrent) ? getString(R.string.wallpaper_none)
@@ -322,7 +378,9 @@ public final class LauncherSettingsActivity extends Activity {
         return choices.contains("columns") || choices.contains(Config.ROWS_BELOW_DOCK_KEY)
                 || choices.contains("animations") || choices.contains("advanced_effects")
                 || choices.contains(Config.WALLPAPER_CHOICE_KEY) || choices.contains(Config.DOCK_OPACITY_KEY)
-                || choices.contains(OpenOnStart.KEY);
+                || choices.contains(OpenOnStart.KEY) || choices.contains(Config.GREETING_KEY)
+                || choices.contains(Config.HEADER_WHITE_KEY) || choices.contains(Config.WIFI_PILL_KEY)
+                || choices.contains(Config.WIFI_COLOR_KEY);
     }
 
     private void open(Intent intent) {

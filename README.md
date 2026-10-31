@@ -549,29 +549,31 @@ and a wallpaper.
 <details>
 <summary><b>Launcher settings and the default home</b></summary>
 
-- Click **Settings** for the TV's own settings. Hold OK on it and choose **Launcher settings**, or click it
-  straight away with `launcher_settings_button`. The launcher's own page has these rows, top to bottom:
+- Click **Settings** for the TV's own settings (with `settings_menu_on_click`, OK drops the launcher's menu instead,
+  with **TV settings** as a row). Hold OK on it and choose **Launcher settings**, or click it straight away with
+  `launcher_settings_button`. The launcher's own page is grouped into sections, top to bottom:
   - **Reorder apps**, only with `launcher_settings_button`: OK picks an app up, the arrows move it, Back
     places it, and Back again finishes.
-  - **Apps per row** 4, 5, 6 or 7; **Rows below dock** 0 to 3, how many rows of tiles stay visible under the
-    dock band; **Dock band opacity** 100%, 70%, 50% or 30%. The last two only do anything while the dock is
-    its own row (`dock_row`, on by default).
-  - **Theme**, only when themes are stored on the TV (`content write` into `themes/<name>/` through the
-    launcher's theme provider, the same files as a folder in `themes/`, its `screenshot.jpg` included): a
-    picker with the stored themes down the left and the focused one's screenshot on the right. OK applies
-    it as `tools/theme.sh` would, without a computer; **Built-in** at the top is the plain `config.xml` look,
-    as `theme.sh --reset` leaves it.
-  - **Wallpaper**: one picture from the theme's collection (or its `wallpaper.jpg`), **None**, or **Theme
-    default**. A pick holds that picture and stops the rotation until you choose Theme default, press
-    Follow theme, or push the theme again.
-  - **Animations** on or off, and **Advanced effects** (tile lift, icon zoom and smooth ambient-colour
-    transitions; they may use more memory) once animations are on.
-  - **Open on start**, only with `open_on_start_choice`: Off, or an app that opens instead of Home the first
-    time Home comes up after the TV starts. Once per boot, so Home and Back still reach the launcher.
-  - **Follow theme (reset on-TV choices)**, which clears every choice above. Pushing or resetting a theme
-    clears them too.
-  - **Choose default home** opens Android's home picker, and **TV system settings** the TV's own settings
-    page.
+  - Appearance: **Theme**, only when themes are stored on the TV (`content write` into `themes/<name>/` through
+    the launcher's theme provider, the same files as a folder in `themes/`, its `screenshot.jpg` included): a
+    picker with the stored themes down the left and the focused one's screenshot on the right. OK applies it
+    as `tools/theme.sh` would, without a computer; **Built-in** at the top is the plain `config.xml` look, as
+    `theme.sh --reset` leaves it. **Wallpaper**: one picture from the theme's collection (or its
+    `wallpaper.jpg`), **None**, or **Theme default**. A pick holds that picture and stops the rotation until
+    you choose Theme default, press Follow theme, or push the theme again.
+  - Layout: **Apps per row** 4, 5, 6 or 7; **Rows below dock** 0 to 3, how many rows of tiles stay visible
+    under the dock band; **Dock band opacity** 100%, 70%, 50% or 30%. The last two only do anything while the
+    dock is its own row (`dock_row`, on by default).
+  - Clock and pills: **Greeting** on or off (`show_greeting`), **Date in white** (`header_white`), **Wi-Fi
+    pill** as Label, Icon only or Hidden (`icon_only_buttons`, `show_network_pill`) and **Wi-Fi status colour**
+    (`wifi_status_color`). Each overrides the theme's key until Follow theme or another theme.
+  - Motion: **Animations** on or off, and **Advanced effects** (tile lift, icon zoom and smooth
+    ambient-colour transitions; they may use more memory) once animations are on. **Open on start**, only
+    with `open_on_start_choice`: Off, or an app that opens instead of Home the first time Home comes up after
+    the TV starts. Once per boot, so Home and Back still reach the launcher.
+  - System: **Follow theme (reset on-TV choices)**, which clears every choice above. Pushing or resetting a
+    theme clears them too. **Choose default home** opens Android's home picker, and **TV system settings**
+    the TV's own settings page.
 - **Change the default home:** Launcher settings and the optional Default-home tile
   (`show_home_settings_shortcut`) open Android's home picker. Choose the original launcher to stop using
   CleanYourTV as Home, or CleanYourTV to return. The original launcher must be enabled; if the install

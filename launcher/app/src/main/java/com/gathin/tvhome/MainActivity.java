@@ -691,9 +691,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             ((TextView) btnSettings).setText(R.string.launcher_settings);
             ((TextView) btnSettings).setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_home_settings_pill, 0, 0, 0);
         }
+        settingsMenuOnClick = cfg.settingsMenuOnClick;
         btnSettings.setOnClickListener(v -> {
             if (launcherSettingsButton) startActivityForResult(
                     new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST);
+            else if (settingsMenuOnClick) showSettingsMenu();
             else open(systemIntent(Settings.ACTION_SETTINGS));
         });
         btnReorder = findViewById(R.id.btnReorder);
@@ -2619,6 +2621,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** config.xml icon_only_buttons. */
     private boolean iconOnlyButtons;
+    /** OK on the Settings pill drops the launcher menu (config.xml settings_menu_on_click). */
+    private boolean settingsMenuOnClick;
     /** config.xml top_menu: Inputs, Wi-Fi and Settings folded into one gear. */
     private boolean topMenu;
     /** show_inputs_pill as configured: top_menu clears showInputsPill, so its Inputs row reads this. */
@@ -3136,6 +3140,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         PopupWindow popup = glassPopup(panel, (int) (200 * density));
         if (!launcherSettingsButton) addSettingsMenuRow(rows, popup, R.string.launcher_settings, () -> startActivityForResult(
                 new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST));
+        // settings_menu_on_click: OK on the pill opens this menu, so the TV's Settings need a row of their own.
+        if (settingsMenuOnClick) addSettingsMenuRow(rows, popup, R.string.tv_settings, () -> open(systemIntent(Settings.ACTION_SETTINGS)));
         // Firmware that ships its own settings app next to the AOSP one (Xiaomi China is one): the
         // vendor app holds pages the AOSP settings has no row for, such as Account & Security with
         // the ADB switch. Offered here only while one of them is installed.

@@ -82,6 +82,13 @@ public class ThemeSwitchTest {
         assertFalse(ThemeSwitch.reset(null));
     }
 
+    @Test public void folderNamesReadAsTitles() {
+        assertEquals("Nature Calm", ThemeSwitch.title("nature-calm"));
+        assertEquals("Six Columns", ThemeSwitch.title("six_columns"));
+        assertEquals("Glass", ThemeSwitch.title("glass"));
+        assertEquals("", ThemeSwitch.title(""));
+    }
+
     @Test public void aThemeWithoutAConfigFails() throws IOException {
         File dir = tmp.getRoot();
         assertFalse(ThemeSwitch.apply(dir, tmp.newFolder("themes", "broken")));
