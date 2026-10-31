@@ -1,7 +1,6 @@
 package com.gathin.tvhome;
 
 import android.content.Context;
-import android.os.SystemClock;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -54,24 +53,10 @@ final class WallpaperPlayer {
     private boolean loading;
     /** next(): the coming update() picks a new picture whatever the interval says (Cycle wallpaper: each return to Home). */
     private boolean force;
-    /** wallpaper_motion: the picture breathes while Home is in front. */
+    /** wallpaper_motion: the picture slides against the focused tile (focusAt). */
     private final boolean motion;
-    /** One scale step every half second: 4 % there and back over 90 s is under a pixel a step, and a 60 fps animator
-     *  cost the launcher 30 % of a core on a Fire TV stick for the same movement. */
-    private static final long BREATH_STEP_MS = 500, BREATH_HALF_MS = 45_000;
-    private final Runnable breathe = new Runnable() {
-        @Override
-        public void run() {
-            if (!active || closed) return;
-            long t = SystemClock.uptimeMillis() % (2 * BREATH_HALF_MS);
-            float phase = t < BREATH_HALF_MS ? t / (float) BREATH_HALF_MS : (2 * BREATH_HALF_MS - t) / (float) BREATH_HALF_MS;
-            // From 1.5 % to 5.5 %: the picture always overflows the screen by more than the parallax shift.
-            float scale = 1.015f + 0.04f * (1f - (float) Math.cos(phase * Math.PI)) / 2f;
-            image.setScaleX(scale);
-            image.setScaleY(scale);
-            root.postDelayed(this, BREATH_STEP_MS);
-        }
-    };
+    /** With motion, the picture is drawn 3 % larger so the parallax shift (24dp at most) never shows its edge. */
+    private static final float MOTION_SCALE = 1.03f;
     private String displayed = "";
     /** wallpaper_captions: the shown picture's name from wallpapers/captions.txt; null when off or there are none. */
     private final TextView caption;
@@ -154,8 +139,8 @@ final class WallpaperPlayer {
         active = true;
         update();
         if (motion && image.getParent() != null) {
-            root.removeCallbacks(breathe);
-            root.post(breathe);
+            image.setScaleX(MOTION_SCALE);
+            image.setScaleY(MOTION_SCALE);
         }
     }
 
@@ -173,7 +158,6 @@ final class WallpaperPlayer {
     }
 
     void stop() {
-        if (motion) root.removeCallbacks(breathe);
         active = false;
     }
 

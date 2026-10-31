@@ -565,9 +565,8 @@ and a wallpaper.
     A pick holds that picture until you choose Theme default, press Follow theme, or push the theme again.
     **Cycle wallpaper**: Off, every 5 or 15 minutes, every hour, time of day (the theme's own groups; hourly
     for a group without them) or each return to Home, through the group of the picture last picked (the
-    theme's own pictures until one is picked). **Wallpaper motion**: the picture breathes, a slow zoom of a few
-    percent and back over 45 seconds, and slides a few pixels against the focused tile (`wallpaper_motion`); off
-    with reduced motion or animations off. On every
+    theme's own pictures until one is picked). **Wallpaper motion**: the picture slides a few pixels against the
+    focused tile (`wallpaper_motion`); off with reduced motion or animations off. On every
     row of this page, Left and Right change the value without opening anything.
   - Layout: **Apps per row** 4, 5, 6 or 7; **Rows below dock** 0 to 3, how many rows of tiles stay visible
     under the dock band; **Dock band opacity** 0% to 100% in steps of 10%, with a bar under the row. The last two only do anything while the

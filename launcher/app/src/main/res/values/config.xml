@@ -244,9 +244,9 @@
          the date: the Weather add-on app answers content://io.github.sumyabazar1.weather/now with
          "12° · Cloudy". Read on each return to Home and each minute, off the main thread; no network in the launcher.
          Empty: no line. A theme can set "weather_provider". Launcher settings has a Weather row that turns the line off. -->
-    <!-- Dynamic wallpaper: the picture breathes, a slow zoom to about 4 % and back over 45 s, so the picture is
-         never still. Off with reduced_motion or with animations off. Off by default; a theme can set
-         "wallpaper_motion": true, and Launcher settings has a Wallpaper motion row. -->
+    <!-- Dynamic wallpaper: the picture, drawn 3 % larger, slides a few pixels against the focused tile. Off with
+         reduced_motion or with animations off. Off by default; a theme can set "wallpaper_motion": true, and
+         Launcher settings has a Wallpaper motion row. -->
     <bool name="wallpaper_motion">true</bool>
     <!-- The header follows the weather and the hour: the weather line takes the provider's tint for the condition
          (warm for a clear day, cool for rain), and after sunset the clock turns slightly warm and the greeting dims.
