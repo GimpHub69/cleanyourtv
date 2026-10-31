@@ -158,6 +158,7 @@
     <string name="wifi_color_state">צבע מצב Wi-Fi: %1$s</string>
     <string name="weather_state">מזג אוויר: %1$s</string>
     <string name="wallpaper_cycle_state">החלפת טפט: %1$s</string>
+    <string name="wallpaper_motion_state">תנועת טפט: %1$s</string>
     <string name="cycle_5">כל 5 דקות</string>
     <string name="cycle_15">כל 15 דקות</string>
     <string name="cycle_hour">כל שעה</string>

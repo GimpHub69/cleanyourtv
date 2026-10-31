@@ -150,6 +150,7 @@
                 <TextView android:id="@+id/themeChoice" style="@style/SettingsRow" />
                 <TextView android:id="@+id/wallpaperChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
                 <TextView android:id="@+id/cycleChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
+                <TextView android:id="@+id/motionChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
             </LinearLayout>
 
             <TextView style="@style/SettingsSection" android:text="@string/section_layout" />

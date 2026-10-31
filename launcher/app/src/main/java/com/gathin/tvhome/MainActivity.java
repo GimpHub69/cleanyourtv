@@ -3157,7 +3157,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // Firmware that ships its own settings app next to the AOSP one (Xiaomi China is one): the
         // vendor app holds pages the AOSP settings has no row for, such as Account & Security with
         // the ADB switch. Offered here only while one of them is installed.
-        if (SystemSettings.vendorIntent(this) != null) {
+        // Fire OS: the vendor fallback is the very screen the TV settings row opens; one row is enough.
+        Intent tvSettings = systemIntent(Settings.ACTION_SETTINGS);
+        Intent vendorSettings = SystemSettings.vendorIntent(this);
+        if (vendorSettings != null && (tvSettings.getComponent() == null || !tvSettings.getComponent().equals(vendorSettings.getComponent()))) {
             addSettingsMenuRow(rows, popup, R.string.native_settings, () -> {
                 Intent vendor = SystemSettings.vendorIntent(this);
                 if (vendor != null) open(vendor);

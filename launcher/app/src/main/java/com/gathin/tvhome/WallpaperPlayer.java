@@ -53,6 +53,8 @@ final class WallpaperPlayer {
     private boolean loading;
     /** next(): the coming update() picks a new picture whatever the interval says (Cycle wallpaper: each return to Home). */
     private boolean force;
+    /** wallpaper_motion: the picture breathes while Home is in front; null when off. */
+    private final android.animation.ObjectAnimator motion;
     private String displayed = "";
     /** wallpaper_captions: the shown picture's name from wallpapers/captions.txt; null when off or there are none. */
     private final TextView caption;
@@ -89,6 +91,17 @@ final class WallpaperPlayer {
         height = metrics.heightPixels;
         image = new ImageView(context);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        if (config.wallpaperMotion) {
+            motion = android.animation.ObjectAnimator.ofPropertyValuesHolder(image,
+                    android.animation.PropertyValuesHolder.ofFloat(View.SCALE_X, 1f, 1.04f),
+                    android.animation.PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f, 1.04f));
+            motion.setDuration(45_000L);
+            motion.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
+            motion.setRepeatMode(android.animation.ValueAnimator.REVERSE);
+            motion.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+        } else {
+            motion = null;
+        }
         image.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         names = config.wallpaperCaptions && config.wallpaperEnabled && !files.isEmpty()
                 ? WallpaperCaptions.read(files.get(0).getParentFile()) : Collections.emptyMap();
@@ -133,6 +146,10 @@ final class WallpaperPlayer {
     void start() {
         active = true;
         update();
+        if (motion != null && image.getParent() != null) {
+            if (motion.isPaused()) motion.resume();
+            else if (!motion.isStarted()) motion.start();
+        }
     }
 
     /** Another picture now: Cycle wallpaper "each return to Home" (MainActivity.onResume). */
@@ -142,6 +159,7 @@ final class WallpaperPlayer {
     }
 
     void stop() {
+        if (motion != null && motion.isStarted()) motion.pause();
         active = false;
     }
 

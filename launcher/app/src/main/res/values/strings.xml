@@ -86,6 +86,7 @@
     <string name="wifi_color_state">Wi-Fi status colour: %1$s</string>
     <string name="weather_state">Weather: %1$s</string>
     <string name="wallpaper_cycle_state">Cycle wallpaper: %1$s</string>
+    <string name="wallpaper_motion_state">Wallpaper motion: %1$s</string>
     <string name="cycle_5">Every 5 minutes</string>
     <string name="cycle_15">Every 15 minutes</string>
     <string name="cycle_hour">Every hour</string>

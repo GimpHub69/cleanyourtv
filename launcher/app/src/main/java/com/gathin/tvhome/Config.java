@@ -55,6 +55,8 @@ final class Config {
     static final String WALLPAPER_SET_KEY = "wallpaper_set";
     /** Cycle wallpaper: 0 off, minutes, -1 time of day, -2 each return to Home. */
     static final String WALLPAPER_CYCLE_KEY = "wallpaper_cycle";
+    /** The Wallpaper motion row in Launcher settings, over config.xml wallpaper_motion. */
+    static final String WALLPAPER_MOTION_KEY = "wallpaper_motion";
     /**
      * Counts the changes made in Launcher settings. Home remembers the count it was built with and rebuilds on
      * resume when it differs, however the settings were left (see MainActivity#onResume).
@@ -125,6 +127,8 @@ final class Config {
     final boolean weatherLine;
     /** Cycle wallpaper "each return to Home": Home shows the next picture of the set on every resume. */
     final boolean wallpaperCycleOnHome;
+    /** The wallpaper breathes, a slow zoom and back (config.xml wallpaper_motion); off under reduced_motion or animations off. */
+    final boolean wallpaperMotion;
     /** Names under every tile, dimmed until focused (config.xml always_show_names); the dock band grows for them. */
     final boolean alwaysShowNames;
     /** Reorder button in the top bar (config.xml reorder_button); the Settings long-press menu offers it either way. */
@@ -272,8 +276,9 @@ final class Config {
                    List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, boolean fadeRows, int homeIdleClockMinutes,
                    boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
                    boolean handleViewInputs, boolean tileMenu, boolean dockEvenPadding, boolean cinematicDots, boolean cinematicWhiteFocus, boolean wifiStatusColor, int cinematicScrim, int cinematicArt,
-                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome) {
+                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome, boolean wallpaperMotion) {
         this.wallpaperCycleOnHome = wallpaperCycleOnHome;
+        this.wallpaperMotion = wallpaperMotion && animations && !reducedMotion;
         this.homeHook = homeHook;
         this.settingsMenuOnClick = settingsMenuOnClick;
         this.weatherProvider = weatherProvider;
@@ -430,6 +435,7 @@ final class Config {
         boolean launcherSettingsButton = res.getBoolean(R.bool.launcher_settings_button);
         boolean settingsMenuOnClick = res.getBoolean(R.bool.settings_menu_on_click);
         String weatherProvider = res.getString(R.string.weather_provider).trim();
+        boolean wallpaperMotion = res.getBoolean(R.bool.wallpaper_motion);
         boolean reorderButton = res.getBoolean(R.bool.reorder_button);
         boolean showNetworkPill = res.getBoolean(R.bool.show_network_pill);
         boolean showInputsPill = res.getBoolean(R.bool.show_inputs_pill);
@@ -527,6 +533,7 @@ final class Config {
             launcherSettingsButton = bool(json, "launcher_settings_button", launcherSettingsButton);
             settingsMenuOnClick = bool(json, "settings_menu_on_click", settingsMenuOnClick);
             weatherProvider = string(json, "weather_provider", weatherProvider);
+            wallpaperMotion = bool(json, "wallpaper_motion", wallpaperMotion);
             reorderButton = bool(json, "reorder_button", reorderButton);
             showNetworkPill = bool(json, "show_network_pill", showNetworkPill);
             showInputsPill = bool(json, "show_inputs_pill", showInputsPill);
@@ -606,6 +613,7 @@ final class Config {
         else if (wifiPill == 2) showNetworkPill = false;
         wifiStatusColor = choices.getBoolean(WIFI_COLOR_KEY, wifiStatusColor);
         boolean weatherLine = choices.getBoolean(WEATHER_KEY, true);
+        wallpaperMotion = choices.getBoolean(WALLPAPER_MOTION_KEY, wallpaperMotion);
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
         // A theme can also switch the wallpaper off while the file is still there.
@@ -679,7 +687,7 @@ final class Config {
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, restoreKeyServices, wallpaperEnabled, wallpaper,
                 wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow, fadeRows,
-                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome);
+                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome, wallpaperMotion);
     }
 
     /**
@@ -723,12 +731,12 @@ final class Config {
             SharedPreferences.Editor editor = choices.edit();
             if (!"absent".equals(token)) editor.remove("columns").remove("animations")
                     .remove("advanced_effects").remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY)
-                    .remove(DOCK_OPACITY_KEY).remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY);
+                    .remove(DOCK_OPACITY_KEY).remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY).remove(WALLPAPER_MOTION_KEY);
             editor.putString(THEME_SIGNATURE_KEY, signature).commit();
         } else if (!seen.equals(signature)) {
             choices.edit().remove("columns").remove("animations").remove("advanced_effects")
                     .remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY).remove(DOCK_OPACITY_KEY)
-                    .remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY)
+                    .remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY).remove(WALLPAPER_MOTION_KEY)
                     .putString(THEME_SIGNATURE_KEY, signature).commit();
         }
     }
