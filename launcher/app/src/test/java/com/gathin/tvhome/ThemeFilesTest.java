@@ -50,6 +50,8 @@ public class ThemeFilesTest {
         assertEquals("themes/sweden/wallpapers/001.jpg", ThemeFiles.path(Arrays.asList("themes", "sweden", "wallpapers", "001.jpg")));
         assertEquals("themes/sweden/wallpapers/captions.txt", ThemeFiles.path(Arrays.asList("themes", "sweden", "wallpapers", "captions.txt")));
         assertEquals("themes/sweden/CREDITS.md", ThemeFiles.path(Arrays.asList("themes", "sweden", "CREDITS.md")));
+        assertEquals("themes/sweden/screenshot.jpg", ThemeFiles.path(Arrays.asList("themes", "sweden", "screenshot.jpg")));
+        assertNull(ThemeFiles.path(Collections.singletonList("screenshot.jpg")));
         assertNull(ThemeFiles.path(Arrays.asList("themes", "sweden", "cards.json")));
         assertNull(ThemeFiles.path(Arrays.asList("themes", "sweden", "run.sh")));
         assertNull(ThemeFiles.path(Arrays.asList("themes", "..", "config.json")));

@@ -147,6 +147,9 @@
     <string name="theme_label">ערכת נושא</string>
     <string name="theme_state">ערכת נושא: %1$s</string>
     <string name="theme_builtin">מובנית</string>
+    <string name="theme_builtin_hint">המראה המובנה של המשגר, ללא קובצי ערכת נושא. לחיצה על OK מחילה.</string>
+    <string name="theme_pick_hint">לחיצה על OK מחילה.</string>
+    <string name="theme_no_preview">אין תצוגה מקדימה</string>
     <string name="home_hook_name">השתלטות על מסך הבית של Fire TV</string>
     <string name="home_hook_description">ב-Fire TV, מחליף את מסך הבית של אמזון במשגר הזה בכל פעם שהוא מופיע.</string>
 </resources>

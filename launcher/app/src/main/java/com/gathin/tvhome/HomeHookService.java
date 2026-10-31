@@ -84,6 +84,17 @@ public class HomeHookService extends AccessibilityService {
             }
         };
         registerReceiver(screenOn, new IntentFilter(Intent.ACTION_SCREEN_ON));
+        // Bound while Amazon's home is already on screen (boot, a reinstall of this launcher that killed the one that
+        // was Home, the service switched on): no window event comes for it, and the home task is not readable from
+        // here on Android 11. So open the invisible ProbeActivity once: when it closes, whatever is in front sends a
+        // window event, and the hook fires only if that is Amazon's home (HomeKeyService.probeAtBoot does the same).
+        // Android also rebinds every accessibility service when another one connects (uiautomator, TalkBack), so a
+        // blind launch here would pull the user out of an app; the probe leaves an app alone.
+        try {
+            startActivity(new Intent(this, ProbeActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION));
+        } catch (RuntimeException ignored) {
+        }
     }
 
     @Override

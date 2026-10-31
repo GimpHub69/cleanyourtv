@@ -13,9 +13,11 @@ powershell -ExecutionPolicy Bypass -File tools\theme.ps1 -TvHost 192.168.1.50 th
 ```
 
 Themes can also live on the TV: `content write --uri content://com.gathin.tvhome.theme/themes/<name>/config.json`
-(and `wallpaper.jpg`, `wallpapers/<picture>`, `wallpapers/captions.txt`, `CREDITS.md`) stores a theme folder under
-the launcher's files, and a **Theme** row then appears in Launcher settings that applies one of them exactly as
-`theme.sh` does, with no computer; `content delete --uri .../themes/<name>` removes a stored theme.
+(and `wallpaper.jpg`, `wallpapers/<picture>`, `wallpapers/captions.txt`, `CREDITS.md`, `screenshot.jpg` for its
+preview) stores a theme folder under the launcher's files, and a **Theme** row then appears in Launcher settings: a
+picker that previews each stored theme from its screenshot and applies the chosen one exactly as `theme.sh` does,
+with no computer, or **Built-in** for the plain look as `theme.sh --reset` leaves it;
+`content delete --uri .../themes/<name>` removes a stored theme.
 
 `tools/manage.py list themes` and `list switches` list them from this file, `show <name>` gives one with its
 screenshot, and `manage.py set <switch> <value> --theme <your folder>` writes a key into a theme of your own and

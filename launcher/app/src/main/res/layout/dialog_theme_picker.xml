@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Theme picker (ThemePicker): one rounded panel, the stored themes down the left, the focused one's
+     screenshot on the right. Rows are added in code. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="880dp"
+        android:layout_height="490dp"
+        android:layout_gravity="center"
+        android:background="@drawable/theme_panel_bg"
+        android:orientation="horizontal"
+        android:padding="28dp">
+
+        <LinearLayout
+            android:layout_width="250dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/outfit_light"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="14dp"
+                android:text="@string/theme_label"
+                android:textColor="#FFFFFFFF"
+                android:textSize="30sp" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/themeRows"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="28dp"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/themePreview"
+                android:layout_width="match_parent"
+                android:layout_height="315dp"
+                android:background="#FF0B0E12"
+                android:contentDescription="@string/theme_no_preview"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/themeName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:fontFamily="@font/outfit_light"
+                android:textColor="#FFFFFFFF"
+                android:textSize="26sp" />
+
+            <TextView
+                android:id="@+id/themeHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="#FF9AA4AE"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

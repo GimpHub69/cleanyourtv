@@ -8,6 +8,8 @@ final class ThemeFiles {
     static final String WALLPAPERS = "wallpapers";
     /** Themes kept on the TV for the Theme row in Launcher settings (ThemeSwitch): themes/<name>/<theme files>. */
     static final String THEMES = "themes";
+    /** A stored theme's preview, the screenshot.jpg the repo keeps beside each theme (ThemePicker). */
+    static final String SCREENSHOT = "screenshot.jpg";
     /** The names tools/theme.sh accepts for a collection image, and the types WallpaperRotation reads. */
     private static final Pattern IMAGE = Pattern.compile("[A-Za-z0-9_.-]+\\.(jpg|jpeg|png|webp)",
             Pattern.CASE_INSENSITIVE);
@@ -24,7 +26,8 @@ final class ThemeFiles {
         // A stored theme holds the same files under themes/<name>/, plus its credits.
         if (segments.size() >= 3 && THEMES.equals(segments.get(0)) && themeName(segments.get(1))) {
             List<String> rest = segments.subList(2, segments.size());
-            String inner = rest.size() == 1 && NOTE.matcher(rest.get(0)).matches() ? rest.get(0) : path(rest);
+            String inner = rest.size() == 1 && (SCREENSHOT.equals(rest.get(0)) || NOTE.matcher(rest.get(0)).matches())
+                    ? rest.get(0) : path(rest);
             return inner == null ? null : THEMES + "/" + segments.get(1) + "/" + inner;
         }
         if (segments.size() == 1) {

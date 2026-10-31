@@ -68,6 +68,20 @@ public class ThemeSwitchTest {
         assertFalse(first.equals(new String(Files.readAllBytes(revision.toPath()), StandardCharsets.US_ASCII)));
     }
 
+    @Test public void resetLeavesNoThemeFilesAndANewToken() throws IOException {
+        File dir = tmp.getRoot();
+        File old = new File(dir, "wallpapers");
+        assertTrue(old.mkdirs());
+        Files.write(new File(dir, "config.json").toPath(), "{}".getBytes(StandardCharsets.UTF_8));
+        Files.write(new File(old, "stale.jpg").toPath(), new byte[]{2});
+        Files.write(new File(dir, "theme_revision").toPath(), "old".getBytes(StandardCharsets.US_ASCII));
+        assertTrue(ThemeSwitch.reset(dir));
+        assertFalse(new File(dir, "config.json").exists());
+        assertFalse(new File(old, "stale.jpg").exists());
+        assertEquals(32, new File(dir, "theme_revision").length());
+        assertFalse(ThemeSwitch.reset(null));
+    }
+
     @Test public void aThemeWithoutAConfigFails() throws IOException {
         File dir = tmp.getRoot();
         assertFalse(ThemeSwitch.apply(dir, tmp.newFolder("themes", "broken")));

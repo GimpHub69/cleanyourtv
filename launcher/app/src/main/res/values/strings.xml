@@ -75,6 +75,9 @@
     <string name="theme_label">Theme</string>
     <string name="theme_state">Theme: %1$s</string>
     <string name="theme_builtin">Built-in</string>
+    <string name="theme_builtin_hint">The launcher\'s own look, with no theme files. Press OK to apply.</string>
+    <string name="theme_pick_hint">Press OK to apply.</string>
+    <string name="theme_no_preview">No preview</string>
     <string name="home_hook_name">Fire TV Home takeover</string>
     <string name="home_hook_description">On Fire TV, replaces Amazon\'s home screen with this launcher whenever it comes up.</string>
     <string name="home_key_name">Home button</string>

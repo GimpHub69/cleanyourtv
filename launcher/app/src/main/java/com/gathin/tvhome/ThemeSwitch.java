@@ -38,10 +38,7 @@ final class ThemeSwitch {
     static boolean apply(File dir, File theme) {
         if (dir == null || theme == null) return false;
         File wallpapers = new File(dir, ThemeFiles.WALLPAPERS);
-        delete(new File(dir, Config.FILE_NAME));
-        delete(new File(dir, Config.WALLPAPER_NAME));
-        File[] old = wallpapers.listFiles();
-        if (old != null) for (File f : old) if (ThemeFiles.collectionImage(f.getName()) || WallpaperCaptions.FILE_NAME.equals(f.getName())) delete(f);
+        clear(dir);
         boolean ok = copy(new File(theme, Config.FILE_NAME), new File(dir, Config.FILE_NAME));
         File single = new File(theme, Config.WALLPAPER_NAME);
         if (single.isFile()) ok &= copy(single, new File(dir, Config.WALLPAPER_NAME));
@@ -54,12 +51,31 @@ final class ThemeSwitch {
                 }
             }
         }
+        return stamp(dir) && ok;
+    }
+
+    /** Built-in: no theme files at all, as tools/theme.sh --reset leaves the TV. */
+    static boolean reset(File dir) {
+        if (dir == null) return false;
+        clear(dir);
+        return stamp(dir);
+    }
+
+    private static void clear(File dir) {
+        delete(new File(dir, Config.FILE_NAME));
+        delete(new File(dir, Config.WALLPAPER_NAME));
+        File[] old = new File(dir, ThemeFiles.WALLPAPERS).listFiles();
+        if (old != null) for (File f : old) if (ThemeFiles.collectionImage(f.getName()) || WallpaperCaptions.FILE_NAME.equals(f.getName())) delete(f);
+    }
+
+    /** A fresh theme_revision token, so Config clears the on-TV choices as after a push. */
+    private static boolean stamp(File dir) {
         try (OutputStream out = new FileOutputStream(new File(dir, "theme_revision"))) {
             out.write(UUID.randomUUID().toString().replace("-", "").getBytes(StandardCharsets.US_ASCII));
+            return true;
         } catch (IOException e) {
-            ok = false;
+            return false;
         }
-        return ok;
     }
 
     private static void delete(File f) {

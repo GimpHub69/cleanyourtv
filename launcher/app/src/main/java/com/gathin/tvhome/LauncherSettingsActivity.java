@@ -169,30 +169,17 @@ public final class LauncherSettingsActivity extends Activity {
         for (int i = views.length - 1; i >= 0; i--) row.addView(views[i]);
     }
 
-    /** The stored themes by folder name; applying one does on the TV what tools/theme.sh does over adb. */
+    /** The stored themes with a preview each, Built-in first; applying one does on the TV what tools/theme.sh does over adb. */
     private void showThemePicker() {
         File dir = Config.dir(this);
-        List<File> themes = ThemeSwitch.themes(dir);
-        String[] labels = new String[themes.size()];
-        String current = choices.getString(THEME_CHOICE_KEY, null);
-        int checked = -1;
-        for (int i = 0; i < themes.size(); i++) {
-            labels[i] = themes.get(i).getName();
-            if (labels[i].equals(current)) checked = i;
-        }
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.theme_label)
-                .setSingleChoiceItems(labels, checked, (dialog, which) -> {
-                    dialog.dismiss();
-                    if (!ThemeSwitch.apply(dir, themes.get(which))) {
-                        Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
-                    }
-                    choices.edit().putString(THEME_CHOICE_KEY, labels[which]).apply();
-                    changed();
-                    refresh();
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        ThemePicker.show(this, ThemeSwitch.themes(dir), choices.getString(THEME_CHOICE_KEY, null), theme -> {
+            boolean ok = theme == null ? ThemeSwitch.reset(dir) : ThemeSwitch.apply(dir, theme);
+            if (!ok) Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
+            if (theme == null) choices.edit().remove(THEME_CHOICE_KEY).apply();
+            else choices.edit().putString(THEME_CHOICE_KEY, theme.getName()).apply();
+            changed();
+            refresh();
+        });
     }
 
     private void showWallpaperPicker() {

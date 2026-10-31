@@ -557,8 +557,10 @@ and a wallpaper.
     dock band; **Dock band opacity** 100%, 70%, 50% or 30%. The last two only do anything while the dock is
     its own row (`dock_row`, on by default).
   - **Theme**, only when themes are stored on the TV (`content write` into `themes/<name>/` through the
-    launcher's theme provider, the same files as a folder in `themes/`): pick one and it is applied as
-    `tools/theme.sh` would apply it, without a computer. The row says **Built-in** until one is picked.
+    launcher's theme provider, the same files as a folder in `themes/`, its `screenshot.jpg` included): a
+    picker with the stored themes down the left and the focused one's screenshot on the right. OK applies
+    it as `tools/theme.sh` would, without a computer; **Built-in** at the top is the plain `config.xml` look,
+    as `theme.sh --reset` leaves it.
   - **Wallpaper**: one picture from the theme's collection (or its `wallpaper.jpg`), **None**, or **Theme
     default**. A pick holds that picture and stops the rotation until you choose Theme default, press
     Follow theme, or push the theme again.
