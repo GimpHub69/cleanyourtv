@@ -65,5 +65,45 @@
             android:fontFamily="@string/font_regular"
             android:letterSpacing="0.14"
             android:textAllCaps="true" />
+        <TextView
+            android:id="@+id/dreamWeather"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:textDirection="rtl"
+            android:gravity="right"
+            android:textColor="#B3FFFFFF"
+            android:textSize="20sp"
+            android:fontFamily="@string/font_light"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/dreamNowPlaying"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textDirection="rtl"
+            android:gravity="right"
+            android:textColor="#B3FFFFFF"
+            android:textSize="18sp"
+            android:fontFamily="@string/font_regular"
+            android:visibility="gone" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/dreamCaption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="48dp"
+        android:layout_marginBottom="36dp"
+        android:textDirection="rtl"
+        android:textColor="#D9FFFFFF"
+        android:textSize="15sp"
+        android:fontFamily="@string/font_regular"
+        android:shadowColor="#CC000000"
+        android:shadowDy="1"
+        android:shadowRadius="6"
+        android:singleLine="true"
+        android:alpha="0" />
 </FrameLayout>

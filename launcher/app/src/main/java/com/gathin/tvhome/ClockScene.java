@@ -15,10 +15,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.widget.TextView;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -37,8 +39,17 @@ final class ClockScene {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
+    private final Context ctx;
     private final View content;
     private final View ambient;
+    /** The weather and now-playing lines under the date (the Home keys weather_provider and now_playing), refreshed each minute. */
+    private final TextView weather, nowPlaying;
+    private String weatherUri;
+    private boolean nowPlayingOn, mood;
+    /** wallpaper_captions: the shown picture's credit, bottom corner, for a few seconds after each change. */
+    private final TextView caption;
+    private Map<String, String> captions = Collections.emptyMap();
+    private static final long CAPTION_MS = 6_000L;
     private final GradientDrawable glow;
     private int colorIndex;
     private int glowColor;
@@ -61,14 +72,19 @@ final class ClockScene {
         public void run() {
             moveClock();
             shiftGlow();
+            refreshLines();
             handler.postDelayed(this, MOVE_MS);
         }
     };
 
     /** root is the inflated dream_clock layout. */
     ClockScene(View root) {
+        ctx = root.getContext();
         content = root.findViewById(R.id.dreamContent);
         ambient = root.findViewById(R.id.dreamAmbient);
+        weather = root.findViewById(R.id.dreamWeather);
+        nowPlaying = root.findViewById(R.id.dreamNowPlaying);
+        caption = root.findViewById(R.id.dreamCaption);
         glow = new GradientDrawable();
         glow.setGradientType(GradientDrawable.RADIAL_GRADIENT);
         ambient.setBackground(glow);
@@ -86,6 +102,7 @@ final class ClockScene {
         });
         handler.removeCallbacks(tick);
         handler.postDelayed(tick, MOVE_MS);
+        refreshLines();
         if (wallpaperFile != null && !wallpaperShown) loadWallpaper();
         else if (slideMs > 0) handler.postDelayed(nextSlide, slideMs);   // restarted with its picture still attached
     }
@@ -93,6 +110,7 @@ final class ClockScene {
     void stop() {
         handler.removeCallbacksAndMessages(null);   // the tick and any glow steps still queued
         content.animate().cancel();
+        caption.animate().cancel();
         wallpaperGeneration++;   // a decode still running must not attach its picture to a stopped scene
     }
 
@@ -109,6 +127,9 @@ final class ClockScene {
         } catch (RuntimeException e) {
             return;
         }
+        weatherUri = cfg.weatherLine ? cfg.weatherProvider : null;
+        nowPlayingOn = cfg.nowPlaying;
+        mood = cfg.headerMood;
         if (!cfg.clockWallpaper) {
             // clock_glow false: plain black behind the clock (OLED); the clock itself still moves every minute.
             if (!cfg.clockGlow) {
@@ -125,6 +146,27 @@ final class ClockScene {
             slideMs = cfg.clockSlideshowMinutes * 60_000L;
             if (wallpaperFile == null || !slides.contains(wallpaperFile)) wallpaperFile = slides.get(0);
         }
+        if (cfg.wallpaperCaptions && wallpaperFile != null) captions = WallpaperCaptions.read(wallpaperFile.getParentFile());
+    }
+
+    /** The same lines Home shows: the add-on's weather and the active media session, hidden when there is none. */
+    private void refreshLines() {
+        if (weatherUri != null) WeatherLine.refresh(ctx.getContentResolver(), weatherUri, weather, mood);
+        if (nowPlayingOn) NowPlaying.refresh(ctx, nowPlaying);
+        // ponytail: the lines widen the clock block after placeClock() measured it; the next minute's move re-clamps it.
+    }
+
+    /** The picture's credit from captions.txt, shown for CAPTION_MS after it appears; none for an unnamed picture. */
+    private void showCaption(File picture) {
+        String name = captions.get(picture.getName());
+        caption.animate().cancel();
+        if (name == null) {
+            caption.setAlpha(0f);
+            return;
+        }
+        caption.setText(name);
+        caption.animate().alpha(1f).setDuration(600).withEndAction(() ->
+                caption.animate().alpha(0f).setDuration(900).setStartDelay(CAPTION_MS).start()).start();
     }
 
     /** The slideshow's next picture, in the set's filename order, crossfaded in over the one shown. */
@@ -149,6 +191,7 @@ final class ClockScene {
                 fade.setCrossFadeEnabled(true);
                 ambient.setBackground(new LayerDrawable(new Drawable[]{fade, new ColorDrawable(shade)}));
                 fade.startTransition(1500);
+                showCaption(next);
                 shown = in;   // ponytail: the previous bitmap is left to the GC; two 4 MB RGB_565 pictures live during a fade
             });
         }, "clock-slide").start();
@@ -172,6 +215,7 @@ final class ClockScene {
                 wallpaperShown = true;
                 shown = new BitmapDrawable(res, bmp);
                 ambient.setBackground(new LayerDrawable(new Drawable[]{shown, new ColorDrawable(shade)}));
+                showCaption(file);
                 if (slideMs > 0) handler.postDelayed(nextSlide, slideMs);
             });
         }, "clock-wallpaper").start();
