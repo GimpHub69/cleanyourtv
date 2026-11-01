@@ -407,6 +407,64 @@
                             android:shadowDy="1"
                             android:shadowRadius="8"
                             />
+
+                        <!-- news_card: the story's picture with its source and headline beside it, see NewsLine. -->
+                        <LinearLayout
+                            android:id="@+id/newsCard"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginStart="14dp"
+                                android:layout_marginEnd="14dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/newsSource"
+                                    android:gravity="right"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:singleLine="true"
+                                    android:textAllCaps="true"
+                                    android:letterSpacing="0.14"
+                                    android:textColor="#A6FFFFFF"
+                                    android:textSize="12sp"
+                                    android:fontFamily="@string/font_regular"
+                                    android:shadowColor="#B3000000"
+                                    android:shadowDy="1"
+                                    android:shadowRadius="8" />
+
+                                <TextView
+                                    android:id="@+id/newsHeadline"
+                                    android:gravity="right"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:maxLines="3"
+                                    android:ellipsize="end"
+                                    android:textColor="#F2FFFFFF"
+                                    android:textSize="17sp"
+                                    android:fontFamily="@font/outfit_regular"
+                                    android:letterSpacing="0.01"
+                                    android:shadowColor="#B3000000"
+                                    android:shadowDy="1"
+                                    android:shadowRadius="8" />
+                            </LinearLayout>
+                            <ImageView
+                                android:id="@+id/newsImage"
+                                android:layout_width="160dp"
+                                android:layout_height="90dp"
+                                android:scaleType="centerCrop"
+                                android:background="#66000000"
+                                android:contentDescription="@null" />
+                        </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 

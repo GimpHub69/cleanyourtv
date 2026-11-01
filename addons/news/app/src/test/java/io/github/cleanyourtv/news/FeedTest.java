@@ -15,7 +15,7 @@ public class FeedTest {
             + "<title><![CDATA[BBC News]]></title>"
             + "<item><title><![CDATA[First &amp; foremost]]></title><description><![CDATA[<p>Some <b>HTML</b> here.</p>]]></description>"
             + "<link>https://example.org/1</link><pubDate>Sun, 01 Nov 2026 15:04:56 GMT</pubDate>"
-            + "<media:thumbnail url=\"x\"><title>not this</title></media:thumbnail></item>"
+            + "<media:thumbnail url=\"https://ichef.example/ace/standard/240/pic.jpg\" width=\"240\" height=\"135\"><title>not this</title></media:thumbnail></item>"
             + "<item><title>Older</title><pubDate>Sat, 31 Oct 2026 09:00:00 GMT</pubDate></item>"
             + "<item><title> </title></item>"
             + "</channel></rss>";
@@ -35,6 +35,8 @@ public class FeedTest {
         assertEquals("First & foremost", items.get(0).title);
         assertEquals("Some HTML here.", items.get(0).summary);
         assertEquals("https://example.org/1", items.get(0).link);
+        assertEquals("https://ichef.example/ace/standard/480/pic.jpg", items.get(0).image);
+        assertEquals("", items.get(1).image);
         assertEquals(Feed.parseDate("Sun, 01 Nov 2026 15:04:56 GMT"), items.get(0).published);
         assertTrue(items.get(0).published > items.get(1).published);
     }
@@ -66,6 +68,8 @@ public class FeedTest {
         assertEquals(2, back.size());
         assertEquals(items.get(1).title, back.get(1).title);
         assertEquals(items.get(0).published, back.get(0).published);
+        assertEquals(items.get(0).image, back.get(0).image);
+        assertEquals(40, Feed.hash(items.get(0).image).length());
         assertEquals(0, Feed.decode("").size());
     }
 

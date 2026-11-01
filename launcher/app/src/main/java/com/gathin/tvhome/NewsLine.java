@@ -2,31 +2,58 @@ package com.gathin.tvhome;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Outline;
 import android.net.Uri;
 import android.view.View;
+import android.view.ViewOutlineProvider;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * One headline under the clock from another app on this TV (config.xml news_provider): the launcher queries that
  * content provider for rows with {@code title} and {@code source} columns, on each return to Home and each
- * minute, and shows the next one every ROTATE_MS while Home is on screen. No network here: the provider is a
- * local app (the News add-on), which fetches on its own. Rows older than STALE_MS by the provider's
- * {@code fetched} column are not shown: an offline TV keeps no day-old headline under the clock.
+ * minute, and shows the next one every ROTATE_MS while Home is on screen. With news_card the headline is a story
+ * card instead: the row's {@code image} (a content URI the provider serves) as a small picture, the source and
+ * headline beside it, the picture crossfading in. No network here: the provider is a local app (the News add-on),
+ * which fetches on its own. Rows older than STALE_MS by the provider's {@code fetched} column are not shown: an
+ * offline TV keeps no day-old headline under the clock.
  */
 final class NewsLine {
     static final long ROTATE_MS = 20_000L, STALE_MS = 6 * 60 * 60 * 1000L;
+    private static final int FADE_MS = 400;
     private final TextView line;
     private final String uri;
-    private List<String> headlines = new ArrayList<>();
+    /** news_card's views, or null for the plain line. */
+    private final View card;
+    private final ImageView image;
+    private final TextView source, headline;
+    private ContentResolver resolver;
+    private List<String[]> stories = new ArrayList<>();   // {source, title, image uri}
     private int next;
     private final Runnable rotate = this::showNext;
 
-    NewsLine(TextView line, String uri) {
+    NewsLine(TextView line, String uri, View card) {
         this.line = line;
         this.uri = uri;
+        this.card = card;
+        image = card == null ? null : card.findViewById(R.id.newsImage);
+        source = card == null ? null : card.findViewById(R.id.newsSource);
+        headline = card == null ? null : card.findViewById(R.id.newsHeadline);
+        if (image != null) {
+            image.setOutlineProvider(new ViewOutlineProvider() {
+                @Override
+                public void getOutline(View v, Outline o) {
+                    o.setRoundRect(0, 0, v.getWidth(), v.getHeight(), 8 * v.getResources().getDisplayMetrics().density);
+                }
+            });
+            image.setClipToOutline(true);
+        }
     }
 
     /** On Home: a fresh read, and the rotation from now. */
@@ -42,27 +69,30 @@ final class NewsLine {
 
     /** Reads the provider off the main thread; the list swaps in on the UI thread, keeping its place. */
     void refresh(ContentResolver resolver) {
+        this.resolver = resolver;
         new Thread(() -> {
-            List<String> fresh = new ArrayList<>();
-            try (Cursor c = resolver.query(Uri.parse(uri), new String[]{"title", "source", "fetched"}, null, null, null)) {
+            List<String[]> fresh = new ArrayList<>();
+            try (Cursor c = resolver.query(Uri.parse(uri), new String[]{"title", "source", "image", "fetched"}, null, null, null)) {
                 if (c != null) {
-                    int t = c.getColumnIndex("title"), s = c.getColumnIndex("source"), f = c.getColumnIndex("fetched");
+                    int t = c.getColumnIndex("title"), s = c.getColumnIndex("source"), i = c.getColumnIndex("image"), f = c.getColumnIndex("fetched");
                     while (c.moveToNext()) {
                         if (f >= 0 && System.currentTimeMillis() - c.getLong(f) > STALE_MS) break;
                         String title = t >= 0 ? c.getString(t) : null;
                         if (title == null || title.trim().isEmpty()) continue;
-                        String source = s >= 0 ? c.getString(s) : null;
-                        fresh.add(source == null || source.trim().isEmpty() ? title.trim() : source.trim() + " · " + title.trim());
+                        String src = s >= 0 && c.getString(s) != null ? c.getString(s).trim() : "";
+                        String img = i >= 0 && c.getString(i) != null ? c.getString(i).trim() : "";
+                        fresh.add(new String[]{src, title.trim(), img});
                     }
                 }
             } catch (RuntimeException ignored) {
                 // The provider is not installed or refused: no line.
             }
             line.post(() -> {
-                boolean first = headlines.isEmpty();
-                headlines = fresh;
+                boolean first = stories.isEmpty();
+                stories = fresh;
                 if (fresh.isEmpty()) {
                     line.setVisibility(View.GONE);
+                    if (card != null) card.setVisibility(View.GONE);
                 } else if (first) {
                     next = 0;
                     show();
@@ -72,15 +102,56 @@ final class NewsLine {
     }
 
     private void showNext() {
-        if (!headlines.isEmpty()) {
-            next = (next + 1) % headlines.size();
+        if (!stories.isEmpty()) {
+            next = (next + 1) % stories.size();
             show();
         }
         line.postDelayed(rotate, ROTATE_MS);
     }
 
     private void show() {
-        line.setText(headlines.get(next % headlines.size()));
-        line.setVisibility(View.VISIBLE);
+        String[] story = stories.get(next % stories.size());
+        if (card == null) {
+            line.setText(story[0].isEmpty() ? story[1] : story[0] + " · " + story[1]);
+            line.setVisibility(View.VISIBLE);
+            return;
+        }
+        source.setText(story[0]);
+        headline.setText(story[1]);
+        card.setVisibility(View.VISIBLE);
+        loadPicture(story[2]);
+    }
+
+    /** The story's picture read from the provider off the main thread, then faded in; none, and the frame stays dark. */
+    private void loadPicture(String img) {
+        final int shown = next;
+        if (img.isEmpty()) {
+            image.animate().cancel();
+            image.setImageBitmap(null);
+            return;
+        }
+        new Thread(() -> {
+            Bitmap b = null;
+            try (InputStream in = resolver.openInputStream(Uri.parse(img))) {
+                if (in != null) {
+                    BitmapFactory.Options o = new BitmapFactory.Options();
+                    o.inPreferredConfig = Bitmap.Config.RGB_565;
+                    b = BitmapFactory.decodeStream(in, null, o);
+                }
+            } catch (Exception ignored) {
+                // Unreadable picture: the frame stays dark.
+            }
+            final Bitmap got = b;
+            image.post(() -> {
+                if (shown != next) {
+                    if (got != null) got.recycle();
+                    return;
+                }
+                image.animate().cancel();
+                image.setAlpha(0f);
+                image.setImageBitmap(got);
+                image.animate().alpha(1f).setDuration(FADE_MS).start();
+            });
+        }, "NewsPicture").start();
     }
 }

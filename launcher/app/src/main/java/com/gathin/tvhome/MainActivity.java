@@ -507,7 +507,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         nowPlayingOn = cfg.nowPlaying;
         noticeLine = findViewById(R.id.noticeLine);
         noticeOn = cfg.notificationLine;
-        newsLine = cfg.newsProvider.isEmpty() ? null : new NewsLine(findViewById(R.id.newsLine), cfg.newsProvider);
+        newsLine = cfg.newsProvider.isEmpty() ? null : new NewsLine(findViewById(R.id.newsLine), cfg.newsProvider,
+                cfg.newsCard ? findViewById(R.id.newsCard) : null);
         nowPlayingCard = cfg.nowPlayingCard;
         nowPlayingArt = cfg.nowPlayingArt;
         if (cfg.headerScrim) findViewById(R.id.headerScrim).setVisibility(View.VISIBLE);

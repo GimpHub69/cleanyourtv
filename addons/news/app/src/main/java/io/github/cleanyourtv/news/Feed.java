@@ -9,8 +9,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -41,14 +44,17 @@ final class Feed {
 
     static final class Item {
         final String source, title, summary, link;
+        /** The story's picture (media:thumbnail or an image enclosure), empty when the feed gives none. */
+        final String image;
         /** Epoch milliseconds, 0 when the feed gave no usable date. */
         final long published;
 
-        Item(String source, String title, String summary, String link, long published) {
+        Item(String source, String title, String summary, String link, String image, long published) {
             this.source = source;
             this.title = title;
             this.summary = summary;
             this.link = link;
+            this.image = image;
             this.published = published;
         }
     }
@@ -83,7 +89,7 @@ final class Feed {
             String summary = clean(atom ? firstText(e, "summary", "content") : firstText(e, "description"));
             String link = atom ? linkHref(e) : firstText(e, "link").trim();
             long when = parseDate(atom ? firstText(e, "updated", "published") : firstText(e, "pubDate"));
-            out.add(new Item(source, title, summary, link, when));
+            out.add(new Item(source, title, summary, link, imageUrl(e), when));
         }
         return out;
     }
@@ -99,6 +105,22 @@ final class Feed {
             }
         }
         return "";
+    }
+
+    /** media:thumbnail's url, else an image enclosure's; BBC's 240 px thumbnail is asked for at 480 px. */
+    static String imageUrl(Element item) {
+        String enclosure = "";
+        for (Node n = item.getFirstChild(); n != null; n = n.getNextSibling()) {
+            if (n.getNodeType() != Node.ELEMENT_NODE) continue;
+            String name = n.getNodeName();
+            if (name.endsWith(":thumbnail") || name.endsWith(":content")) {
+                String url = ((Element) n).getAttribute("url");
+                if (url.startsWith("https://")) return url.replace("/240/", "/480/");
+            } else if ("enclosure".equals(name) && ((Element) n).getAttribute("type").startsWith("image/")) {
+                enclosure = ((Element) n).getAttribute("url");
+            }
+        }
+        return enclosure.startsWith("https://") ? enclosure : "";
     }
 
     private static String linkHref(Element entry) {
@@ -183,7 +205,7 @@ final class Feed {
         for (Item i : items) {
             if (b.length() > 0) b.append(RECORD);
             b.append(i.source).append(FIELD).append(i.title).append(FIELD).append(i.summary).append(FIELD)
-                    .append(i.link).append(FIELD).append(i.published);
+                    .append(i.link).append(FIELD).append(i.image).append(FIELD).append(i.published);
         }
         return b.toString();
     }
@@ -193,16 +215,95 @@ final class Feed {
         if (line == null || line.isEmpty()) return out;
         for (String rec : line.split(String.valueOf(RECORD))) {
             String[] f = rec.split(String.valueOf(FIELD), -1);
-            if (f.length != 5) continue;
+            if (f.length != 6) continue;
             long when;
             try {
-                when = Long.parseLong(f[4]);
+                when = Long.parseLong(f[5]);
             } catch (NumberFormatException e) {
                 continue;
             }
-            out.add(new Item(f[0], f[1], f[2], f[3], when));
+            out.add(new Item(f[0], f[1], f[2], f[3], f[4], when));
         }
         return out;
+    }
+
+    /** Pictures for the first IMAGES stories, each shrunk to IMAGE_WIDTH and saved as JPEG in the cache dir. */
+    static final int IMAGES = 8, IMAGE_WIDTH = 480, IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+    private static final long IMAGE_PASS_MS = 30_000L;
+
+    static File imageDir(Context ctx) {
+        return new File(ctx.getCacheDir(), "img");
+    }
+
+    /** The cached file for a picture URL (sha1 of the URL), whether or not it exists yet. */
+    static File imageFile(Context ctx, String url) {
+        return new File(imageDir(ctx), hash(url) + ".jpg");
+    }
+
+    static String hash(String s) {
+        try {
+            byte[] d = MessageDigest.getInstance("SHA-1").digest(s.getBytes(StandardCharsets.UTF_8));
+            StringBuilder b = new StringBuilder();
+            for (byte x : d) b.append(String.format("%02x", x));
+            return b.toString();
+        } catch (Exception e) {
+            return "0000000000000000000000000000000000000000";
+        }
+    }
+
+    /** After the headlines are saved: the first pictures, within IMAGE_PASS_MS; files for other stories go. */
+    private static void cacheImages(Context ctx, List<Item> items) {
+        File dir = imageDir(ctx);
+        if (!dir.isDirectory() && !dir.mkdirs()) return;
+        List<String> keep = new ArrayList<>();
+        long deadline = System.currentTimeMillis() + IMAGE_PASS_MS;
+        for (Item i : items) {
+            if (i.image.isEmpty() || keep.size() >= IMAGES) continue;
+            File f = imageFile(ctx, i.image);
+            keep.add(f.getName());
+            if (f.isFile() || System.currentTimeMillis() > deadline) continue;
+            try {
+                fetchImage(i.image, f);
+            } catch (Exception e) {
+                android.util.Log.w("news", "image failed: " + e);
+            }
+        }
+        File[] old = dir.listFiles();
+        if (old != null) for (File f : old) if (!keep.contains(f.getName())) f.delete();
+    }
+
+    /** One picture over HTTPS, at most IMAGE_MAX_BYTES, decoded small (RGB_565, about IMAGE_WIDTH wide) and saved as JPEG. */
+    private static void fetchImage(String url, File out) throws Exception {
+        HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+        c.setConnectTimeout(TIMEOUT_MS);
+        c.setReadTimeout(TIMEOUT_MS);
+        c.setRequestProperty("User-Agent", "cleanyourtv-news/1.0");
+        byte[] buf;
+        int n = 0, r;
+        try (InputStream in = c.getInputStream()) {
+            buf = new byte[IMAGE_MAX_BYTES];
+            while (n < buf.length && (r = in.read(buf, n, buf.length - n)) > 0) n += r;
+            if (n >= buf.length) throw new IOException("picture over " + IMAGE_MAX_BYTES + " bytes");
+        } finally {
+            c.disconnect();
+        }
+        android.graphics.BitmapFactory.Options o = new android.graphics.BitmapFactory.Options();
+        o.inJustDecodeBounds = true;
+        android.graphics.BitmapFactory.decodeByteArray(buf, 0, n, o);
+        if (o.outWidth <= 0) throw new IOException("not a picture");
+        o.inJustDecodeBounds = false;
+        o.inSampleSize = 1;
+        while (o.outWidth / (o.inSampleSize * 2) >= IMAGE_WIDTH) o.inSampleSize *= 2;
+        o.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
+        android.graphics.Bitmap b = android.graphics.BitmapFactory.decodeByteArray(buf, 0, n, o);
+        if (b == null) throw new IOException("undecodable picture");
+        File tmp = new File(out.getPath() + ".part");
+        try (FileOutputStream fo = new FileOutputStream(tmp)) {
+            b.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, fo);
+        } finally {
+            b.recycle();
+        }
+        if (!tmp.renameTo(out)) tmp.delete();
     }
 
     static SharedPreferences cache(Context ctx) {
@@ -235,6 +336,7 @@ final class Feed {
                 List<Item> items = fetchAll(urls, max);
                 cache.edit().putString("items", encode(items)).putLong("fetched", System.currentTimeMillis()).apply();
                 ok = true;
+                cacheImages(app, items);
             } catch (Exception e) {
                 // Offline or a broken feed: the cached items stay, the next query tries again after RETRY_MS.
                 android.util.Log.w("news", "fetch failed: " + e);

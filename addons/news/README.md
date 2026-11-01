@@ -31,11 +31,14 @@ Set in `app/src/main/res/values/options.xml` before building.
 ## The headlines for the launcher
 
 The app answers `content://io.github.cleanyourtv.news/headlines` with one row per story, newest first: `title`,
-`source` (the feed's name, "BBC News"), `summary`, `link`, `published` and `fetched` (both epoch milliseconds),
-from its own cache. A query older than 15 minutes starts one fetch in the background, so the next query is fresh;
+`source` (the feed's name, "BBC News"), `summary`, `link`, `image`, `published` and `fetched` (both epoch
+milliseconds), from its own cache. `image` is a `content://io.github.cleanyourtv.news/image/<id>` URI for the
+story's picture (the feed's `media:thumbnail` or image enclosure, BBC's asked for at 480 px), once the app has it:
+after each fetch it downloads the first 8 stories' pictures, shrinks them to about 480 px wide and keeps them as
+JPEGs in its cache folder (about 30 KB each, old ones deleted); any app can open them read-only. A query older than 15 minutes starts one fetch in the background, so the next query is fresh;
 5 minutes between attempts after a failure. The Clean Your TV launcher's `news_provider` key points at it and
 shows "BBC News · headline" under the clock, the next story every 20 seconds, and hides the line once `fetched`
-is over six hours old. Any app on the TV can read it (no permission): it is what the page already shows.
+is over six hours old; with its `news_card` key the line becomes a picture card with the headline beside it. Any app on the TV can read it (no permission): it is what the page already shows.
 
 ## Permissions
 
