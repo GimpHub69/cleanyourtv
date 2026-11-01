@@ -114,7 +114,8 @@ final class Feed {
             if (n.getNodeType() != Node.ELEMENT_NODE) continue;
             String name = n.getNodeName();
             if (name.endsWith(":thumbnail") || name.endsWith(":content")) {
-                String url = ((Element) n).getAttribute("url");
+                String url = ((Element) n).getAttribute("url"), type = ((Element) n).getAttribute("type");
+                if (!type.isEmpty() && !type.startsWith("image/")) continue;   // a media:content video
                 if (url.startsWith("https://")) return url.replace("/240/", "/480/");
             } else if ("enclosure".equals(name) && ((Element) n).getAttribute("type").startsWith("image/")) {
                 enclosure = ((Element) n).getAttribute("url");

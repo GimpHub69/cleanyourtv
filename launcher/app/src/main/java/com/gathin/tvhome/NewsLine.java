@@ -37,6 +37,8 @@ final class NewsLine {
     private List<String[]> stories = new ArrayList<>();   // {source, title, image uri}
     private int next;
     private final Runnable rotate = this::showNext;
+    /** The picture's fade-in (imageAlpha only, so the dark frame behind it stays). */
+    private android.animation.ObjectAnimator fade;
 
     NewsLine(TextView line, String uri, View card) {
         this.line = line;
@@ -126,7 +128,7 @@ final class NewsLine {
     private void loadPicture(String img) {
         final int shown = next;
         if (img.isEmpty()) {
-            image.animate().cancel();
+            if (fade != null) fade.cancel();
             image.setImageBitmap(null);
             return;
         }
@@ -147,10 +149,11 @@ final class NewsLine {
                     if (got != null) got.recycle();
                     return;
                 }
-                image.animate().cancel();
-                image.setAlpha(0f);
+                if (fade != null) fade.cancel();
                 image.setImageBitmap(got);
-                image.animate().alpha(1f).setDuration(FADE_MS).start();
+                image.setImageAlpha(0);
+                fade = android.animation.ObjectAnimator.ofInt(image, "imageAlpha", 0, 255).setDuration(FADE_MS);
+                fade.start();
             });
         }, "NewsPicture").start();
     }
