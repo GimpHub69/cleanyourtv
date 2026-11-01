@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * The feeds in options.xml, read every REFRESH_MS into one SharedPreferences cache ("cache": the encoded items,
@@ -55,7 +56,12 @@ final class Feed {
     /** The items of one RSS 2.0 or Atom document; the channel title names the source. */
     static List<Item> parse(InputStream in) throws Exception {
         DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
-        f.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        try {
+            f.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        } catch (ParserConfigurationException ignored) {
+            // Android's DOM (Harmony over KXmlParser) knows only the two SAX feature names and throws for this
+            // one; it fetches no external entities anyway. The JDK's Xerces, in the unit test, honours it.
+        }
         f.setExpandEntityReferences(false);
         Document doc = f.newDocumentBuilder().parse(in);
         Element root = doc.getDocumentElement();
