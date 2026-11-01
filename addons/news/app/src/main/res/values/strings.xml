@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">News</string>
+    <string name="loading">Loading the headlines…</string>
+    <string name="offline">Can\'t reach the feeds. Check the TV\'s internet connection; it tries again in 5 minutes.</string>
+    <string name="updated">Updated %1$s</string>
+    <string name="age_minutes">%1$d min ago</string>
+    <string name="age_hours">%1$d h ago</string>
+    <string name="age_days">%1$d d ago</string>
+</resources>

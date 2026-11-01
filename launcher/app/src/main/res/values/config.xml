@@ -277,6 +277,12 @@
          weather read on a light picture. Off by default; a theme can set "header_scrim": true. -->
     <bool name="header_scrim">true</bool>
     <string name="weather_provider" translatable="false">content://io.github.sumyabazar1.weather/now</string>
+    <!-- A content URI another app on this TV answers with rows whose "title" and "source" columns are headlines,
+         newest first: one shows under the clock as "Source · headline", the next every 20 seconds while Home is
+         on screen. Read on each return to Home and each minute, off the main thread; hidden when the provider's
+         "fetched" column is over six hours old (the TV has been offline). The News add-on answers
+         content://io.github.cleanyourtv.news/headlines. Empty (the default): no line. A theme can set "news_provider". -->
+    <string name="news_provider" translatable="false">content://io.github.cleanyourtv.news/headlines</string>
     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows
          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can
          also be set with "dock_glass": true in a theme's config.json. -->

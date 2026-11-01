@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Options, set before building. -->
+<resources>
+    <!-- The RSS or Atom feeds, newest items of all of them merged. Any feed URL; the BBC ones need no key and
+         allow personal use of their feeds. Keep them small: the whole feed is downloaded every 15 minutes. -->
+    <string-array name="feeds" translatable="false">
+        <item>https://feeds.bbci.co.uk/news/rss.xml</item>
+        <item>https://feeds.bbci.co.uk/news/technology/rss.xml</item>
+    </string-array>
+    <!-- Headlines kept, newest first, across all feeds. -->
+    <integer name="max_items">30</integer>
+</resources>

@@ -373,6 +373,24 @@
                             android:shadowDy="1"
                             android:shadowRadius="8"
                             />
+
+                        <!-- One headline from a local provider (news_provider: "BBC News · …"), see NewsLine. -->
+                        <TextView
+                            android:id="@+id/newsLine"
+                            android:gravity="left"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:maxLines="2"
+                            android:ellipsize="end"
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="14sp"
+                            android:fontFamily="@font/outfit_regular"
+                            android:letterSpacing="0.04"
+                            android:visibility="gone" android:shadowColor="#B3000000"
+                            android:shadowDy="1"
+                            android:shadowRadius="8"
+                            />
                     </LinearLayout>
 
             </LinearLayout>

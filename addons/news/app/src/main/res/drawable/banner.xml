@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The TV banner: three headline bars on a deep red card. Drawn for this add-on, no third-party art. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp" android:height="180dp"
+    android:viewportWidth="320" android:viewportHeight="180">
+    <path android:fillColor="#FF7A1F1F" android:pathData="M0,0h320v180h-320z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M70,52h180v18h-180z" />
+    <path android:fillColor="#B3FFFFFF" android:pathData="M70,84h140v12h-140z" />
+    <path android:fillColor="#80FFFFFF" android:pathData="M70,108h160v12h-160z" />
+</vector>

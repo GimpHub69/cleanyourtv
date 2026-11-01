@@ -131,6 +131,8 @@ final class Config {
     final String weatherProvider;
     /** The weather_provider line is shown: a provider is set and the Weather row is on. */
     final boolean weatherLine;
+    /** Content URI of a local app's headline rows for one rotating line under the clock (config.xml news_provider); empty for none. */
+    final String newsProvider;
     /** Cycle wallpaper "each return to Home": Home shows the next picture of the set on every resume. */
     final boolean wallpaperCycleOnHome;
     /** The wallpaper breathes, a slow zoom and back (config.xml wallpaper_motion); off under reduced_motion or animations off. */
@@ -303,7 +305,7 @@ final class Config {
                    List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, boolean fadeRows, int homeIdleClockMinutes,
                    boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
                    boolean handleViewInputs, boolean tileMenu, boolean dockEvenPadding, boolean cinematicDots, boolean cinematicWhiteFocus, boolean wifiStatusColor, int cinematicScrim, int cinematicArt,
-                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome, boolean wallpaperMotion, boolean headerMood, int clockWeight, int clockHours, boolean clockSeconds, String tileShape, boolean nowPlaying, boolean headerScrim, int clockSlideshowMinutes, List<File> wallpaperPool, boolean notificationLine, boolean nowPlayingCard, boolean nowPlayingArt) {
+                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome, boolean wallpaperMotion, boolean headerMood, int clockWeight, int clockHours, boolean clockSeconds, String tileShape, boolean nowPlaying, boolean headerScrim, int clockSlideshowMinutes, List<File> wallpaperPool, boolean notificationLine, boolean nowPlayingCard, boolean nowPlayingArt, String newsProvider) {
         this.headerScrim = headerScrim;
         this.clockSlideshowMinutes = clockSlideshowMinutes;
         this.wallpaperPool = wallpaperPool;
@@ -322,6 +324,7 @@ final class Config {
         this.settingsMenuOnClick = settingsMenuOnClick;
         this.weatherProvider = weatherProvider;
         this.weatherLine = weatherLine && !weatherProvider.isEmpty();
+        this.newsProvider = newsProvider;
         this.handleViewInputs = handleViewInputs;
         this.tileMenu = tileMenu;
         this.inputKeycodes = inputKeycodes;
@@ -474,6 +477,7 @@ final class Config {
         boolean launcherSettingsButton = res.getBoolean(R.bool.launcher_settings_button);
         boolean settingsMenuOnClick = res.getBoolean(R.bool.settings_menu_on_click);
         String weatherProvider = res.getString(R.string.weather_provider).trim();
+        String newsProvider = res.getString(R.string.news_provider).trim();
         boolean wallpaperMotion = res.getBoolean(R.bool.wallpaper_motion);
         boolean headerMood = res.getBoolean(R.bool.header_mood);
         String tileShape = res.getString(R.string.tile_shape).trim();
@@ -580,6 +584,7 @@ final class Config {
             launcherSettingsButton = bool(json, "launcher_settings_button", launcherSettingsButton);
             settingsMenuOnClick = bool(json, "settings_menu_on_click", settingsMenuOnClick);
             weatherProvider = string(json, "weather_provider", weatherProvider);
+            newsProvider = string(json, "news_provider", newsProvider);
             wallpaperMotion = bool(json, "wallpaper_motion", wallpaperMotion);
             headerMood = bool(json, "header_mood", headerMood);
             tileShape = string(json, "tile_shape", tileShape);
@@ -754,7 +759,7 @@ final class Config {
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, restoreKeyServices, wallpaperEnabled, wallpaper,
                 wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow, fadeRows,
-                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome, wallpaperMotion, headerMood, clockWeight, clockHours, clockSeconds, tileShape, nowPlaying, headerScrim, clockSlideshowMinutes, pool, notificationLine, nowPlayingCard, nowPlayingArt);
+                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome, wallpaperMotion, headerMood, clockWeight, clockHours, clockSeconds, tileShape, nowPlaying, headerScrim, clockSlideshowMinutes, pool, notificationLine, nowPlayingCard, nowPlayingArt, newsProvider);
     }
 
     /**

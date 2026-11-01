@@ -198,6 +198,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean nowPlayingCard, nowPlayingArt;
     private String sessionKey = "";
     private final Runnable hideNotice = () -> noticeLine.setVisibility(View.GONE);
+    /** news_provider: one headline under the notice line, the next every 20 s (NewsLine); null when off. */
+    private NewsLine newsLine;
     private String weatherUri;
     /** header_mood: the weather line tinted, the clock warm and the greeting dimmer after sunset. */
     private boolean headerMood;
@@ -378,6 +380,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             updateGreeting();
             updateRace();
             if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine, headerMood);
+            if (newsLine != null) newsLine.refresh(getContentResolver());
             if (nowPlayingOn) NowPlaying.refresh(MainActivity.this, nowPlaying);
             syncSession();
             // The pill follows the network callbacks and each return to Home; only the diya's flame follows the
@@ -504,6 +507,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         nowPlayingOn = cfg.nowPlaying;
         noticeLine = findViewById(R.id.noticeLine);
         noticeOn = cfg.notificationLine;
+        newsLine = cfg.newsProvider.isEmpty() ? null : new NewsLine(findViewById(R.id.newsLine), cfg.newsProvider);
         nowPlayingCard = cfg.nowPlayingCard;
         nowPlayingArt = cfg.nowPlayingArt;
         if (cfg.headerScrim) findViewById(R.id.headerScrim).setVisibility(View.VISIBLE);
@@ -987,6 +991,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         updateGreeting();
         updateRace();
         if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine, headerMood);
+        if (newsLine != null) newsLine.start(getContentResolver());
         if (nowPlayingOn) NowPlaying.refresh(MainActivity.this, nowPlaying);
         syncSession();
         if (noticeOn) {
@@ -1178,6 +1183,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         root.removeCallbacks(showIdleClock);
         NowPlaying.onNotice = null;
         noticeLine.removeCallbacks(hideNotice);
+        if (newsLine != null) newsLine.stop();
         endReorder();   // Home or another app while reordering keeps the order so far
         wallpaperPlayer.stop();
         stopAmbientAnimation();
