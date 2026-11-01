@@ -53,6 +53,9 @@ final class WallpaperPlayer {
     private boolean loading;
     /** next(): the coming update() picks a new picture whatever the interval says (Cycle wallpaper: each return to Home). */
     private boolean force;
+    /** now_playing_art: a picture shown in place of the files until override(null); survives a memory release. */
+    private boolean overridden;
+    private Bitmap overrideBitmap;
     /** wallpaper_motion: the picture slides against the focused tile (focusAt). */
     private final boolean motion;
     /** With motion, the picture is drawn 3 % larger so the parallax shift (24dp at most) never shows its edge. */
@@ -137,6 +140,7 @@ final class WallpaperPlayer {
 
     void start() {
         active = true;
+        if (overridden && current == null && overrideBitmap != null) show(overrideBitmap);
         update();
         if (motion && image.getParent() != null) {
             image.setScaleX(MOTION_SCALE);
@@ -189,8 +193,28 @@ final class WallpaperPlayer {
         decoder.shutdownNow();
     }
 
+    /**
+     * Shows this picture instead of the rotation (now_playing_art), or with null goes back to the files. Sticky:
+     * start() and next() while overridden change nothing, and the image/changed preferences stay untouched.
+     */
+    void override(Bitmap bitmap) {
+        if (bitmap != null) {
+            overridden = true;
+            overrideBitmap = bitmap;
+            if (image.getParent() == null) root.addView(image, 0, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            show(bitmap);
+            return;
+        }
+        if (!overridden) return;
+        overridden = false;
+        overrideBitmap = null;   // show() recycles it once the next picture has drawn
+        displayed = "";
+        update();
+    }
+
     void update() {
-        if (!active || closed || loading || files.isEmpty()) return;
+        if (overridden || !active || closed || loading || files.isEmpty()) return;
         String previous = preferences.getString("image", "");
         // A picture outside the time of day's group (the group changed) is replaced at once, not after the interval.
         List<File> playable = playable();

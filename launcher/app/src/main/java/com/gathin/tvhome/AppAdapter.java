@@ -64,7 +64,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     static final class Entry {
-        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, EMPTY = 3;
+        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, EMPTY = 3, RESUME = 4;
 
         final int kind;
         final String label;
@@ -252,6 +252,17 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
      * Rebuilds the tiles. A shown module card stands in for every tile of its package (same component,
      * so focus follows it); hidden_apps wins over a card, and a card's package in dock_apps takes that slot.
      */
+    /** now_playing_card: the app whose session plays or is paused, what it names, and its artwork; null for none. */
+    private String resumePkg, resumeTitle;
+    private Drawable resumeArt;
+
+    /** Call before reload(): that app's tile then shows the artwork and "App · title", and opens the app as ever. */
+    void setResume(String pkg, String title, Drawable art) {
+        resumePkg = pkg;
+        resumeTitle = title;
+        resumeArt = art;
+    }
+
     void reload(List<Cards.Card> cards, List<ResolveInfo> leanback) {
         PackageManager pm = ctx.getPackageManager();
         // The LEANBACK query is shared with the module-card check (MainActivity); copy it before adding
@@ -300,7 +311,11 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // The icon is only drawn (and sampled for the glow) when there is no banner, so a tile with a
             // banner skips loading and decoding it.
             Drawable icon = banner == null ? ri.loadIcon(pm) : null;
-            if (card != null) {
+            if (pkg.equals(resumePkg)) {
+                // Like a card, the Continue-watching tile stands in for the app's own, same component and place.
+                fresh.add(new Entry(Entry.RESUME, label, component, resumeArt != null ? resumeArt : banner,
+                        resumeArt != null ? null : icon, resumeTitle, 0));
+            } else if (card != null) {
                 fresh.add(new Entry(Entry.CARD, label, component, banner, icon, card.caption, card.accent));
             } else {
                 fresh.add(new Entry(label, component, banner, icon));

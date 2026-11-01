@@ -266,6 +266,13 @@
          complete") under the clock for a minute: titles only, read when posted, never stored or sent anywhere.
          Ongoing and media notifications are skipped. Off by default; a theme can set "notification_line": true. -->
     <bool name="notification_line">true</bool>
+    <!-- With now_playing: the playing or paused app's own tile shows the session's artwork with "App · title"
+         under it, a Continue-watching tile in the app's place; OK opens the app as ever. Off by default; a theme
+         can set "now_playing_card": true. -->
+    <bool name="now_playing_card">true</bool>
+    <!-- With now_playing: the session's artwork, blurred and darkened, as Home's wallpaper while something plays or
+         is paused; the chosen wallpaper returns when it stops. Off by default; a theme can set "now_playing_art". -->
+    <bool name="now_playing_art">true</bool>
     <!-- A dark fade over the top of the wallpaper (340dp, black 70 % at the edge to clear), so the clock, date and
          weather read on a light picture. Off by default; a theme can set "header_scrim": true. -->
     <bool name="header_scrim">true</bool>

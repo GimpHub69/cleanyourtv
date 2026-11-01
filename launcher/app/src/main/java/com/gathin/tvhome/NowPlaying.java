@@ -3,6 +3,8 @@ package com.gathin.tvhome;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -53,9 +55,31 @@ public final class NowPlaying extends NotificationListenerService {
         if (hook != null) hook.run();
     }
 
-    // ponytail: read on resume and each minute like the weather line; a PlaybackState callback would update sooner.
-    static void refresh(Context ctx, TextView line) {
-        CharSequence shown = null;
+    /** The first playing or paused media session: its app, what it names, and its artwork scaled to tile size. */
+    static final class Session {
+        final String pkg, app, title;
+        final boolean playing;
+        /** At most ART_PX wide; null when the session carries no picture (a live stream, most of the time). */
+        final Bitmap art;
+
+        Session(String pkg, String app, String title, boolean playing, Bitmap art) {
+            this.pkg = pkg;
+            this.app = app;
+            this.title = title;
+            this.playing = playing;
+            this.art = art;
+        }
+
+        /** What a rebuild compares: a new title, app or state is a new tile and a new backdrop. */
+        String key() {
+            return pkg + '\n' + title + '\n' + playing;
+        }
+    }
+
+    private static final int ART_PX = 480;
+
+    /** Null when nothing plays or is paused, or the listener is not allowed on this TV. */
+    static Session active(Context ctx) {
         try {
             MediaSessionManager sessions = (MediaSessionManager) ctx.getSystemService(Context.MEDIA_SESSION_SERVICE);
             for (MediaController session : sessions.getActiveSessions(new ComponentName(ctx, NowPlaying.class))) {
@@ -69,22 +93,57 @@ public final class NowPlaying extends NotificationListenerService {
                 } catch (PackageManager.NameNotFoundException gone) {
                     app = session.getPackageName();
                 }
-                String head = ctx.getString(s == PlaybackState.STATE_PLAYING ? R.string.now_playing : R.string.now_paused, app);
                 MediaMetadata meta = session.getMetadata();
                 String title = meta == null ? null : meta.getString(MediaMetadata.METADATA_KEY_TITLE);
                 title = title == null || title.trim().isEmpty() ? null : title.trim();
-                SpannableString text = new SpannableString(title == null ? head : head + "\n" + title);
-                if (title != null) {
-                    text.setSpan(new RelativeSizeSpan(0.75f), head.length() + 1, text.length(), 0);
-                    text.setSpan(new ForegroundColorSpan(0x99FFFFFF), head.length() + 1, text.length(), 0);
+                Bitmap art = null;
+                if (meta != null) {
+                    for (String k : new String[]{MediaMetadata.METADATA_KEY_ART, MediaMetadata.METADATA_KEY_ALBUM_ART,
+                            MediaMetadata.METADATA_KEY_DISPLAY_ICON}) {
+                        art = meta.getBitmap(k);
+                        if (art != null) break;
+                    }
                 }
-                shown = text;
-                break;
+                // Metadata pictures can be full posters: keep a tile-sized copy, the original goes back to the session.
+                if (art != null && art.getWidth() > ART_PX) {
+                    art = Bitmap.createScaledBitmap(art, ART_PX, Math.max(1, art.getHeight() * ART_PX / art.getWidth()), true);
+                }
+                return new Session(session.getPackageName(), app, title, s == PlaybackState.STATE_PLAYING, art);
             }
         } catch (SecurityException notAllowed) {
-            // The listener is not allowed on this TV: no line.
+            // The listener is not allowed on this TV: no session.
+        }
+        return null;
+    }
+
+    // ponytail: read on resume and each minute like the weather line; a PlaybackState callback would update sooner.
+    static void refresh(Context ctx, TextView line) {
+        Session s = active(ctx);
+        CharSequence shown = null;
+        if (s != null) {
+            String head = ctx.getString(s.playing ? R.string.now_playing : R.string.now_paused, s.app);
+            SpannableString text = new SpannableString(s.title == null ? head : head + "\n" + s.title);
+            if (s.title != null) {
+                text.setSpan(new RelativeSizeSpan(0.75f), head.length() + 1, text.length(), 0);
+                text.setSpan(new ForegroundColorSpan(0x99FFFFFF), head.length() + 1, text.length(), 0);
+            }
+            shown = text;
         }
         line.setText(shown);
         line.setVisibility(shown == null ? View.GONE : View.VISIBLE);
+    }
+
+    /**
+     * now_playing_art: the artwork as a soft, dark backdrop at half the screen's size (the wallpaper view covers
+     * the screen with it). Scaled down to 40 px and back up with filtering: a blur without RenderScript.
+     */
+    static Bitmap blur(Bitmap art, int screenW, int screenH) {
+        int w = Math.max(2, screenW / 2), h = Math.max(2, screenH / 2);
+        Bitmap small = Bitmap.createScaledBitmap(art, 40, Math.max(2, 40 * h / w), true);
+        Bitmap soft = Bitmap.createScaledBitmap(small, w, h, true);
+        if (small != soft) small.recycle();
+        if (!soft.isMutable()) soft = soft.copy(Bitmap.Config.ARGB_8888, true);
+        new Canvas(soft).drawColor(0xA6000000);
+        return soft;
     }
 }

@@ -194,6 +194,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** notification_line: the latest other app's notification title, under the now-playing line for a minute. */
     private TextView noticeLine;
     private boolean noticeOn;
+    /** now_playing_card / now_playing_art: what the last rebuild knew of the media session (NowPlaying.Session.key). */
+    private boolean nowPlayingCard, nowPlayingArt;
+    private String sessionKey = "";
     private final Runnable hideNotice = () -> noticeLine.setVisibility(View.GONE);
     private String weatherUri;
     /** header_mood: the weather line tinted, the clock warm and the greeting dimmer after sunset. */
@@ -376,6 +379,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             updateRace();
             if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine, headerMood);
             if (nowPlayingOn) NowPlaying.refresh(MainActivity.this, nowPlaying);
+            syncSession();
             // The pill follows the network callbacks and each return to Home; only the diya's flame follows the
             // signal level, so only it needs this minute's binder calls (about 7 ms on the UI thread).
             if (festive) updateWifiLabel();
@@ -500,6 +504,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         nowPlayingOn = cfg.nowPlaying;
         noticeLine = findViewById(R.id.noticeLine);
         noticeOn = cfg.notificationLine;
+        nowPlayingCard = cfg.nowPlayingCard;
+        nowPlayingArt = cfg.nowPlayingArt;
         if (cfg.headerScrim) findViewById(R.id.headerScrim).setVisibility(View.VISIBLE);
         lunarDate = findViewById(R.id.lunarDate);
         lunar = cfg.lunarDate;
@@ -982,6 +988,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         updateRace();
         if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine, headerMood);
         if (nowPlayingOn) NowPlaying.refresh(MainActivity.this, nowPlaying);
+        syncSession();
         if (noticeOn) {
             NowPlaying.onNotice = () -> runOnUiThread(this::showNotice);
             showNotice();
@@ -2460,6 +2467,29 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             updateGreeting();
         } else {
             handler.postDelayed(clockCheck, 1_000L);
+        }
+    }
+
+    /**
+     * now_playing_card and now_playing_art: the media session into the app's tile and the wallpaper, only when it
+     * changed since the last look, and the tiles only while nothing else holds them (reorder, a popup, a prompt).
+     */
+    private void syncSession() {
+        if (!nowPlayingOn || (!nowPlayingCard && !nowPlayingArt)) return;
+        NowPlaying.Session s = NowPlaying.active(this);
+        String key = s == null ? "" : s.key();
+        if (key.equals(sessionKey)) return;
+        boolean tilesFree = !reordering && openPopup == null && cardPrompt == null;
+        if (nowPlayingCard && !tilesFree) return;   // next minute, with the key still unchanged
+        sessionKey = key;
+        if (nowPlayingArt) {
+            wallpaperPlayer.override(s == null || s.art == null ? null
+                    : NowPlaying.blur(s.art, root.getWidth(), root.getHeight()));
+        }
+        if (nowPlayingCard) {
+            adapter.setResume(s == null ? null : s.pkg, s == null ? null : s.title,
+                    s == null || s.art == null ? null : new android.graphics.drawable.BitmapDrawable(getResources(), s.art));
+            reloadApps(false);
         }
     }
 
