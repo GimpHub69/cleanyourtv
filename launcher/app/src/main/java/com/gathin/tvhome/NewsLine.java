@@ -26,13 +26,15 @@ import java.util.List;
  */
 final class NewsLine {
     static final long ROTATE_MS = 20_000L, STALE_MS = 6 * 60 * 60 * 1000L;
+    /** The card cycles the newest CARD_STORIES only (the ones the provider keeps pictures for), one dot each. */
+    static final int CARD_STORIES = 8;
     private static final int FADE_MS = 400;
     private final TextView line;
     private final String uri;
     /** news_card's views, or null for the plain line. */
     private final View card;
     private final ImageView image;
-    private final TextView source, headline;
+    private final TextView source, headline, dots;
     private ContentResolver resolver;
     private List<String[]> stories = new ArrayList<>();   // {source, title, image uri}
     private int next;
@@ -47,6 +49,7 @@ final class NewsLine {
         image = card == null ? null : card.findViewById(R.id.newsImage);
         source = card == null ? null : card.findViewById(R.id.newsSource);
         headline = card == null ? null : card.findViewById(R.id.newsHeadline);
+        dots = card == null ? null : card.findViewById(R.id.newsDots);
         if (image != null) {
             image.setOutlineProvider(new ViewOutlineProvider() {
                 @Override
@@ -83,6 +86,7 @@ final class NewsLine {
                         if (title == null || title.trim().isEmpty()) continue;
                         String src = s >= 0 && c.getString(s) != null ? c.getString(s).trim() : "";
                         String img = i >= 0 && c.getString(i) != null ? c.getString(i).trim() : "";
+                        if (card != null && fresh.size() >= CARD_STORIES) break;
                         fresh.add(new String[]{src, title.trim(), img});
                     }
                 }
@@ -120,6 +124,9 @@ final class NewsLine {
         }
         source.setText(story[0]);
         headline.setText(story[1]);
+        StringBuilder d = new StringBuilder();
+        for (int k = 0; k < stories.size(); k++) d.append(k == next % stories.size() ? '\u25CF' : '\u25CB');
+        dots.setText(d);
         card.setVisibility(View.VISIBLE);
         loadPicture(story[2]);
     }

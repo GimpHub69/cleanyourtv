@@ -447,6 +447,22 @@
                                     android:shadowColor="#B3000000"
                                     android:shadowDy="1"
                                     android:shadowRadius="8" />
+
+                                <!-- Which story of the card's eight is showing: ● for it, ○ for the others. -->
+                                <TextView
+                                    android:id="@+id/newsDots"
+                                    android:gravity="left"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="6dp"
+                                    android:singleLine="true"
+                                    android:letterSpacing="0.3"
+                                    android:textColor="#80FFFFFF"
+                                    android:textSize="10sp"
+                                    android:fontFamily="@string/font_regular"
+                                    android:shadowColor="#B3000000"
+                                    android:shadowDy="1"
+                                    android:shadowRadius="8" />
                             </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
