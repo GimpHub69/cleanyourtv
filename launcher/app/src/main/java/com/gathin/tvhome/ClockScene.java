@@ -64,6 +64,12 @@ final class ClockScene {
     /** clock_slideshow_minutes: the wallpaper set the scene crossfades through, every slideMs; empty keeps one picture. */
     private List<File> slides = Collections.emptyList();
     private long slideMs;
+    private String order = WallpaperRotation.ORDER_SEQUENTIAL;
+    /** header_mood: after sunset the clock goes a shade warm and the picture's darkening deepens to at least 75 %. */
+    private boolean moodNight;
+    private final TextView clock;
+    private ColorDrawable shadeLayer;
+    private static final int NIGHT_SHADE = 0xBF000000;
     private BitmapDrawable shown;
     private final Runnable nextSlide = this::nextSlide;
 
@@ -73,6 +79,7 @@ final class ClockScene {
             moveClock();
             shiftGlow();
             refreshLines();
+            nightTint();
             handler.postDelayed(this, MOVE_MS);
         }
     };
@@ -85,6 +92,7 @@ final class ClockScene {
         weather = root.findViewById(R.id.dreamWeather);
         nowPlaying = root.findViewById(R.id.dreamNowPlaying);
         caption = root.findViewById(R.id.dreamCaption);
+        clock = root.findViewById(R.id.dreamClock);
         glow = new GradientDrawable();
         glow.setGradientType(GradientDrawable.RADIAL_GRADIENT);
         ambient.setBackground(glow);
@@ -103,6 +111,7 @@ final class ClockScene {
         handler.removeCallbacks(tick);
         handler.postDelayed(tick, MOVE_MS);
         refreshLines();
+        nightTint();
         if (wallpaperFile != null && !wallpaperShown) loadWallpaper();
         else if (slideMs > 0) handler.postDelayed(nextSlide, slideMs);   // restarted with its picture still attached
     }
@@ -144,6 +153,7 @@ final class ClockScene {
         if (cfg.clockSlideshowMinutes > 0 && cfg.wallpaperPool.size() > 1) {
             slides = cfg.wallpaperPool;
             slideMs = cfg.clockSlideshowMinutes * 60_000L;
+            order = cfg.wallpaperOrder;
             if (wallpaperFile == null || !slides.contains(wallpaperFile)) wallpaperFile = slides.get(0);
         }
         if (cfg.wallpaperCaptions && wallpaperFile != null) captions = WallpaperCaptions.read(wallpaperFile.getParentFile());
@@ -169,14 +179,30 @@ final class ClockScene {
                 caption.animate().alpha(0f).setDuration(900).setStartDelay(CAPTION_MS).start()).start();
     }
 
-    /** The slideshow's next picture, in the set's filename order, crossfaded in over the one shown. */
+    /** header_mood: Home's night look on the screensaver too, checked each minute. */
+    private void nightTint() {
+        if (!mood) return;
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        int[] sun = WallpaperMood.sun(now.toLocalDate(), ctx.getString(R.string.latitude), ctx.getString(R.string.longitude),
+                java.time.ZoneId.systemDefault());
+        moodNight = WallpaperMood.NIGHT.equals(WallpaperMood.timeOfDay(now.getHour() * 60 + now.getMinute(), sun[0], sun[1]));
+        clock.setTextColor(moodNight ? 0xFFFFEEDC : 0xE6FFFFFF);
+        if (shadeLayer != null) shadeLayer.setColor(shade());
+    }
+
+    /** The picture's darkening: clock_wallpaper_dim by day, at least 75 % after sunset under header_mood. */
+    private int shade() {
+        return moodNight && (wallpaperShade & 0xFF000000) < NIGHT_SHADE ? NIGHT_SHADE : wallpaperShade;
+    }
+
+    /** The slideshow's next picture, in the set's filename order or shuffled (wallpaper_order), crossfaded in. */
     private void nextSlide() {
-        File next = WallpaperRotation.next(slides, wallpaperFile.getName());
+        File next = WallpaperRotation.pick(slides, wallpaperFile.getName(), order, random);
         wallpaperFile = next;   // moved on even if the decode fails, so one bad file cannot stall the show
         handler.postDelayed(nextSlide, slideMs);
         Resources res = wallpaperRes;
         DisplayMetrics dm = res.getDisplayMetrics();
-        int w = dm.widthPixels, h = dm.heightPixels, shade = wallpaperShade, generation = wallpaperGeneration;
+        int w = dm.widthPixels, h = dm.heightPixels, generation = wallpaperGeneration;
         new Thread(() -> {
             Bitmap bmp = decode(next, w, h);
             if (bmp == null) return;
@@ -189,7 +215,8 @@ final class ClockScene {
                 Drawable from = shown != null ? shown : new ColorDrawable(0xFF000000);
                 TransitionDrawable fade = new TransitionDrawable(new Drawable[]{from, in});
                 fade.setCrossFadeEnabled(true);
-                ambient.setBackground(new LayerDrawable(new Drawable[]{fade, new ColorDrawable(shade)}));
+                shadeLayer = new ColorDrawable(shade());
+                ambient.setBackground(new LayerDrawable(new Drawable[]{fade, shadeLayer}));
                 fade.startTransition(1500);
                 showCaption(next);
                 shown = in;   // ponytail: the previous bitmap is left to the GC; two 4 MB RGB_565 pictures live during a fade
@@ -199,7 +226,6 @@ final class ClockScene {
 
     private void loadWallpaper() {
         File file = wallpaperFile;
-        int shade = wallpaperShade;
         Resources res = wallpaperRes;
         DisplayMetrics dm = res.getDisplayMetrics();
         int w = dm.widthPixels, h = dm.heightPixels;
@@ -214,7 +240,8 @@ final class ClockScene {
                 }
                 wallpaperShown = true;
                 shown = new BitmapDrawable(res, bmp);
-                ambient.setBackground(new LayerDrawable(new Drawable[]{shown, new ColorDrawable(shade)}));
+                shadeLayer = new ColorDrawable(shade());
+                ambient.setBackground(new LayerDrawable(new Drawable[]{shown, shadeLayer}));
                 showCaption(file);
                 if (slideMs > 0) handler.postDelayed(nextSlide, slideMs);
             });

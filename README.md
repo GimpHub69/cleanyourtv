@@ -631,7 +631,8 @@ With `clock_wallpaper` on, `clock_slideshow_minutes` turns the screensaver into 
 wallpaper set (the theme's collection, or the folder of the picture chosen on the TV) every that many minutes, the
 clock drifting over it. No zoom, no network. The screensaver also carries Home's extra lines when they are on: the
 weather from `weather_provider`, the `now_playing` line, and with `wallpaper_captions` each picture's credit for a few
-seconds in the bottom corner.
+seconds in the bottom corner. `header_mood` reaches it too: after sunset the clock turns a shade warm and the pictures
+darken to at least 75 %.
 
 </details>
 
