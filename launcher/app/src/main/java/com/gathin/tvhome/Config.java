@@ -275,6 +275,10 @@ final class Config {
     final int clockWallpaperDim;
     /** The clock screensaver's coloured glow; false leaves the clock on plain black, e.g. for an OLED (config.xml, clock_glow). */
     final boolean clockGlow;
+    /** Minutes between pictures when the clock screensaver cycles the wallpaper set; 0 keeps one (config.xml, clock_slideshow_minutes). */
+    final int clockSlideshowMinutes;
+    /** The wallpaper set behind the Cycle row and the screensaver slideshow: the theme's collection, or the chosen picture's folder. */
+    final List<File> wallpaperPool;
     /** Every app in the dock's row, which scrolls sideways, and no grid below it (config.xml, single_row); needs dock_row. */
     final boolean singleRow;
     /** With single_row, the band runs behind every app in the row, not only the dock apps (config.xml, dock_band_all). */
@@ -293,8 +297,10 @@ final class Config {
                    List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, boolean fadeRows, int homeIdleClockMinutes,
                    boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
                    boolean handleViewInputs, boolean tileMenu, boolean dockEvenPadding, boolean cinematicDots, boolean cinematicWhiteFocus, boolean wifiStatusColor, int cinematicScrim, int cinematicArt,
-                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome, boolean wallpaperMotion, boolean headerMood, int clockWeight, int clockHours, boolean clockSeconds, String tileShape, boolean nowPlaying, boolean headerScrim) {
+                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome, boolean wallpaperMotion, boolean headerMood, int clockWeight, int clockHours, boolean clockSeconds, String tileShape, boolean nowPlaying, boolean headerScrim, int clockSlideshowMinutes, List<File> wallpaperPool) {
         this.headerScrim = headerScrim;
+        this.clockSlideshowMinutes = clockSlideshowMinutes;
+        this.wallpaperPool = wallpaperPool;
         this.headerMood = headerMood;
         this.clockWeight = clockWeight;
         this.clockHours = clockHours;
@@ -516,6 +522,7 @@ final class Config {
         boolean clockWallpaper = res.getBoolean(R.bool.clock_wallpaper);
         int clockWallpaperDim = res.getInteger(R.integer.clock_wallpaper_dim);
         boolean clockGlow = res.getBoolean(R.bool.clock_glow);
+        int clockSlideshowMinutes = res.getInteger(R.integer.clock_slideshow_minutes);
         String glassStyle = res.getString(R.string.glass_style);
         boolean singleRow = res.getBoolean(R.bool.single_row);
         boolean dockBandAll = res.getBoolean(R.bool.dock_band_all);
@@ -618,6 +625,7 @@ final class Config {
             clockWallpaper = bool(json, "clock_wallpaper", clockWallpaper);
             clockWallpaperDim = integer(json, "clock_wallpaper_dim", clockWallpaperDim, 0, 90);
             clockGlow = bool(json, "clock_glow", clockGlow);
+            clockSlideshowMinutes = integer(json, "clock_slideshow_minutes", clockSlideshowMinutes, 0, 1440);
             singleRow = bool(json, "single_row", singleRow);
             dockBandAll = bool(json, "dock_band_all", dockBandAll);
             glowStyle = string(json, "glow_style", glowStyle);
@@ -694,8 +702,11 @@ final class Config {
         }
         int cycle = choices.getInt(WALLPAPER_CYCLE_KEY, 0);
         String set = choices.getString(WALLPAPER_SET_KEY, null);
-        if (dir != null && cycle != 0 && !WallpaperRotation.CHOICE_NONE.equals(wallpaperChoice)) {
-            List<File> pool = new ArrayList<>();
+        // The pool is built whenever a theme is stored: the Cycle row rotates Home through it, and the clock
+        // screensaver's slideshow (clock_slideshow_minutes) uses it even with Cycle off.
+        List<File> pool = new ArrayList<>();
+        boolean ownFolder = false;
+        if (dir != null && !WallpaperRotation.CHOICE_NONE.equals(wallpaperChoice)) {
             if (set == null || set.isEmpty() || ThemeFiles.WALLPAPERS.equals(set)) {
                 pool.addAll(WallpaperRotation.images(new File(dir, ThemeFiles.WALLPAPERS)));
                 File single = new File(dir, WALLPAPER_NAME);
@@ -703,8 +714,11 @@ final class Config {
             } else {
                 File folder = set.startsWith("/") ? new File(set) : new File(dir, set);
                 for (File f : WallpaperRotation.images(folder)) if (!ThemeFiles.SCREENSHOT.equals(f.getName())) pool.add(f);
-                wallpaperMoods = Collections.emptyMap();   // the theme's time-of-day groups name its own pictures
+                ownFolder = true;
             }
+        }
+        if (cycle != 0) {
+            if (ownFolder) wallpaperMoods = Collections.emptyMap();   // the theme's time-of-day groups name its own pictures
             if (!pool.isEmpty()) {
                 wallpapers = pool;
                 wallpaper = pool.get(0);
@@ -725,7 +739,7 @@ final class Config {
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, restoreKeyServices, wallpaperEnabled, wallpaper,
                 wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow, fadeRows,
-                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome, wallpaperMotion, headerMood, clockWeight, clockHours, clockSeconds, tileShape, nowPlaying, headerScrim);
+                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome, wallpaperMotion, headerMood, clockWeight, clockHours, clockSeconds, tileShape, nowPlaying, headerScrim, clockSlideshowMinutes, pool);
     }
 
     /**

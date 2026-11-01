@@ -627,6 +627,10 @@ Pick "Clock" in the TV's screensaver settings, or over ADB:
 tools/tv.py 'settings put secure screensaver_components com.gathin.tvhome/.ClockDream; settings put secure screensaver_enabled 1'
 ```
 
+With `clock_wallpaper` on, `clock_slideshow_minutes` turns the screensaver into a slideshow: it crossfades through the
+wallpaper set (the theme's collection, or the folder of the picture chosen on the TV) every that many minutes, the
+clock drifting over it. No zoom, no network.
+
 </details>
 
 <details>

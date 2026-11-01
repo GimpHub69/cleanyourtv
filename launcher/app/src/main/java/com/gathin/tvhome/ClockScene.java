@@ -10,12 +10,15 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.View;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -47,6 +50,11 @@ final class ClockScene {
     private Resources wallpaperRes;
     /** Bumped by stop(): a decode started before it finds a different number and drops its result. Main thread only. */
     private int wallpaperGeneration;
+    /** clock_slideshow_minutes: the wallpaper set the scene crossfades through, every slideMs; empty keeps one picture. */
+    private List<File> slides = Collections.emptyList();
+    private long slideMs;
+    private BitmapDrawable shown;
+    private final Runnable nextSlide = this::nextSlide;
 
     private final Runnable tick = new Runnable() {
         @Override
@@ -79,6 +87,7 @@ final class ClockScene {
         handler.removeCallbacks(tick);
         handler.postDelayed(tick, MOVE_MS);
         if (wallpaperFile != null && !wallpaperShown) loadWallpaper();
+        else if (slideMs > 0) handler.postDelayed(nextSlide, slideMs);   // restarted with its picture still attached
     }
 
     void stop() {
@@ -111,6 +120,38 @@ final class ClockScene {
         wallpaperFile = cfg.wallpaper != null ? cfg.wallpaper : cfg.wallpapers.isEmpty() ? null : cfg.wallpapers.get(0);
         wallpaperShade = (cfg.clockWallpaperDim * 255 / 100) << 24;
         wallpaperRes = ctx.getResources();
+        if (cfg.clockSlideshowMinutes > 0 && cfg.wallpaperPool.size() > 1) {
+            slides = cfg.wallpaperPool;
+            slideMs = cfg.clockSlideshowMinutes * 60_000L;
+            if (wallpaperFile == null || !slides.contains(wallpaperFile)) wallpaperFile = slides.get(0);
+        }
+    }
+
+    /** The slideshow's next picture, in the set's filename order, crossfaded in over the one shown. */
+    private void nextSlide() {
+        File next = WallpaperRotation.next(slides, wallpaperFile.getName());
+        wallpaperFile = next;   // moved on even if the decode fails, so one bad file cannot stall the show
+        handler.postDelayed(nextSlide, slideMs);
+        Resources res = wallpaperRes;
+        DisplayMetrics dm = res.getDisplayMetrics();
+        int w = dm.widthPixels, h = dm.heightPixels, shade = wallpaperShade, generation = wallpaperGeneration;
+        new Thread(() -> {
+            Bitmap bmp = decode(next, w, h);
+            if (bmp == null) return;
+            handler.post(() -> {
+                if (generation != wallpaperGeneration) {
+                    bmp.recycle();
+                    return;
+                }
+                BitmapDrawable in = new BitmapDrawable(res, bmp);
+                Drawable from = shown != null ? shown : new ColorDrawable(0xFF000000);
+                TransitionDrawable fade = new TransitionDrawable(new Drawable[]{from, in});
+                fade.setCrossFadeEnabled(true);
+                ambient.setBackground(new LayerDrawable(new Drawable[]{fade, new ColorDrawable(shade)}));
+                fade.startTransition(1500);
+                shown = in;   // ponytail: the previous bitmap is left to the GC; two 4 MB RGB_565 pictures live during a fade
+            });
+        }, "clock-slide").start();
     }
 
     private void loadWallpaper() {
@@ -129,8 +170,9 @@ final class ClockScene {
                     return;
                 }
                 wallpaperShown = true;
-                ambient.setBackground(new LayerDrawable(new Drawable[]{
-                        new BitmapDrawable(res, bmp), new ColorDrawable(shade)}));
+                shown = new BitmapDrawable(res, bmp);
+                ambient.setBackground(new LayerDrawable(new Drawable[]{shown, new ColorDrawable(shade)}));
+                if (slideMs > 0) handler.postDelayed(nextSlide, slideMs);
             });
         }, "clock-wallpaper").start();
     }
