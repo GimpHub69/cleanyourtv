@@ -191,6 +191,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** now_playing: the "Playing on …" line under the clock, refreshed with the weather. */
     private TextView nowPlaying;
     private boolean nowPlayingOn;
+    /** notification_line: the latest other app's notification title, under the now-playing line for a minute. */
+    private TextView noticeLine;
+    private boolean noticeOn;
+    private final Runnable hideNotice = () -> noticeLine.setVisibility(View.GONE);
     private String weatherUri;
     /** header_mood: the weather line tinted, the clock warm and the greeting dimmer after sunset. */
     private boolean headerMood;
@@ -494,6 +498,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ClockStyle.apply(findViewById(R.id.clock), cfg.clockWeight, cfg.clockHours, cfg.clockSeconds);
         nowPlaying = findViewById(R.id.nowPlaying);
         nowPlayingOn = cfg.nowPlaying;
+        noticeLine = findViewById(R.id.noticeLine);
+        noticeOn = cfg.notificationLine;
         if (cfg.headerScrim) findViewById(R.id.headerScrim).setVisibility(View.VISIBLE);
         lunarDate = findViewById(R.id.lunarDate);
         lunar = cfg.lunarDate;
@@ -976,6 +982,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         updateRace();
         if (weatherUri != null) WeatherLine.refresh(getContentResolver(), weatherUri, weatherLine, headerMood);
         if (nowPlayingOn) NowPlaying.refresh(MainActivity.this, nowPlaying);
+        if (noticeOn) {
+            NowPlaying.onNotice = () -> runOnUiThread(this::showNotice);
+            showNotice();
+        }
         // The network and Inputs pills keep their state while Home is in the background, and callbacks update them
         // when the network or the inputs change, so this refresh only catches anything missed. Its binder calls
         // (about 7 ms on a TCL C755, most of it WifiManager.getConnectionInfo) would hold up the first frame back
@@ -1159,6 +1169,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onPause() {
         super.onPause();
         root.removeCallbacks(showIdleClock);
+        NowPlaying.onNotice = null;
+        noticeLine.removeCallbacks(hideNotice);
         endReorder();   // Home or another app while reordering keeps the order so far
         wallpaperPlayer.stop();
         stopAmbientAnimation();
@@ -2449,6 +2461,20 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         } else {
             handler.postDelayed(clockCheck, 1_000L);
         }
+    }
+
+    /** notification_line: the latest title while it is under a minute old, hidden when that minute is up. */
+    private void showNotice() {
+        String text = NowPlaying.notice;
+        long age = SystemClock.elapsedRealtime() - NowPlaying.noticeAt;
+        noticeLine.removeCallbacks(hideNotice);
+        if (text == null || age >= NowPlaying.NOTICE_MS) {
+            noticeLine.setVisibility(View.GONE);
+            return;
+        }
+        noticeLine.setText(text);
+        noticeLine.setVisibility(View.VISIBLE);
+        noticeLine.postDelayed(hideNotice, NowPlaying.NOTICE_MS - age);
     }
 
     /** header_mood after sunset: the clock a shade warm, the greeting dimmer; by day both as the theme left them. */

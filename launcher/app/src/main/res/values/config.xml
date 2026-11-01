@@ -225,7 +225,7 @@
     <!-- Optional VPN app the network pill opens (hold the pill for Wi-Fi settings), e.g. the package of the
          VPN you use. Empty: the pill opens Wi-Fi settings. The green VPN badge shows for any VPN either way;
          with an app set here, a red "VPN off" badge also shows while no VPN is up. -->
-    <string name="vpn_app" translatable="false"></string>
+    <string name="vpn_app" translatable="false">ch.protonvpn.android</string>
     <!-- The dock as its own row: a lighter band, no names under the tiles, parked low on the screen with the top
          shelf above it. false makes the dock apps simply the first tiles of one plain grid (still in dock_apps
          order, no empty slots), with names under every tile and the glow behind every focused tile. -->
@@ -262,6 +262,10 @@
          it over ADB with `cmd notification allow_listener com.gathin.tvhome/.NowPlaying` (undo: disallow_listener).
          Off by default; a theme can set "now_playing": true. -->
     <bool name="now_playing">true</bool>
+    <!-- With now_playing's listener allowed, the latest notification from another app ("Downloader: Download
+         complete") under the clock for a minute: titles only, read when posted, never stored or sent anywhere.
+         Ongoing and media notifications are skipped. Off by default; a theme can set "notification_line": true. -->
+    <bool name="notification_line">true</bool>
     <!-- A dark fade over the top of the wallpaper (340dp, black 70 % at the edge to clear), so the clock, date and
          weather read on a light picture. Off by default; a theme can set "header_scrim": true. -->
     <bool name="header_scrim">true</bool>
@@ -438,7 +442,7 @@
          Unlike the system screensaver this never starts over live TV or an app, which matters on TVs whose
          Live TV window does not keep the screen on (CVTE): there the system screensaver would start in the
          middle of a programme. Can also be set with "home_idle_clock_minutes": 10 in a theme's config.json. -->
-    <integer name="home_idle_clock_minutes">0</integer>
+    <integer name="home_idle_clock_minutes">10</integer>
     <!-- The clock screensaver (Home idle clock and the system screensaver) over Home's wallpaper instead of black with
          a coloured glow. The clock still moves every minute. Can also be set with "clock_wallpaper" in a theme. -->
     <bool name="clock_wallpaper">true</bool>
