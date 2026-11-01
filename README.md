@@ -577,6 +577,8 @@ and a wallpaper.
     format** Auto, 12-hour or 24-hour, **Seconds** on or off, **Date in white** (`header_white`), **Wi-Fi
     pill** as Label, Icon only or Hidden (`icon_only_buttons`, `show_network_pill`), **Wi-Fi status colour**
     (`wifi_status_color`) and, with `weather_provider` set, **Weather** on or off for the line under the date.
+    With the provider set, the Quick settings panel also ends with a Forecast row: the coming three days, each a
+    weekday, the condition's glyph and the high and low.
     Each overrides the theme's key until Follow theme or another theme.
   - Motion: **Animations** on or off, and **Advanced effects** (tile lift, icon zoom and smooth
     ambient-colour transitions; they may use more memory) once animations are on. **Open on start**, only

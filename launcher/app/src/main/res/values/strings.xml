@@ -198,6 +198,8 @@
     <string name="shape_square">Square</string>
     <string name="shape_pill">Pill</string>
     <string name="quick_settings">Quick settings</string>
+    <!-- Quick settings: the row with the coming days from the weather add-on. -->
+    <string name="quick_forecast">Forecast</string>
     <!-- now_playing, under the clock while an app plays or is paused; %1$s is the app. -->
     <string name="now_playing">▶ Playing on %1$s</string>
     <string name="now_paused">⏸ Paused on %1$s</string>

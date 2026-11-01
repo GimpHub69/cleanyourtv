@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class WeatherProvider extends ContentProvider {
     private static final String CACHE = "now";
     private static final String[] COLUMNS = {"text", "temp_c", "sky", "place", "updated", "glyph", "color"};
+    /** {@code /days}: one row per coming day, tomorrow first, from the same cache. */
+    private static final String[] DAY_COLUMNS = {"date", "glyph", "max_c", "min_c", "sky"};
     private static final AtomicBoolean fetching = new AtomicBoolean();
 
     @Override
@@ -32,11 +34,19 @@ public final class WeatherProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] args, String order) {
         SharedPreferences place = getContext().getSharedPreferences("place", 0);
         SharedPreferences cache = getContext().getSharedPreferences(CACHE, 0);
-        MatrixCursor out = new MatrixCursor(COLUMNS);
+        boolean days = "days".equals(uri.getLastPathSegment());
+        MatrixCursor out = new MatrixCursor(days ? DAY_COLUMNS : COLUMNS);
         if (!place.contains("lat")) return out;
         long updated = cache.getLong("updated", 0);
-        // Older than the refresh interval, or cached by a build without the glyph column: fetch again.
-        if (System.currentTimeMillis() - updated > Forecast.REFRESH_MS || !cache.contains("color") || !place.contains("country")) refresh(place, cache);
+        // Older than the refresh interval, or cached by a build without the glyph or days columns: fetch again.
+        if (System.currentTimeMillis() - updated > Forecast.REFRESH_MS || !cache.contains("color") || !cache.contains("days")
+                || !place.contains("country")) refresh(place, cache);
+        if (days) {
+            for (Forecast.Day d : Forecast.decodeDays(cache.getString("days", ""))) {
+                out.addRow(new Object[]{d.date.toString(), glyph(d.code, true), d.maxC, d.minC, getContext().getString(Forecast.sky(d.code, true))});
+            }
+            return out;
+        }
         if (updated > 0) {
             String country = place.getString("country", "");
             String where = place.getString("name", "") + (country.isEmpty() ? "" : ", " + country);
@@ -71,6 +81,7 @@ public final class WeatherProvider extends ContentProvider {
                 String sky = getContext().getString(Forecast.sky(r.code, r.day));
                 cache.edit().putString("text", String.format(Locale.ROOT, "%d° · %s", r.tempC, sky))
                         .putInt("temp_c", r.tempC).putString("sky", sky).putString("glyph", glyph(r.code, r.day)).putString("color", color(r.code, r.day))
+                        .putString("days", Forecast.encodeDays(r.days))
                         .putLong("updated", System.currentTimeMillis()).apply();
             } catch (Exception ignored) {
                 // Offline or refused: the cached row stays, the next query tries again.
@@ -104,7 +115,9 @@ public final class WeatherProvider extends ContentProvider {
         return "#CFD8DC";
     }
 
-    @Override public String getType(Uri uri) { return "vnd.android.cursor.item/vnd.weather.now"; }
+    @Override public String getType(Uri uri) {
+        return "days".equals(uri.getLastPathSegment()) ? "vnd.android.cursor.dir/vnd.weather.day" : "vnd.android.cursor.item/vnd.weather.now";
+    }
     @Override public Uri insert(Uri uri, ContentValues values) { return null; }
     @Override public int delete(Uri uri, String selection, String[] args) { return 0; }
     @Override public int update(Uri uri, ContentValues values, String selection, String[] args) { return 0; }

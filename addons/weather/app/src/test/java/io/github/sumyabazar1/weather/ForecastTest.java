@@ -7,6 +7,20 @@ import org.junit.Test;
 /** The tables that turn Open-Meteo's numbers into words and colours. */
 public class ForecastTest {
     @Test
+    public void theDaysSurviveTheCacheLine() {
+        java.util.List<Forecast.Day> days = java.util.Arrays.asList(
+                new Forecast.Day(java.time.LocalDate.of(2026, 11, 2), 3, 12, 4),
+                new Forecast.Day(java.time.LocalDate.of(2026, 11, 3), 61, -1, -5));
+        String line = Forecast.encodeDays(days);
+        assertEquals("2026-11-02|3|12|4;2026-11-03|61|-1|-5", line);
+        java.util.List<Forecast.Day> back = Forecast.decodeDays(line + ";broken");
+        assertEquals(2, back.size());
+        assertEquals(61, back.get(1).code);
+        assertEquals(-5, back.get(1).minC);
+        assertEquals(0, Forecast.decodeDays("").size());
+    }
+
+    @Test
     public void aqiBandsFollowTheUsScale() {
         assertEquals(0, Forecast.aqiBand(0));
         assertEquals(0, Forecast.aqiBand(50));

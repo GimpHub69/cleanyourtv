@@ -117,6 +117,32 @@ final class Forecast {
         return Math.max(MIN_DAYS, Math.min(MAX_DAYS, wanted));
     }
 
+    /** The days as one line for the cache: "2026-11-02|3|12|4;..." (date, WMO code, high, low). */
+    static String encodeDays(List<Day> days) {
+        StringBuilder out = new StringBuilder();
+        for (Day d : days) {
+            if (out.length() > 0) out.append(';');
+            out.append(d.date).append('|').append(d.code).append('|').append(d.maxC).append('|').append(d.minC);
+        }
+        return out.toString();
+    }
+
+    /** The cache line back into days; a damaged entry is skipped. */
+    static List<Day> decodeDays(String line) {
+        List<Day> days = new java.util.ArrayList<>();
+        if (line == null || line.isEmpty()) return days;
+        for (String part : line.split(";")) {
+            String[] f = part.split("\\|");
+            if (f.length != 4) continue;
+            try {
+                days.add(new Day(LocalDate.parse(f[0]), Integer.parseInt(f[1]), Integer.parseInt(f[2]), Integer.parseInt(f[3])));
+            } catch (RuntimeException bad) {
+                // one damaged day, the rest still show
+            }
+        }
+        return days;
+    }
+
     /**
      * The weather and air quality at a place, with this many days after today. The air quality is a separate
      * service: if it fails, aqi is -1.

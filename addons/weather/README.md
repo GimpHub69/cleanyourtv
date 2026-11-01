@@ -38,6 +38,9 @@ in the background, so the next query is fresh; no row until a city has been chos
 `weather_provider` key points at it and shows `text` under the clock. Any app on the TV can read it (no permission):
 it is the city name and the weather the app already shows.
 
+`content://io.github.sumyabazar1.weather/days` answers the coming days from the same cache, tomorrow first, one row
+each: `date` (ISO), `glyph`, `max_c`, `min_c` and `sky`. The launcher's Quick settings panel shows the first three.
+
 ## Permissions
 
 | Permission | Why |
