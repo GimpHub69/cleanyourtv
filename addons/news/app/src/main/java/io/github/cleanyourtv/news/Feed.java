@@ -235,8 +235,9 @@ final class Feed {
                 List<Item> items = fetchAll(urls, max);
                 cache.edit().putString("items", encode(items)).putLong("fetched", System.currentTimeMillis()).apply();
                 ok = true;
-            } catch (Exception ignored) {
+            } catch (Exception e) {
                 // Offline or a broken feed: the cached items stay, the next query tries again after RETRY_MS.
+                android.util.Log.w("news", "fetch failed: " + e);
             } finally {
                 cache.edit().putLong("tried", System.currentTimeMillis()).apply();
                 fetching.set(false);

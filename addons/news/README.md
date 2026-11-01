@@ -66,7 +66,10 @@ with your own key if you hand them out; the launcher pins its Show answer to the
 ## Tested on
 
 Amazon Fire TV Stick 4K Max (2nd gen, AFTKRT), Fire OS 8.1.8.5 (Android 11): the list, the summary panel, the
-card prompt, and the headline line under the launcher's clock.
+card in the launcher's grid, and the headline line under its clock. With Fire OS's Data Saver on, a fetch
+started by the launcher's query (the app in the background) gets no DNS; allow the app background data
+(`cmd netpolicy add restrict-background-whitelist <uid>` over ADB, or Settings) or the line only refreshes
+while this page is open.
 
 ## Maintainer
 
