@@ -7,6 +7,9 @@ android {
     compileSdk 34
 
     defaultConfig {
+        // Fork only (AFTKRT stick, en-GB): package English and German strings, drop the other 22 languages
+        // from the APK for room under the size gate. The source folders stay; remove this line for every language.
+        resConfigs "en", "de"
         // Opt-in identity for firmware with a package-name HOME allowlist; see docs/devices/xiaomi-mitv-aetp0-dofus.md.
         applicationId providers.gradleProperty('launcherApplicationId').getOrElse('com.gathin.tvhome')
         minSdk 26
