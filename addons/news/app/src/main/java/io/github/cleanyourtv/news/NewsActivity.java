@@ -55,7 +55,10 @@ public final class NewsActivity extends Activity {
         list.setOnItemClickListener((p, v, pos, id) -> {
             Feed.Item i = (Feed.Item) p.getItemAtPosition(pos);
             if (i != null && !i.link.isEmpty()) {
-                startActivity(new android.content.Intent(this, ArticleActivity.class).putExtra(ArticleActivity.EXTRA_URL, i.link));
+                startActivity(new android.content.Intent(this, ReaderActivity.class)
+                        .putExtra(ReaderActivity.EXTRA_URL, i.link).putExtra(ReaderActivity.EXTRA_TITLE, i.title)
+                        .putExtra(ReaderActivity.EXTRA_META, i.source + (i.published > 0 ? " · " + age(i.published) : ""))
+                        .putExtra(ReaderActivity.EXTRA_IMAGE, i.image));
             }
         });
         list.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

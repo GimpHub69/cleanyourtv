@@ -518,21 +518,31 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 slot.addView(v);
             }
             slot.setVisibility(View.VISIBLE);
-            // Under the pills the card stands: the picture (320x180 dp) above, the source, headline and dots below it.
+            // Under the pills the card is the picture alone, as wide as the two pills together (300x169 dp), with the
+            // source and headline laid over its foot on a dark gradient; no dots.
             LinearLayout cardView = findViewById(R.id.newsCard);
-            cardView.setOrientation(LinearLayout.VERTICAL);
             View picture = findViewById(R.id.newsImage);
-            LinearLayout.LayoutParams pp = (LinearLayout.LayoutParams) picture.getLayoutParams();
-            pp.width = (int) (320 * density);
-            pp.height = (int) (180 * density);
             View column = cardView.getChildAt(1);
-            LinearLayout.LayoutParams cp = (LinearLayout.LayoutParams) column.getLayoutParams();
-            cp.width = pp.width;
-            cp.weight = 0;
-            cp.setMarginStart(0);
-            cp.setMarginEnd(0);
-            cp.topMargin = (int) (10 * density);
-            cp.gravity = android.view.Gravity.NO_GRAVITY;
+            cardView.removeAllViews();
+            int w = (int) (300 * density), h = (int) (169 * density), pad = (int) (12 * density);
+            android.widget.FrameLayout frame = new android.widget.FrameLayout(this);
+            frame.addView(picture, new android.widget.FrameLayout.LayoutParams(w, h));
+            android.widget.FrameLayout.LayoutParams cp = new android.widget.FrameLayout.LayoutParams(w, ViewGroup.LayoutParams.WRAP_CONTENT);
+            cp.gravity = android.view.Gravity.BOTTOM;
+            column.setPadding(pad, pad * 2, pad, pad);
+            column.setBackground(new android.graphics.drawable.GradientDrawable(
+                    android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0x00000000, 0xB3000000, 0xE6000000}));
+            frame.addView(column, cp);
+            frame.setOutlineProvider(new android.view.ViewOutlineProvider() {
+                @Override
+                public void getOutline(View v, android.graphics.Outline o) {
+                    o.setRoundRect(0, 0, v.getWidth(), v.getHeight(), 8 * density);
+                }
+            });
+            frame.setClipToOutline(true);
+            cardView.addView(frame, new LinearLayout.LayoutParams(w, h));
+            ((TextView) findViewById(R.id.newsHeadline)).setMaxLines(2);
+            findViewById(R.id.newsDots).setVisibility(View.GONE);
         }
         newsLine = !newsOn ? null : new NewsLine(findViewById(R.id.newsLine), cfg.newsProvider,
                 cfg.newsCard ? findViewById(R.id.newsCard) : null, cfg.newsSeconds * 1000L, cfg.newsStories);

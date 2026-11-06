@@ -294,7 +294,7 @@
          theme can set "news_stories": 6. -->
     <integer name="news_stories">8</integer>
     <!-- Where the news sits on Home: "left" (under the clock, the default) or "right" (under the Wi-Fi and Settings
-         pills, the picture above the headline). A theme can set "news_position": "right". Launcher settings > News
+         pills: the headline laid over the picture). A theme can set "news_position": "right". Launcher settings > News
          switches the news off and changes the speed, the count and the place on the TV. -->
     <string name="news_position" translatable="false">left</string>
     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows

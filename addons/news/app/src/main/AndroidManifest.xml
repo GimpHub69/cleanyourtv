@@ -31,7 +31,11 @@
             <meta-data android:name="com.gathin.tvhome.card" android:resource="@xml/module_card" />
         </activity>
 
-        <!-- The full article, in the TV's WebView, when a headline is clicked. -->
+        <!-- A headline clicked: the article as text (Reader), OK on it the publisher's page in the TV's WebView. -->
+        <activity
+            android:name=".ReaderActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
         <activity
             android:name=".ArticleActivity"
             android:exported="false"

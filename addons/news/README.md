@@ -39,9 +39,12 @@ image enclosure gives stories without pictures.
 
 ### The full article
 
-OK on a headline opens its link full screen in the TV's own WebView (`ArticleActivity`): Up and Down scroll by a
-third of the screen, Back goes back through the pages and then to the headlines. JavaScript and DOM storage are on
-for that page, because news sites draw their text with them; the page is the publisher's, with its cookie banners.
+OK on a headline opens reader mode (`ReaderActivity`): the page is fetched once (at most 2 MB, the add-on's user
+agent) and reduced to its title and the paragraphs and subheadings of its `<article>` (else `<main>`, else the
+body), with scripts, navigation, figures, asides and footers cut out (`Reader.java`, plain regex). Up and Down
+scroll, Back returns to the headlines. OK on the text opens the publisher's own page in the TV's WebView
+(`ArticleActivity`, JavaScript and DOM storage on, with its banners and sign-in walls); a page with fewer than two
+readable paragraphs goes there at once.
 
 ### Pictures
 

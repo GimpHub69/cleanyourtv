@@ -15,5 +15,7 @@
     <string name="feeds_add_bad">Needs a web address starting with http:// or https://</string>
     <string name="feeds_none">Tick at least one feed</string>
     <string name="ok">OK</string>
+    <string name="reader_loading">Reading the article…</string>
+    <string name="reader_hint">OK opens the web page · Back returns to the headlines</string>
     <string name="cancel">Cancel</string>
 </resources>

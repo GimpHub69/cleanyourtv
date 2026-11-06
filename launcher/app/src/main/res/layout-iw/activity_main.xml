@@ -556,16 +556,6 @@
                     android:drawableStart="@drawable/ic_input"
                     android:nextFocusDown="@+id/grid" />
             </LinearLayout>
-            <!-- news_position "right": the news line or card moves here from leftBlock (MainActivity), under the pills. -->
-            <LinearLayout
-                android:id="@+id/newsRight"
-                android:layout_width="320dp"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/topButtons"
-                android:layout_alignStart="@id/topButtons"
-                android:layout_marginTop="6dp"
-                android:orientation="vertical"
-                android:visibility="gone" />
         </RelativeLayout>
 
         <!-- The wrapper clips at the grid's edge; the grid itself must not clip so scaled tiles can overflow their cells. -->
@@ -590,6 +580,18 @@
                 android:descendantFocusability="afterDescendants" />
         </FrameLayout>
     </LinearLayout>
+
+    <!-- news_position "right": the news line or card moves here from leftBlock (MainActivity). Outside the header's
+         flow, under the Wi-Fi and Settings pills, so its height never pushes the dock down the screen. -->
+    <LinearLayout
+        android:id="@+id/newsRight"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginTop="96dp"
+        android:layout_marginStart="57dp"
+        android:orientation="vertical"
+        android:visibility="gone" />
 
     <!-- The single floating glass highlight that springs between tiles. -->
     <com.gathin.tvhome.GlassView
