@@ -115,4 +115,10 @@ public class FeedTest {
         assertEquals("BBC News", Feed.shortSource("BBC News"));
         assertEquals("Some Very Long Feed Name", Feed.shortSource("Some Very Long Feed Name - all the news that fits in here"));
     }
+
+    @Test
+    public void cleanDecodesNumericAndNamedEntities() {
+        assertEquals("The town's mayor \u2018said\u2019 \u00A35 & more", Feed.clean("The town&#x27;s mayor &lsquo;said&#8217; &pound;5 &amp; more"));
+        assertEquals("&#39; literal", Feed.clean("&amp;#39; literal"));
+    }
 }

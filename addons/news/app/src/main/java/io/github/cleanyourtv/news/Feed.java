@@ -140,8 +140,25 @@ final class Feed {
     static String clean(String s) {
         if (s == null) return "";
         s = s.replaceAll("<[^>]+>", " ");
-        s = s.replace("&nbsp;", " ").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
-                .replace("&quot;", "\"").replace("&#39;", "'").replace("&apos;", "'");
+        s = s.replace("&nbsp;", " ").replace("&lt;", "<").replace("&gt;", ">")
+                .replace("&quot;", "\"").replace("&apos;", "'").replace("&rsquo;", "\u2019").replace("&lsquo;", "\u2018")
+                .replace("&rdquo;", "\u201D").replace("&ldquo;", "\u201C").replace("&ndash;", "\u2013").replace("&mdash;", "\u2014")
+                .replace("&hellip;", "\u2026").replace("&pound;", "\u00A3").replace("&euro;", "\u20AC");
+        // Numeric references, decimal or hex (&#39; &#x27; &#8217;), then &amp; last so "&amp;#39;" stays literal.
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("&#(x?)([0-9a-fA-F]{1,6});").matcher(s);
+        StringBuffer out = new StringBuffer();
+        while (m.find()) {
+            String rep;
+            try {
+                int cp = Integer.parseInt(m.group(2), m.group(1).isEmpty() ? 10 : 16);
+                rep = cp >= 32 && Character.isValidCodePoint(cp) ? new String(Character.toChars(cp)) : " ";
+            } catch (NumberFormatException e) {
+                rep = m.group();
+            }
+            m.appendReplacement(out, java.util.regex.Matcher.quoteReplacement(rep));
+        }
+        m.appendTail(out);
+        s = out.toString().replace("&amp;", "&");
         return s.replaceAll("[\\s\\u001E\\u001F]+", " ").trim();
     }
 
