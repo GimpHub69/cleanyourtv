@@ -693,7 +693,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         grid.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
             @Override
             public void onChildViewAttachedToWindow(@NonNull View v) {
-                fadeDockTile(v, !singleRow && grid.computeVerticalScrollOffset() > 0, false);
+                // The offset is not settled yet during a reload: start opaque, the layout pass below decides.
+                v.animate().cancel();
+                v.setAlpha(1f);
             }
 
             @Override
@@ -702,6 +704,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 v.setAlpha(1f);
             }
         });
+        grid.addOnLayoutChangeListener((v, l, tp, r, b, ol, ot, or, ob) -> syncDockFade(false));
         // Keep the glass glued to its tile while the grid scrolls.
         grid.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -709,11 +712,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 // The headline under the clock gives way once the rows scroll up towards it, and so does the dock
                 // row itself: the grid cannot scroll it fully off a short screen, so its cut-off tiles fade out
                 // instead of showing as a strip under the header.
-                if (dy != 0 && !singleRow) {
-                    boolean away = rv.computeVerticalScrollOffset() > 0;
-                    if (newsLine != null) newsLine.setScrolledAway(away, animations && !reducedMotion);
-                    for (int i = 0; i < rv.getChildCount(); i++) fadeDockTile(rv.getChildAt(i), away, true);
-                }
+                if (!singleRow) syncDockFade(dy != 0);
                 if (!glassShown) return;
                 glassTargetY -= dy;
                 glassScrollShift -= dy;
@@ -2086,6 +2085,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      * The dock row cannot scroll fully off a short screen, so while the grid is away from its top the dock's
      * cut-off tiles are faded out instead of showing as a strip under the header; back at the top they return.
      */
+    private void syncDockFade(boolean animate) {
+        if (singleRow || grid == null) return;
+        boolean away = grid.computeVerticalScrollOffset() > 0;
+        if (newsLine != null) newsLine.setScrolledAway(away, animate && animations && !reducedMotion);
+        for (int i = 0; i < grid.getChildCount(); i++) fadeDockTile(grid.getChildAt(i), away, animate);
+    }
+
     private void fadeDockTile(View tile, boolean away, boolean animate) {
         if (!dockRow) return;
         int pos = grid.getChildAdapterPosition(tile);
