@@ -77,7 +77,7 @@ public final class LauncherSettingsActivity extends Activity {
     private android.widget.TextClock previewClock;
     /** News: seconds per story, stories in the card, place (0 under the clock, 1 under the pills, 2 off). */
     private TextView newsOnChoice, newsSpeedChoice, newsStoriesChoice, newsPositionChoice, idleClockChoice;
-    private static final int[] NEWS_SPEEDS = {5, 10, 15, 20, 30, 60};
+    private static final int[] NEWS_SPEEDS = {5, 8, 10, 15, 20, 30, 60};
     private static final int[] NEWS_COUNTS = {3, 4, 5, 6, 8, 10, 12};
     /** Minutes before the idle clock on Home: off, then 1 to 30. */
     private static final int[] IDLE_MINUTES = {0, 1, 2, 5, 10, 30};
