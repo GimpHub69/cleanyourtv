@@ -25,8 +25,23 @@ Set in `app/src/main/res/values/options.xml` before building.
 
 | Option | Default | What it does |
 |---|---|---|
-| `feeds` | the two BBC feeds | The feed URLs, merged newest first. |
+| `feeds` | the two BBC feeds | The feed URLs read until the owner picks others on the TV, merged newest first. |
 | `max_items` | `30` | Headlines kept across all feeds. |
+| `preset_names`, `preset_urls` | 13 BBC and Sky News feeds | The feeds offered on the app's Feeds page. |
+
+### Feeds page
+
+The Feeds button at the top of the app lists the presets with a tick each, any address the owner added, and "Add
+another feed address…", which takes one RSS or Atom URL with the TV's keyboard. OK saves the ticked list and fetches
+it at once. Each feed is downloaded whole every 15 minutes and must stay under 512 KB; the presets were 6 to 53 KB
+on 2026-11-06 (the Guardian's is about 500 KB, the New York Times' 124 KB). A feed without `media:thumbnail` or an
+image enclosure gives stories without pictures.
+
+### Pictures
+
+After each fetch the app downloads the picture of every kept story (within 30 seconds per pass, over HTTPS only,
+at most 2 MB each) shrunk to 480 px wide and saved as JPEG in its cache. The app shows them as thumbnails in the
+list and large beside the summary; the launcher's `news_card` reads them through the provider.
 
 ## The headlines for the launcher
 
@@ -34,7 +49,7 @@ The app answers `content://io.github.cleanyourtv.news/headlines` with one row pe
 `source` (the feed's name, "BBC News"), `summary`, `link`, `image`, `published` and `fetched` (both epoch
 milliseconds), from its own cache. `image` is a `content://io.github.cleanyourtv.news/image/<id>` URI for the
 story's picture (the feed's `media:thumbnail` or image enclosure, BBC's asked for at 480 px), once the app has it:
-after each fetch it downloads the first 8 stories' pictures, shrinks them to about 480 px wide and keeps them as
+after each fetch it downloads every kept story's picture, shrinks them to about 480 px wide and keeps them as
 JPEGs in its cache folder (about 30 KB each, old ones deleted); any app can open them read-only. A query older than 15 minutes starts one fetch in the background, so the next query is fresh;
 5 minutes between attempts after a failure. The Clean Your TV launcher's `news_provider` key points at it and
 shows "BBC News · headline" under the clock, the next story every 20 seconds, and hides the line once `fetched`

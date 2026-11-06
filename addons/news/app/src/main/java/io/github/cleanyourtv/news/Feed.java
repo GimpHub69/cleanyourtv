@@ -37,6 +37,8 @@ final class Feed {
     static final long REFRESH_MS = 15 * 60 * 1000L, RETRY_MS = 5 * 60 * 1000L;
     static final int TIMEOUT_MS = 10_000, MAX_BYTES = 512 * 1024;
     static final String CACHE = "cache";
+    /** The owner's feed list from the app's Feeds page ("settings": {@code feeds}, one URL per line); unset, options.xml. */
+    static final String SETTINGS = "settings";
     private static final AtomicBoolean fetching = new AtomicBoolean();
     private static final char FIELD = '\u001F', RECORD = '\u001E';
 
@@ -228,8 +230,31 @@ final class Feed {
         return out;
     }
 
-    /** Pictures for the first IMAGES stories, each shrunk to IMAGE_WIDTH and saved as JPEG in the cache dir. */
-    static final int IMAGES = 8, IMAGE_WIDTH = 480, IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+    /** The feeds to read: the list saved on the Feeds page, else options.xml. */
+    static String[] feeds(Context ctx) {
+        String saved = ctx.getSharedPreferences(SETTINGS, 0).getString("feeds", null);
+        List<String> list = saved == null ? null : parseFeeds(saved);
+        return list == null || list.isEmpty() ? ctx.getResources().getStringArray(R.array.feeds) : list.toArray(new String[0]);
+    }
+
+    /** One URL per line, trimmed, blanks and repeats dropped, http(s) only. */
+    static List<String> parseFeeds(String text) {
+        List<String> out = new ArrayList<>();
+        for (String line : text.split("\n")) {
+            String u = line.trim();
+            if ((u.startsWith("https://") || u.startsWith("http://")) && u.length() > 10 && !out.contains(u)) out.add(u);
+        }
+        return out;
+    }
+
+    static void saveFeeds(Context ctx, List<String> urls) {
+        ctx.getSharedPreferences(SETTINGS, 0).edit().putString("feeds", String.join("\n", urls)).apply();
+        // A changed list is fetched now, not after the usual quarter hour.
+        cache(ctx).edit().putLong("fetched", 0).putLong("tried", 0).apply();
+    }
+
+    /** Pictures for the kept stories, each shrunk to IMAGE_WIDTH and saved as JPEG in the cache dir. */
+    static final int IMAGE_WIDTH = 480, IMAGE_MAX_BYTES = 2 * 1024 * 1024;
     private static final long IMAGE_PASS_MS = 30_000L;
 
     static File imageDir(Context ctx) {
@@ -252,14 +277,14 @@ final class Feed {
         }
     }
 
-    /** After the headlines are saved: the first pictures, within IMAGE_PASS_MS; files for other stories go. */
+    /** After the headlines are saved: their pictures, within IMAGE_PASS_MS; files for stories no longer kept go. */
     private static void cacheImages(Context ctx, List<Item> items) {
         File dir = imageDir(ctx);
         if (!dir.isDirectory() && !dir.mkdirs()) return;
         List<String> keep = new ArrayList<>();
         long deadline = System.currentTimeMillis() + IMAGE_PASS_MS;
         for (Item i : items) {
-            if (i.image.isEmpty() || keep.size() >= IMAGES) continue;
+            if (i.image.isEmpty()) continue;
             File f = imageFile(ctx, i.image);
             keep.add(f.getName());
             if (f.isFile() || System.currentTimeMillis() > deadline) continue;
@@ -332,7 +357,7 @@ final class Feed {
             SharedPreferences cache = cache(app);
             boolean ok = false;
             try {
-                String[] urls = app.getResources().getStringArray(R.array.feeds);
+                String[] urls = feeds(app);
                 int max = app.getResources().getInteger(R.integer.max_items);
                 List<Item> items = fetchAll(urls, max);
                 cache.edit().putString("items", encode(items)).putLong("fetched", System.currentTimeMillis()).apply();

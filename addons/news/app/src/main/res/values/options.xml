@@ -9,4 +9,36 @@
     </string-array>
     <!-- Headlines kept, newest first, across all feeds. -->
     <integer name="max_items">30</integer>
+    <!-- The feeds offered on the Feeds page of the app (name and URL, same order), each with a picture per story and
+         under 60 KB when measured on 2026-11-06. The owner ticks them on the TV; the ticked list replaces "feeds". -->
+    <string-array name="preset_names" translatable="false">
+        <item>BBC News · Front page</item>
+        <item>BBC News · World</item>
+        <item>BBC News · UK</item>
+        <item>BBC News · Business</item>
+        <item>BBC News · Technology</item>
+        <item>BBC News · Science &amp; Environment</item>
+        <item>BBC News · Health</item>
+        <item>BBC News · Entertainment &amp; Arts</item>
+        <item>BBC Sport</item>
+        <item>Sky News · Home</item>
+        <item>Sky News · World</item>
+        <item>Sky News · Technology</item>
+        <item>Sky News · Entertainment</item>
+    </string-array>
+    <string-array name="preset_urls" translatable="false">
+        <item>https://feeds.bbci.co.uk/news/rss.xml</item>
+        <item>https://feeds.bbci.co.uk/news/world/rss.xml</item>
+        <item>https://feeds.bbci.co.uk/news/uk/rss.xml</item>
+        <item>https://feeds.bbci.co.uk/news/business/rss.xml</item>
+        <item>https://feeds.bbci.co.uk/news/technology/rss.xml</item>
+        <item>https://feeds.bbci.co.uk/news/science_and_environment/rss.xml</item>
+        <item>https://feeds.bbci.co.uk/news/health/rss.xml</item>
+        <item>https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml</item>
+        <item>https://feeds.bbci.co.uk/sport/rss.xml</item>
+        <item>https://feeds.skynews.com/feeds/rss/home.xml</item>
+        <item>https://feeds.skynews.com/feeds/rss/world.xml</item>
+        <item>https://feeds.skynews.com/feeds/rss/technology.xml</item>
+        <item>https://feeds.skynews.com/feeds/rss/entertainment.xml</item>
+    </string-array>
 </resources>

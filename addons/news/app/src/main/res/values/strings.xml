@@ -7,4 +7,13 @@
     <string name="age_minutes">%1$d min ago</string>
     <string name="age_hours">%1$d h ago</string>
     <string name="age_days">%1$d d ago</string>
+    <string name="feeds">Feeds</string>
+    <string name="feeds_title">Which feeds</string>
+    <string name="feeds_add">Add another feed address…</string>
+    <string name="feeds_add_title">Feed address</string>
+    <string name="feeds_add_hint">https://example.org/feed.xml</string>
+    <string name="feeds_add_bad">Needs a web address starting with http:// or https://</string>
+    <string name="feeds_none">Tick at least one feed</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
 </resources>

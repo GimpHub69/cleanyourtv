@@ -48,6 +48,7 @@ the rules. Keys from before this rule are on its wanted list; a screenshot for o
 | `weather_provider` | Fire TV Stick 4K Max with the weather add-on installed: its "12° · Cloudy" line under the date, read from the add-on's content provider | <img src="switches/weather_provider.jpg" width="320" alt="weather_provider"> |
 | `news_provider` | Fire TV Stick 4K Max with the news add-on installed: one BBC headline under the clock, the next every 20 seconds | <img src="switches/news_provider.jpg" width="320" alt="news_provider"> |
 | `news_card` | Fire TV Stick 4K Max with the news add-on: the story picture with the source and headline beside it under the clock | <img src="switches/news_card.jpg" width="320" alt="news_card"> |
+| `news_seconds` | Fire TV Stick 4K Max: the same story card, the next story every 10 seconds instead of 20 | <img src="switches/news_card.jpg" width="320" alt="news_seconds"> |
 | `wallpaper_motion` | Fire TV Stick 4K Max: the Sweden picture drawn a few percent in, ready to slide against the focused tile | <img src="switches/wallpaper_motion.jpg" width="320" alt="wallpaper_motion"> |
 | `tile_shape` | Fire TV Stick 4K Max: `pill` tiles, the dock band and focus glass rounded to match | <img src="switches/tile_shape.jpg" width="320" alt="tile_shape"> |
 | `now_playing` | Fire TV Stick 4K Max: "▶ Playing on Stremio" with the title under the weather line while Stremio plays behind Home | <img src="switches/now_playing.jpg" width="320" alt="now_playing"> |

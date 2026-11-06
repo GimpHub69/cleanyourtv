@@ -25,12 +25,16 @@ import java.util.List;
  * offline TV keeps no day-old headline under the clock.
  */
 final class NewsLine {
-    static final long ROTATE_MS = 20_000L, STALE_MS = 6 * 60 * 60 * 1000L;
-    /** The card cycles the newest CARD_STORIES only (the ones the provider keeps pictures for), one dot each. */
+    static final long STALE_MS = 6 * 60 * 60 * 1000L;
+    /** The card cycles the newest CARD_STORIES only, one dot each. */
     static final int CARD_STORIES = 8;
     private static final int FADE_MS = 400;
     private final TextView line;
     private final String uri;
+    /** Milliseconds each story stays (config.xml news_seconds). */
+    private final long rotateMs;
+    /** True while the grid is scrolled away from its top: the news is faded out so the rows have the space. */
+    private boolean scrolledAway;
     /** news_card's views, or null for the plain line. */
     private final View card;
     private final ImageView image;
@@ -42,10 +46,11 @@ final class NewsLine {
     /** The picture's fade-in (imageAlpha only, so the dark frame behind it stays). */
     private android.animation.ObjectAnimator fade;
 
-    NewsLine(TextView line, String uri, View card) {
+    NewsLine(TextView line, String uri, View card, long rotateMs) {
         this.line = line;
         this.uri = uri;
         this.card = card;
+        this.rotateMs = rotateMs;
         image = card == null ? null : card.findViewById(R.id.newsImage);
         source = card == null ? null : card.findViewById(R.id.newsSource);
         headline = card == null ? null : card.findViewById(R.id.newsHeadline);
@@ -65,7 +70,18 @@ final class NewsLine {
     void start(ContentResolver resolver) {
         refresh(resolver);
         line.removeCallbacks(rotate);
-        line.postDelayed(rotate, ROTATE_MS);
+        line.postDelayed(rotate, rotateMs);
+        setScrolledAway(false, false);
+    }
+
+    /** The grid left its top (or came back): the headline or card fades out of the rows' way, and back in. */
+    void setScrolledAway(boolean away, boolean animate) {
+        if (away == scrolledAway) return;
+        scrolledAway = away;
+        View v = card != null ? card : line;
+        v.animate().cancel();
+        if (animate) v.animate().alpha(away ? 0f : 1f).setDuration(away ? 160 : 260).start();
+        else v.setAlpha(away ? 0f : 1f);
     }
 
     void stop() {
@@ -119,7 +135,7 @@ final class NewsLine {
             next = (next + 1) % stories.size();
             show();
         }
-        line.postDelayed(rotate, ROTATE_MS);
+        line.postDelayed(rotate, rotateMs);
     }
 
     private void show() {

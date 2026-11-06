@@ -1,29 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- A headline row: the story's small picture (gone when the feed gave none), the title and "source · age". -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/row_bg"
     android:focusable="true"
-    android:orientation="vertical"
-    android:paddingStart="16dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="12dp"
     android:paddingEnd="16dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp">
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxLines="2"
-        android:ellipsize="end"
-        android:textColor="#FFFFFFFF"
-        android:textSize="20sp" />
+    <ImageView
+        android:id="@+id/thumb"
+        android:layout_width="104dp"
+        android:layout_height="58dp"
+        android:layout_marginEnd="14dp"
+        android:scaleType="centerCrop"
+        android:background="#33000000"
+        android:contentDescription="@null" />
 
-    <TextView
-        android:id="@+id/meta"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textColor="#80FFFFFF"
-        android:textSize="14sp" />
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textColor="#FFFFFFFF"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#80FFFFFF"
+            android:textSize="14sp" />
+    </LinearLayout>
 </LinearLayout>

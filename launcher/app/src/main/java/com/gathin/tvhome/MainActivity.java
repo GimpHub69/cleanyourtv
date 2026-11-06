@@ -508,7 +508,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         noticeLine = findViewById(R.id.noticeLine);
         noticeOn = cfg.notificationLine;
         newsLine = cfg.newsProvider.isEmpty() ? null : new NewsLine(findViewById(R.id.newsLine), cfg.newsProvider,
-                cfg.newsCard ? findViewById(R.id.newsCard) : null);
+                cfg.newsCard ? findViewById(R.id.newsCard) : null, cfg.newsSeconds * 1000L);
         nowPlayingCard = cfg.nowPlayingCard;
         nowPlayingArt = cfg.nowPlayingArt;
         if (cfg.headerScrim) findViewById(R.id.headerScrim).setVisibility(View.VISIBLE);
@@ -680,6 +680,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         grid.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+                // The headline under the clock gives way once the rows scroll up towards it.
+                if (newsLine != null && dy != 0) {
+                    newsLine.setScrolledAway(rv.computeVerticalScrollOffset() > 0, animations && !reducedMotion);
+                }
                 if (!glassShown) return;
                 glassTargetY -= dy;
                 glassScrollShift -= dy;

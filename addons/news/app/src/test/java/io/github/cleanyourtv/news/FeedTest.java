@@ -89,4 +89,13 @@ public class FeedTest {
         }
         assertTrue(refused);
     }
+
+    @Test
+    public void feedListOneAddressPerLineTrimmedAndUnique() {
+        List<String> f = Feed.parseFeeds("  https://a.example/rss.xml \n\nhttp://b.example/feed\nftp://no\nhttps://a.example/rss.xml\njunk");
+        assertEquals(2, f.size());
+        assertEquals("https://a.example/rss.xml", f.get(0));
+        assertEquals("http://b.example/feed", f.get(1));
+        assertTrue(Feed.parseFeeds("").isEmpty());
+    }
 }
