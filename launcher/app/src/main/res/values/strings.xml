@@ -195,6 +195,9 @@
     <string name="clock_seconds_state">Seconds: %1$s</string>
     <string name="tile_shape_state">Tile shape: %1$s</string>
     <string name="section_news">News</string>
+    <string name="news_on_state">News: %1$s</string>
+    <string name="idle_clock_state">Screensaver after: %1$s</string>
+    <string name="minutes_value">%1$d min</string>
     <string name="news_speed_state">Next story after: %1$s</string>
     <string name="news_seconds_value">%1$d s</string>
     <string name="news_stories_state">Stories in the card: %1$s</string>

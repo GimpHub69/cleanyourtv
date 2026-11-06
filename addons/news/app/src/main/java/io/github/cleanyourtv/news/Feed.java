@@ -109,7 +109,7 @@ final class Feed {
         return "";
     }
 
-    /** media:thumbnail's url, else an image enclosure's; BBC's 240 px thumbnail is asked for at 480 px. */
+    /** media:thumbnail's url, else an image enclosure's; BBC's 240 px thumbnail is asked for at 800 px. */
     static String imageUrl(Element item) {
         String enclosure = "";
         for (Node n = item.getFirstChild(); n != null; n = n.getNextSibling()) {
@@ -118,7 +118,7 @@ final class Feed {
             if (name.endsWith(":thumbnail") || name.endsWith(":content")) {
                 String url = ((Element) n).getAttribute("url"), type = ((Element) n).getAttribute("type");
                 if (!type.isEmpty() && !type.startsWith("image/")) continue;   // a media:content video
-                if (url.startsWith("https://")) return url.replace("/240/", "/480/");
+                if (url.startsWith("https://")) return url.replace("/240/", "/800/");
             } else if ("enclosure".equals(name) && ((Element) n).getAttribute("type").startsWith("image/")) {
                 enclosure = ((Element) n).getAttribute("url");
             }
@@ -267,7 +267,7 @@ final class Feed {
     }
 
     /** Pictures for the kept stories, each shrunk to IMAGE_WIDTH and saved as JPEG in the cache dir. */
-    static final int IMAGE_WIDTH = 480, IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+    static final int IMAGE_WIDTH = 800, IMAGE_MAX_BYTES = 2 * 1024 * 1024;
     private static final long IMAGE_PASS_MS = 30_000L;
 
     static File imageDir(Context ctx) {

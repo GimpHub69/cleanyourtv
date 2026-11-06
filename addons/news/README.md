@@ -46,7 +46,7 @@ for that page, because news sites draw their text with them; the page is the pub
 ### Pictures
 
 After each fetch the app downloads the picture of every kept story (within 30 seconds per pass, over HTTPS only,
-at most 2 MB each) shrunk to 480 px wide and saved as JPEG in its cache. The app shows them as thumbnails in the
+at most 2 MB each) shrunk to 800 px wide and saved as JPEG in its cache. The app shows them as thumbnails in the
 list and large beside the summary; the launcher's `news_card` reads them through the provider.
 
 ## The headlines for the launcher
@@ -54,8 +54,8 @@ list and large beside the summary; the launcher's `news_card` reads them through
 The app answers `content://io.github.cleanyourtv.news/headlines` with one row per story, newest first: `title`,
 `source` (the feed's name, "BBC News"), `summary`, `link`, `image`, `published` and `fetched` (both epoch
 milliseconds), from its own cache. `image` is a `content://io.github.cleanyourtv.news/image/<id>` URI for the
-story's picture (the feed's `media:thumbnail` or image enclosure, BBC's asked for at 480 px), once the app has it:
-after each fetch it downloads every kept story's picture, shrinks them to about 480 px wide and keeps them as
+story's picture (the feed's `media:thumbnail` or image enclosure, BBC's asked for at 800 px), once the app has it:
+after each fetch it downloads every kept story's picture, shrinks them to about 800 px wide and keeps them as
 JPEGs in its cache folder (about 30 KB each, old ones deleted); any app can open them read-only. A query older than 15 minutes starts one fetch in the background, so the next query is fresh;
 5 minutes between attempts after a failure. The Clean Your TV launcher's `news_provider` key points at it and
 shows "BBC News · headline" under the clock, the next story every 20 seconds, and hides the line once `fetched`

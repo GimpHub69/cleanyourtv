@@ -559,7 +559,7 @@
             <!-- news_position "right": the news line or card moves here from leftBlock (MainActivity), under the pills. -->
             <LinearLayout
                 android:id="@+id/newsRight"
-                android:layout_width="520dp"
+                android:layout_width="320dp"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/topButtons"
                 android:layout_alignStart="@id/topButtons"

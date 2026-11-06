@@ -293,8 +293,9 @@
     <!-- With news_card: how many of the newest stories the card cycles through (one dot each), 1 to 12. 8 by default; a
          theme can set "news_stories": 6. -->
     <integer name="news_stories">8</integer>
-    <!-- Where the news sits on Home: "left" (under the clock, the default), "right" (under the Wi-Fi and Settings
-         pills) or "off". A theme can set "news_position": "right". Launcher settings > News changes all three on the TV. -->
+    <!-- Where the news sits on Home: "left" (under the clock, the default) or "right" (under the Wi-Fi and Settings
+         pills, the picture above the headline). A theme can set "news_position": "right". Launcher settings > News
+         switches the news off and changes the speed, the count and the place on the TV. -->
     <string name="news_position" translatable="false">left</string>
     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows
          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can

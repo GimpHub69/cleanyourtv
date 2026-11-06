@@ -63,9 +63,11 @@ final class Config {
     static final String CLOCK_SECONDS_KEY = "clock_seconds";
     /** The Tile shape row's choice over config tile_shape. */
     static final String TILE_SHAPE_KEY = "tile_shape";
-    /** Launcher settings > News: seconds per story, stories in the card, and where the news sits (0 left, 1 right, 2 off). */
-    static final String NEWS_SECONDS_KEY = "news_seconds", NEWS_STORIES_KEY = "news_stories", NEWS_POSITION_KEY = "news_position";
-    static final String[] NEWS_POSITIONS = {"left", "right", "off"};
+    /** Launcher settings > News: shown at all, seconds per story, stories in the card, where it sits (0 left, 1 right). */
+    static final String NEWS_ON_KEY = "news_shown", NEWS_SECONDS_KEY = "news_seconds", NEWS_STORIES_KEY = "news_stories", NEWS_POSITION_KEY = "news_position";
+    static final String[] NEWS_POSITIONS = {"left", "right"};
+    /** Launcher settings: minutes before the idle clock, over home_idle_clock_minutes. */
+    static final String IDLE_CLOCK_KEY = "idle_clock_minutes";
     /**
      * Counts the changes made in Launcher settings. Home remembers the count it was built with and rebuilds on
      * resume when it differs, however the settings were left (see MainActivity#onResume).
@@ -142,8 +144,10 @@ final class Config {
     final int newsSeconds;
     /** Stories the news card cycles through (config.xml news_stories), 1 to 12. */
     final int newsStories;
-    /** Where the news sits: "left" under the clock, "right" under the pills, or "off" (config.xml news_position). */
+    /** Where the news sits: "left" under the clock or "right" under the pills (config.xml news_position). */
     final String newsPosition;
+    /** Launcher settings > News > News: off hides the line or card on this TV (NEWS_ON_KEY). */
+    final boolean newsShown;
     /** Cycle wallpaper "each return to Home": Home shows the next picture of the set on every resume. */
     final boolean wallpaperCycleOnHome;
     /** The wallpaper breathes, a slow zoom and back (config.xml wallpaper_motion); off under reduced_motion or animations off. */
@@ -316,7 +320,7 @@ final class Config {
                    List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, boolean fadeRows, int homeIdleClockMinutes,
                    boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
                    boolean handleViewInputs, boolean tileMenu, boolean dockEvenPadding, boolean cinematicDots, boolean cinematicWhiteFocus, boolean wifiStatusColor, int cinematicScrim, int cinematicArt,
-                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome, boolean wallpaperMotion, boolean headerMood, int clockWeight, int clockHours, boolean clockSeconds, String tileShape, boolean nowPlaying, boolean headerScrim, int clockSlideshowMinutes, List<File> wallpaperPool, boolean notificationLine, boolean nowPlayingCard, boolean nowPlayingArt, String newsProvider, boolean newsCard, int newsSeconds, int newsStories, String newsPosition) {
+                   Map<String, Set<String>> wallpaperMoods, boolean gamepadPassthrough, boolean consumeVolumeKeys, boolean wifiStatusWarnings, List<String> topBarApps, boolean showGreeting, boolean headerWhite, boolean clockWallpaper, int clockWallpaperDim, boolean clockGlow, String glassStyle, boolean singleRow, boolean dockBandAll, boolean lunarDate, int lunarUtcOffset, boolean homeHook, boolean settingsMenuOnClick, String weatherProvider, boolean weatherLine, boolean wallpaperCycleOnHome, boolean wallpaperMotion, boolean headerMood, int clockWeight, int clockHours, boolean clockSeconds, String tileShape, boolean nowPlaying, boolean headerScrim, int clockSlideshowMinutes, List<File> wallpaperPool, boolean notificationLine, boolean nowPlayingCard, boolean nowPlayingArt, String newsProvider, boolean newsCard, int newsSeconds, int newsStories, String newsPosition, boolean newsShown) {
         this.headerScrim = headerScrim;
         this.clockSlideshowMinutes = clockSlideshowMinutes;
         this.wallpaperPool = wallpaperPool;
@@ -339,7 +343,8 @@ final class Config {
         this.newsCard = newsCard && !newsProvider.isEmpty();
         this.newsSeconds = Math.max(5, Math.min(300, newsSeconds));
         this.newsStories = Math.max(1, Math.min(12, newsStories));
-        this.newsPosition = "right".equals(newsPosition) || "off".equals(newsPosition) ? newsPosition : "left";
+        this.newsPosition = "right".equals(newsPosition) ? "right" : "left";
+        this.newsShown = newsShown;
         this.handleViewInputs = handleViewInputs;
         this.tileMenu = tileMenu;
         this.inputKeycodes = inputKeycodes;
@@ -705,7 +710,9 @@ final class Config {
         newsSeconds = choices.getInt(NEWS_SECONDS_KEY, newsSeconds);
         newsStories = choices.getInt(NEWS_STORIES_KEY, newsStories);
         int newsPlace = choices.getInt(NEWS_POSITION_KEY, -1);
-        if (newsPlace >= 0 && newsPlace <= 2) newsPosition = NEWS_POSITIONS[newsPlace];
+        if (newsPlace >= 0 && newsPlace <= 1) newsPosition = NEWS_POSITIONS[newsPlace];
+        boolean newsShown = choices.getBoolean(NEWS_ON_KEY, true);
+        idleClockMinutes = choices.getInt(IDLE_CLOCK_KEY, idleClockMinutes);
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
         // A theme can also switch the wallpaper off while the file is still there.
@@ -787,7 +794,7 @@ final class Config {
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, restoreKeyServices, wallpaperEnabled, wallpaper,
                 wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow, fadeRows,
-                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome, wallpaperMotion, headerMood, clockWeight, clockHours, clockSeconds, tileShape, nowPlaying, headerScrim, clockSlideshowMinutes, pool, notificationLine, nowPlayingCard, nowPlayingArt, newsProvider, newsCard, newsSeconds, newsStories, newsPosition);
+                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, tileMenu, dockEvenPadding, cinematicDots, cinematicWhiteFocus, wifiStatusColor, cinematicScrim, cinematicArt, wallpaperMoods, gamepadPassthrough, consumeVolumeKeys, wifiStatusWarnings, topBarApps, showGreeting, headerWhite, clockWallpaper, Math.max(0, Math.min(90, clockWallpaperDim)), clockGlow, glassStyle, singleRow && dockRow, dockBandAll, lunar, lunarOffset, homeHook, settingsMenuOnClick, weatherProvider, weatherLine, cycleOnHome, wallpaperMotion, headerMood, clockWeight, clockHours, clockSeconds, tileShape, nowPlaying, headerScrim, clockSlideshowMinutes, pool, notificationLine, nowPlayingCard, nowPlayingArt, newsProvider, newsCard, newsSeconds, newsStories, newsPosition, newsShown);
     }
 
     /**
@@ -831,12 +838,12 @@ final class Config {
             SharedPreferences.Editor editor = choices.edit();
             if (!"absent".equals(token)) editor.remove("columns").remove("animations")
                     .remove("advanced_effects").remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY)
-                    .remove(DOCK_OPACITY_KEY).remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY).remove(WALLPAPER_MOTION_KEY).remove(CLOCK_WEIGHT_KEY).remove(CLOCK_HOURS_KEY).remove(CLOCK_SECONDS_KEY).remove(TILE_SHAPE_KEY).remove(NEWS_SECONDS_KEY).remove(NEWS_STORIES_KEY).remove(NEWS_POSITION_KEY);
+                    .remove(DOCK_OPACITY_KEY).remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY).remove(WALLPAPER_MOTION_KEY).remove(CLOCK_WEIGHT_KEY).remove(CLOCK_HOURS_KEY).remove(CLOCK_SECONDS_KEY).remove(TILE_SHAPE_KEY).remove(NEWS_SECONDS_KEY).remove(NEWS_STORIES_KEY).remove(NEWS_POSITION_KEY).remove(NEWS_ON_KEY).remove(IDLE_CLOCK_KEY);
             editor.putString(THEME_SIGNATURE_KEY, signature).commit();
         } else if (!seen.equals(signature)) {
             choices.edit().remove("columns").remove("animations").remove("advanced_effects")
                     .remove(ROWS_BELOW_DOCK_KEY).remove(WALLPAPER_CHOICE_KEY).remove(DOCK_OPACITY_KEY)
-                    .remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY).remove(WALLPAPER_MOTION_KEY).remove(CLOCK_WEIGHT_KEY).remove(CLOCK_HOURS_KEY).remove(CLOCK_SECONDS_KEY).remove(TILE_SHAPE_KEY).remove(NEWS_SECONDS_KEY).remove(NEWS_STORIES_KEY).remove(NEWS_POSITION_KEY)
+                    .remove(GREETING_KEY).remove(HEADER_WHITE_KEY).remove(WIFI_PILL_KEY).remove(WIFI_COLOR_KEY).remove(WEATHER_KEY).remove(WALLPAPER_SET_KEY).remove(WALLPAPER_CYCLE_KEY).remove(WALLPAPER_MOTION_KEY).remove(CLOCK_WEIGHT_KEY).remove(CLOCK_HOURS_KEY).remove(CLOCK_SECONDS_KEY).remove(TILE_SHAPE_KEY).remove(NEWS_SECONDS_KEY).remove(NEWS_STORIES_KEY).remove(NEWS_POSITION_KEY).remove(NEWS_ON_KEY).remove(IDLE_CLOCK_KEY)
                     .putString(THEME_SIGNATURE_KEY, signature).commit();
         }
     }

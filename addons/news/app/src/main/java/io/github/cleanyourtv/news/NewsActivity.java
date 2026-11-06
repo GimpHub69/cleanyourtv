@@ -123,7 +123,7 @@ public final class NewsActivity extends Activity {
         picture.setVisibility(b != null ? View.VISIBLE : View.GONE);
     }
 
-    /** The story's picture from the add-on's own cache (480 px wide JPEG, a few ms to decode), or null. */
+    /** The story's picture from the add-on's own cache (800 px wide JPEG, a few ms to decode), or null. */
     private Bitmap cachedPicture(Feed.Item i) {
         if (i.image.isEmpty()) return null;
         File f = Feed.imageFile(this, i.image);

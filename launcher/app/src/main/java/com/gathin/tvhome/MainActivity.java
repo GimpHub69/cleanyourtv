@@ -509,7 +509,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         noticeOn = cfg.notificationLine;
         // news_position: the line or card stays under the clock, moves under the pills, or is off; both views travel
         // together so NewsLine finds the one the theme asked for.
-        boolean newsOn = !cfg.newsProvider.isEmpty() && !"off".equals(cfg.newsPosition);
+        boolean newsOn = !cfg.newsProvider.isEmpty() && cfg.newsShown;
         if (newsOn && "right".equals(cfg.newsPosition)) {
             android.view.ViewGroup slot = findViewById(R.id.newsRight);
             for (int id : new int[]{R.id.newsLine, R.id.newsCard}) {
@@ -518,6 +518,21 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 slot.addView(v);
             }
             slot.setVisibility(View.VISIBLE);
+            // Under the pills the card stands: the picture (320x180 dp) above, the source, headline and dots below it.
+            LinearLayout cardView = findViewById(R.id.newsCard);
+            cardView.setOrientation(LinearLayout.VERTICAL);
+            View picture = findViewById(R.id.newsImage);
+            LinearLayout.LayoutParams pp = (LinearLayout.LayoutParams) picture.getLayoutParams();
+            pp.width = (int) (320 * density);
+            pp.height = (int) (180 * density);
+            View column = cardView.getChildAt(1);
+            LinearLayout.LayoutParams cp = (LinearLayout.LayoutParams) column.getLayoutParams();
+            cp.width = pp.width;
+            cp.weight = 0;
+            cp.setMarginStart(0);
+            cp.setMarginEnd(0);
+            cp.topMargin = (int) (10 * density);
+            cp.gravity = android.view.Gravity.NO_GRAVITY;
         }
         newsLine = !newsOn ? null : new NewsLine(findViewById(R.id.newsLine), cfg.newsProvider,
                 cfg.newsCard ? findViewById(R.id.newsCard) : null, cfg.newsSeconds * 1000L, cfg.newsStories);

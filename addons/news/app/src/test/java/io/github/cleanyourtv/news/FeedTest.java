@@ -35,7 +35,7 @@ public class FeedTest {
         assertEquals("First & foremost", items.get(0).title);
         assertEquals("Some HTML here.", items.get(0).summary);
         assertEquals("https://example.org/1", items.get(0).link);
-        assertEquals("https://ichef.example/ace/standard/480/pic.jpg", items.get(0).image);
+        assertEquals("https://ichef.example/ace/standard/800/pic.jpg", items.get(0).image);
         assertEquals("", items.get(1).image);
         assertEquals(Feed.parseDate("Sun, 01 Nov 2026 15:04:56 GMT"), items.get(0).published);
         assertTrue(items.get(0).published > items.get(1).published);
