@@ -688,6 +688,20 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             grid.post(this::refitGlass);
         });
 
+        // A tile bound or re-attached while the grid is scrolled (a reload, a move) takes the dock's current state,
+        // so a faded dock tile never comes back invisible at the top.
+        grid.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
+            @Override
+            public void onChildViewAttachedToWindow(@NonNull View v) {
+                fadeDockTile(v, !singleRow && grid.computeVerticalScrollOffset() > 0, false);
+            }
+
+            @Override
+            public void onChildViewDetachedFromWindow(@NonNull View v) {
+                v.animate().cancel();
+                v.setAlpha(1f);
+            }
+        });
         // Keep the glass glued to its tile while the grid scrolls.
         grid.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -697,19 +711,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 // instead of showing as a strip under the header.
                 if (dy != 0 && !singleRow) {
                     boolean away = rv.computeVerticalScrollOffset() > 0;
-                    boolean animate = animations && !reducedMotion;
-                    if (newsLine != null) newsLine.setScrolledAway(away, animate);
-                    if (dockRow) {
-                        for (int i = 0; i < rv.getChildCount(); i++) {
-                            View ch = rv.getChildAt(i);
-                            int pos = rv.getChildAdapterPosition(ch);
-                            float a = away && pos >= 0 && pos < COLUMNS ? 0f : 1f;
-                            if (ch.getAlpha() == a) continue;
-                            ch.animate().cancel();
-                            if (animate) ch.animate().alpha(a).setDuration(a == 0f ? 160 : 260).start();
-                            else ch.setAlpha(a);
-                        }
-                    }
+                    if (newsLine != null) newsLine.setScrolledAway(away, animations && !reducedMotion);
+                    for (int i = 0; i < rv.getChildCount(); i++) fadeDockTile(rv.getChildAt(i), away, true);
                 }
                 if (!glassShown) return;
                 glassTargetY -= dy;
@@ -2077,6 +2080,20 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             setAmbient(color);
             ambient.animate().alpha(1f).setDuration(500).start();
         }).start();
+    }
+
+    /**
+     * The dock row cannot scroll fully off a short screen, so while the grid is away from its top the dock's
+     * cut-off tiles are faded out instead of showing as a strip under the header; back at the top they return.
+     */
+    private void fadeDockTile(View tile, boolean away, boolean animate) {
+        if (!dockRow) return;
+        int pos = grid.getChildAdapterPosition(tile);
+        float a = away && pos >= 0 && pos < COLUMNS ? 0f : 1f;
+        if (tile.getAlpha() == a) return;
+        tile.animate().cancel();
+        if (animate && animations && !reducedMotion) tile.animate().alpha(a).setDuration(a == 0f ? 160 : 260).start();
+        else tile.setAlpha(a);
     }
 
     private void hideHero() {
