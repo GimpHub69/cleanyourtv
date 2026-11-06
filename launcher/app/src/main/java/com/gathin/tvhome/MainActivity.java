@@ -1780,6 +1780,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         int h = (int) (card.getHeight() * scale + 2 * pad);
         if (!glassShown || card.getWidth() != glassCardW || glass.getWidth() != w || glass.getHeight() != h) {
             onTileFocused(pos, card);
+            return;
+        }
+        // The top shelf too: after a Home rebuild the dock can park at a new height while the glass still fits,
+        // and the hero would stay where the dock was.
+        if (heroShown && dockRow && (singleRow || pos < COLUMNS)) {
+            Rect r = tileRect;
+            r.set(0, 0, card.getWidth(), card.getHeight());
+            root.offsetDescendantRectToMyCoords(card, r);
+            float want = r.top - 14 * density - 26 * density - hero.getHeight();
+            if (Math.abs(hero.getY() - want) > 2f * density) onTileFocused(pos, card);
         }
     }
 
