@@ -196,8 +196,13 @@ final class Feed {
         return newest(all, max);
     }
 
+    /** Newest first, capped; a story two feeds both carry (same link, or same title) is kept once. */
     static List<Item> newest(List<Item> all, int max) {
-        List<Item> out = new ArrayList<>(all);
+        List<Item> out = new ArrayList<>();
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (Item i : all) {
+            if (seen.add(i.link.isEmpty() ? "t:" + i.title : i.link) && seen.add("t:" + i.title)) out.add(i);
+        }
         Collections.sort(out, (a, b) -> Long.compare(b.published, a.published));
         return out.size() > max ? new ArrayList<>(out.subList(0, max)) : out;
     }

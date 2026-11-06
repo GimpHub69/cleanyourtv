@@ -98,4 +98,14 @@ public class FeedTest {
         assertEquals("http://b.example/feed", f.get(1));
         assertTrue(Feed.parseFeeds("").isEmpty());
     }
+
+    @Test
+    public void newestKeepsAStoryTwoFeedsShareOnce() {
+        Feed.Item a = new Feed.Item("BBC News", "Same story", "", "https://x/1", "", 3);
+        Feed.Item b = new Feed.Item("BBC News", "Same story", "", "https://x/1", "", 3);
+        Feed.Item c = new Feed.Item("Sky", "Other", "", "https://x/2", "", 2);
+        List<Feed.Item> out = Feed.newest(java.util.Arrays.asList(c, a, b), 10);
+        assertEquals(2, out.size());
+        assertEquals("Same story", out.get(0).title);
+    }
 }
