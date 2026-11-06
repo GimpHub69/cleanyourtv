@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A headline row: plain, and a pale card while focused so the remote's place is clear. -->
+<!-- A headline row: plain, and while it is the list's selected row (the remote's place) a bright card with the
+     add-on's red bar down its start edge, so the chosen story is clear from across the room. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_focused="true">
-        <shape android:shape="rectangle">
-            <solid android:color="#33FFFFFF" />
-            <corners android:radius="10dp" />
-        </shape>
+    <item android:state_selected="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#59FFFFFF" />
+                    <corners android:radius="10dp" />
+                </shape>
+            </item>
+            <item android:width="5dp" android:gravity="start|fill_vertical">
+                <shape android:shape="rectangle">
+                    <solid android:color="#FFE74C3C" />
+                    <corners android:topLeftRadius="10dp" android:bottomLeftRadius="10dp" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
     <item>
         <shape android:shape="rectangle">

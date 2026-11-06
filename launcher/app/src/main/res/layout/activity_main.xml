@@ -538,6 +538,16 @@
                     android:drawableStart="@drawable/ic_settings"
                     android:nextFocusDown="@+id/grid" />
             </LinearLayout>
+            <!-- news_position "right": the news line or card moves here from leftBlock (MainActivity), under the pills. -->
+            <LinearLayout
+                android:id="@+id/newsRight"
+                android:layout_width="520dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/topButtons"
+                android:layout_alignEnd="@id/topButtons"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical"
+                android:visibility="gone" />
         </RelativeLayout>
 
         <!-- The wrapper clips at the grid's edge; the grid itself must not clip so scaled tiles can overflow their cells. -->

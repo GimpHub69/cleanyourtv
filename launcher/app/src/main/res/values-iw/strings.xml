@@ -187,6 +187,13 @@
     <string name="clock_hours_12">12 שעות</string>
     <string name="clock_hours_24">24 שעות</string>
     <string name="clock_seconds_state">שניות: %1$s</string>
+    <string name="section_news">חדשות</string>
+    <string name="news_speed_state">הכתבה הבאה אחרי: %1$s</string>
+    <string name="news_seconds_value">%1$d שנ׳</string>
+    <string name="news_stories_state">כתבות בכרטיס: %1$s</string>
+    <string name="news_position_state">מיקום: %1$s</string>
+    <string name="news_place_left">מתחת לשעון</string>
+    <string name="news_place_right">מתחת לכפתורים</string>
     <string name="tile_shape_state">צורת האריחים: %1$s</string>
     <string name="shape_rounded">מעוגל</string>
     <string name="shape_square">מרובע</string>

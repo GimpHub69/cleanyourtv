@@ -290,6 +290,12 @@
     <!-- With news_provider: seconds each headline or story stays before the next, 5 to 300. 20 by default; a theme
          can set "news_seconds": 10. -->
     <integer name="news_seconds">10</integer>
+    <!-- With news_card: how many of the newest stories the card cycles through (one dot each), 1 to 12. 8 by default; a
+         theme can set "news_stories": 6. -->
+    <integer name="news_stories">8</integer>
+    <!-- Where the news sits on Home: "left" (under the clock, the default), "right" (under the Wi-Fi and Settings
+         pills) or "off". A theme can set "news_position": "right". Launcher settings > News changes all three on the TV. -->
+    <string name="news_position" translatable="false">left</string>
     <!-- The dock band as light frosted glass, like the Inputs, Wi-Fi and Settings pills, so a sky or wallpaper shows
          through it. false (the default) keeps the solid near-black band, or the cinematic shelf's dark glass. Can
          also be set with "dock_glass": true in a theme's config.json. -->
@@ -457,7 +463,7 @@
     <!-- The rows fade out as they scroll up under the clock, instead of being cut off at a hard line (TopFade).
          The grid then draws into a hardware layer, about 6 MB of graphics memory at 1080p, so it is off by default.
          Can also be set with "fade_rows": true in a theme's config.json. -->
-    <bool name="fade_rows">false</bool>
+    <bool name="fade_rows">true</bool>
     <!-- Minutes Home may sit untouched before it shows the clock screensaver (ClockActivity); 0 turns it off.
          Unlike the system screensaver this never starts over live TV or an app, which matters on TVs whose
          Live TV window does not keep the screen on (CVTE): there the system screensaver would start in the

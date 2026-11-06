@@ -26,8 +26,8 @@ import java.util.List;
  */
 final class NewsLine {
     static final long STALE_MS = 6 * 60 * 60 * 1000L;
-    /** The card cycles the newest CARD_STORIES only, one dot each. */
-    static final int CARD_STORIES = 8;
+    /** The card cycles the newest few stories only, one dot each (config.xml news_stories). */
+    private final int maxStories;
     private static final int FADE_MS = 400;
     private final TextView line;
     private final String uri;
@@ -46,11 +46,12 @@ final class NewsLine {
     /** The picture's fade-in (imageAlpha only, so the dark frame behind it stays). */
     private android.animation.ObjectAnimator fade;
 
-    NewsLine(TextView line, String uri, View card, long rotateMs) {
+    NewsLine(TextView line, String uri, View card, long rotateMs, int stories) {
         this.line = line;
         this.uri = uri;
         this.card = card;
         this.rotateMs = rotateMs;
+        this.maxStories = stories;
         image = card == null ? null : card.findViewById(R.id.newsImage);
         source = card == null ? null : card.findViewById(R.id.newsSource);
         headline = card == null ? null : card.findViewById(R.id.newsHeadline);
@@ -102,7 +103,7 @@ final class NewsLine {
                         if (title == null || title.trim().isEmpty()) continue;
                         String src = s >= 0 && c.getString(s) != null ? c.getString(s).trim() : "";
                         String img = i >= 0 && c.getString(i) != null ? c.getString(i).trim() : "";
-                        if (card != null && fresh.size() >= CARD_STORIES) break;
+                        if (card != null && fresh.size() >= maxStories) break;
                         fresh.add(new String[]{src, title.trim(), img});
                     }
                 }

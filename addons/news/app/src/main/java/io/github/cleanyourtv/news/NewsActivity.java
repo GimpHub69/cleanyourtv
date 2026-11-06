@@ -52,6 +52,12 @@ public final class NewsActivity extends Activity {
         summary = findViewById(R.id.summary);
         picture = findViewById(R.id.picture);
         findViewById(R.id.feeds).setOnClickListener(v -> chooseFeeds());
+        list.setOnItemClickListener((p, v, pos, id) -> {
+            Feed.Item i = (Feed.Item) p.getItemAtPosition(pos);
+            if (i != null && !i.link.isEmpty()) {
+                startActivity(new android.content.Intent(this, ArticleActivity.class).putExtra(ArticleActivity.EXTRA_URL, i.link));
+            }
+        });
         list.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> p, View v, int pos, long id) { showItem((Feed.Item) p.getItemAtPosition(pos)); }
             @Override public void onNothingSelected(AdapterView<?> p) {}

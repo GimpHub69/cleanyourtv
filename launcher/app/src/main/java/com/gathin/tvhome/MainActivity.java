@@ -507,8 +507,20 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         nowPlayingOn = cfg.nowPlaying;
         noticeLine = findViewById(R.id.noticeLine);
         noticeOn = cfg.notificationLine;
-        newsLine = cfg.newsProvider.isEmpty() ? null : new NewsLine(findViewById(R.id.newsLine), cfg.newsProvider,
-                cfg.newsCard ? findViewById(R.id.newsCard) : null, cfg.newsSeconds * 1000L);
+        // news_position: the line or card stays under the clock, moves under the pills, or is off; both views travel
+        // together so NewsLine finds the one the theme asked for.
+        boolean newsOn = !cfg.newsProvider.isEmpty() && !"off".equals(cfg.newsPosition);
+        if (newsOn && "right".equals(cfg.newsPosition)) {
+            android.view.ViewGroup slot = findViewById(R.id.newsRight);
+            for (int id : new int[]{R.id.newsLine, R.id.newsCard}) {
+                View v = findViewById(id);
+                ((android.view.ViewGroup) v.getParent()).removeView(v);
+                slot.addView(v);
+            }
+            slot.setVisibility(View.VISIBLE);
+        }
+        newsLine = !newsOn ? null : new NewsLine(findViewById(R.id.newsLine), cfg.newsProvider,
+                cfg.newsCard ? findViewById(R.id.newsCard) : null, cfg.newsSeconds * 1000L, cfg.newsStories);
         nowPlayingCard = cfg.nowPlayingCard;
         nowPlayingArt = cfg.nowPlayingArt;
         if (cfg.headerScrim) findViewById(R.id.headerScrim).setVisibility(View.VISIBLE);
@@ -680,9 +692,24 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         grid.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
-                // The headline under the clock gives way once the rows scroll up towards it.
-                if (newsLine != null && dy != 0) {
-                    newsLine.setScrolledAway(rv.computeVerticalScrollOffset() > 0, animations && !reducedMotion);
+                // The headline under the clock gives way once the rows scroll up towards it, and so does the dock
+                // row itself: the grid cannot scroll it fully off a short screen, so its cut-off tiles fade out
+                // instead of showing as a strip under the header.
+                if (dy != 0 && !singleRow) {
+                    boolean away = rv.computeVerticalScrollOffset() > 0;
+                    boolean animate = animations && !reducedMotion;
+                    if (newsLine != null) newsLine.setScrolledAway(away, animate);
+                    if (dockRow) {
+                        for (int i = 0; i < rv.getChildCount(); i++) {
+                            View ch = rv.getChildAt(i);
+                            int pos = rv.getChildAdapterPosition(ch);
+                            float a = away && pos >= 0 && pos < COLUMNS ? 0f : 1f;
+                            if (ch.getAlpha() == a) continue;
+                            ch.animate().cancel();
+                            if (animate) ch.animate().alpha(a).setDuration(a == 0f ? 160 : 260).start();
+                            else ch.setAlpha(a);
+                        }
+                    }
                 }
                 if (!glassShown) return;
                 glassTargetY -= dy;

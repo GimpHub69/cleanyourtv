@@ -227,6 +227,15 @@
                 <TextView android:id="@+id/weatherChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" android:visibility="gone" />
             </LinearLayout>
 
+            <!-- News: shown only with a news_provider (LauncherSettingsActivity). -->
+            <TextView android:id="@+id/newsSection" style="@style/SettingsSection" android:text="@string/section_news" android:visibility="gone" />
+
+            <LinearLayout android:id="@+id/newsGroup" style="@style/SettingsGroup" android:visibility="gone">
+                <TextView android:id="@+id/newsSpeedChoice" style="@style/SettingsRow" />
+                <TextView android:id="@+id/newsStoriesChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
+                <TextView android:id="@+id/newsPositionChoice" style="@style/SettingsRow" android:layout_marginTop="6dp" />
+            </LinearLayout>
+
             <TextView style="@style/SettingsSection" android:text="@string/section_motion" />
 
             <LinearLayout style="@style/SettingsGroup">

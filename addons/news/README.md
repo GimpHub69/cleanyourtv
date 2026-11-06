@@ -37,6 +37,12 @@ it at once. Each feed is downloaded whole every 15 minutes and must stay under 5
 on 2026-11-06 (the Guardian's is about 500 KB, the New York Times' 124 KB). A feed without `media:thumbnail` or an
 image enclosure gives stories without pictures.
 
+### The full article
+
+OK on a headline opens its link full screen in the TV's own WebView (`ArticleActivity`): Up and Down scroll by a
+third of the screen, Back goes back through the pages and then to the headlines. JavaScript and DOM storage are on
+for that page, because news sites draw their text with them; the page is the publisher's, with its cookie banners.
+
 ### Pictures
 
 After each fetch the app downloads the picture of every kept story (within 30 seconds per pass, over HTTPS only,

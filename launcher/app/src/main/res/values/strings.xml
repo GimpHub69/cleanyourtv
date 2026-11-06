@@ -194,6 +194,13 @@
     <string name="clock_hours_24">24-hour</string>
     <string name="clock_seconds_state">Seconds: %1$s</string>
     <string name="tile_shape_state">Tile shape: %1$s</string>
+    <string name="section_news">News</string>
+    <string name="news_speed_state">Next story after: %1$s</string>
+    <string name="news_seconds_value">%1$d s</string>
+    <string name="news_stories_state">Stories in the card: %1$s</string>
+    <string name="news_position_state">Place: %1$s</string>
+    <string name="news_place_left">Under the clock</string>
+    <string name="news_place_right">Under the pills</string>
     <string name="shape_rounded">Rounded</string>
     <string name="shape_square">Square</string>
     <string name="shape_pill">Pill</string>

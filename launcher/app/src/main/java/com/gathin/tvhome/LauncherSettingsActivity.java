@@ -75,6 +75,11 @@ public final class LauncherSettingsActivity extends Activity {
     private static final String[] SHAPES = {"rounded", "square", "pill"};
     private String tileShape;
     private android.widget.TextClock previewClock;
+    /** News: seconds per story, stories in the card, place (0 under the clock, 1 under the pills, 2 off). */
+    private TextView newsSpeedChoice, newsStoriesChoice, newsPositionChoice;
+    private static final int[] NEWS_SPEEDS = {5, 10, 15, 20, 30, 60};
+    private static final int[] NEWS_COUNTS = {3, 4, 5, 6, 8, 10, 12};
+    private int newsSeconds, newsStories, newsPlace;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -218,6 +223,21 @@ public final class LauncherSettingsActivity extends Activity {
         wifiColorChoice.setOnClickListener(v -> toggleColor.run());
         stepKeys(wifiColorChoice, toggleColor, toggleColor);
 
+        // News: only with a provider; Left and Right step each row.
+        newsSpeedChoice = findViewById(R.id.newsSpeedChoice);
+        newsStoriesChoice = findViewById(R.id.newsStoriesChoice);
+        newsPositionChoice = findViewById(R.id.newsPositionChoice);
+        if (!config.newsProvider.isEmpty()) {
+            findViewById(R.id.newsSection).setVisibility(View.VISIBLE);
+            findViewById(R.id.newsGroup).setVisibility(View.VISIBLE);
+            newsSpeedChoice.setOnClickListener(v -> stepNews(0, 1));
+            stepKeys(newsSpeedChoice, () -> stepNews(0, -1), () -> stepNews(0, 1));
+            newsStoriesChoice.setOnClickListener(v -> stepNews(1, 1));
+            stepKeys(newsStoriesChoice, () -> stepNews(1, -1), () -> stepNews(1, 1));
+            newsPositionChoice.setOnClickListener(v -> stepNews(2, 1));
+            stepKeys(newsPositionChoice, () -> stepNews(2, -1), () -> stepNews(2, 1));
+        }
+
         animationsChoice = findViewById(R.id.animationsChoice);
         Runnable toggleAnimations = () -> {
             animations = !animations;
@@ -256,7 +276,8 @@ public final class LauncherSettingsActivity extends Activity {
                     .remove(Config.DOCK_OPACITY_KEY).remove(OpenOnStart.KEY)
                     .remove(Config.GREETING_KEY).remove(Config.HEADER_WHITE_KEY)
                     .remove(Config.WIFI_PILL_KEY).remove(Config.WIFI_COLOR_KEY).remove(Config.WEATHER_KEY)
-                    .remove(Config.WALLPAPER_SET_KEY).remove(Config.WALLPAPER_CYCLE_KEY).remove(Config.WALLPAPER_MOTION_KEY).commit();
+                    .remove(Config.WALLPAPER_SET_KEY).remove(Config.WALLPAPER_CYCLE_KEY).remove(Config.WALLPAPER_MOTION_KEY)
+                    .remove(Config.NEWS_SECONDS_KEY).remove(Config.NEWS_STORIES_KEY).remove(Config.NEWS_POSITION_KEY).commit();
             loadPreviewPicture();
             readCurrent(Config.load(this));
             changed();
@@ -308,6 +329,26 @@ public final class LauncherSettingsActivity extends Activity {
         int at = Math.round(dockOpacity / 10f) * 10 + by;
         dockOpacity = ((at % 110) + 110) % 110;
         choices.edit().putInt(Config.DOCK_OPACITY_KEY, dockOpacity).apply();
+        changed();
+        refresh();
+    }
+
+    /** Row 0 the speed, 1 the count, 2 the place, each wrapping through its values. */
+    private void stepNews(int row, int by) {
+        if (row == 0) {
+            int at = 0;
+            for (int i = 0; i < NEWS_SPEEDS.length; i++) if (NEWS_SPEEDS[i] <= newsSeconds) at = i;
+            newsSeconds = NEWS_SPEEDS[((at + by) % NEWS_SPEEDS.length + NEWS_SPEEDS.length) % NEWS_SPEEDS.length];
+            choices.edit().putInt(Config.NEWS_SECONDS_KEY, newsSeconds).apply();
+        } else if (row == 1) {
+            int at = 0;
+            for (int i = 0; i < NEWS_COUNTS.length; i++) if (NEWS_COUNTS[i] <= newsStories) at = i;
+            newsStories = NEWS_COUNTS[((at + by) % NEWS_COUNTS.length + NEWS_COUNTS.length) % NEWS_COUNTS.length];
+            choices.edit().putInt(Config.NEWS_STORIES_KEY, newsStories).apply();
+        } else {
+            newsPlace = ((newsPlace + by) % 3 + 3) % 3;
+            choices.edit().putInt(Config.NEWS_POSITION_KEY, newsPlace).apply();
+        }
         changed();
         refresh();
     }
@@ -389,6 +430,9 @@ public final class LauncherSettingsActivity extends Activity {
         clockHours = config.clockHours;
         clockSeconds = config.clockSeconds;
         tileShape = config.tileShape;
+        newsSeconds = config.newsSeconds;
+        newsStories = config.newsStories;
+        newsPlace = "right".equals(config.newsPosition) ? 1 : "off".equals(config.newsPosition) ? 2 : 0;
         cycle = choices.getInt(Config.WALLPAPER_CYCLE_KEY, 0);
         motion = choices.getBoolean(Config.WALLPAPER_MOTION_KEY, config.wallpaperMotion);
         previewPicture = config.wallpapers.isEmpty() ? null : config.wallpapers.get(0);
@@ -577,6 +621,10 @@ public final class LauncherSettingsActivity extends Activity {
         tileShapeChoice.setText(getString(R.string.tile_shape_state, getString("pill".equals(tileShape) ? R.string.shape_pill
                 : "square".equals(tileShape) ? R.string.shape_square : R.string.shape_rounded)));
         headerWhiteChoice.setText(getString(R.string.header_white_state, onOff(headerWhite)));
+        newsSpeedChoice.setText(getString(R.string.news_speed_state, getString(R.string.news_seconds_value, newsSeconds)));
+        newsStoriesChoice.setText(getString(R.string.news_stories_state, String.valueOf(newsStories)));
+        newsPositionChoice.setText(getString(R.string.news_position_state, getString(newsPlace == 1 ? R.string.news_place_right
+                : newsPlace == 2 ? R.string.off : R.string.news_place_left)));
         wifiPillChoice.setText(getString(R.string.wifi_pill_state, getString(wifiPill == 2 ? R.string.wifi_pill_hidden
                 : wifiPill == 1 ? R.string.wifi_pill_icon : R.string.wifi_pill_label)));
         wifiColorChoice.setText(getString(R.string.wifi_color_state, onOff(wifiColor)));
@@ -608,7 +656,8 @@ public final class LauncherSettingsActivity extends Activity {
                 || choices.contains(Config.WALLPAPER_SET_KEY) || choices.contains(Config.WALLPAPER_CYCLE_KEY)
                 || choices.contains(Config.WALLPAPER_MOTION_KEY) || choices.contains(Config.CLOCK_WEIGHT_KEY)
                 || choices.contains(Config.CLOCK_HOURS_KEY) || choices.contains(Config.CLOCK_SECONDS_KEY)
-                || choices.contains(Config.TILE_SHAPE_KEY);
+                || choices.contains(Config.TILE_SHAPE_KEY) || choices.contains(Config.NEWS_SECONDS_KEY)
+                || choices.contains(Config.NEWS_STORIES_KEY) || choices.contains(Config.NEWS_POSITION_KEY);
     }
 
     private void open(Intent intent) {
