@@ -54,7 +54,7 @@ the rules. Keys from before this rule are on its wanted list; a screenshot for o
 | `wallpaper_motion` | Fire TV Stick 4K Max: the Sweden picture drawn a few percent in, ready to slide against the focused tile | <img src="switches/wallpaper_motion.jpg" width="320" alt="wallpaper_motion"> |
 | `tile_shape` | Fire TV Stick 4K Max: `pill` tiles, the dock band and focus glass rounded to match | <img src="switches/tile_shape.jpg" width="320" alt="tile_shape"> |
 | `now_playing` | Fire TV Stick 4K Max: "▶ Playing on Stremio" with the title under the weather line while Stremio plays behind Home | <img src="switches/now_playing.jpg" width="320" alt="now_playing"> |
-| `notification_line` | Fire TV Stick 4K Max: the latest notification's title under the now-playing line for a minute | <img src="switches/now_playing.jpg" width="320" alt="notification_line"> |
+| `notification_line` | Fire TV Stick 4K Max: the latest notification's title under the now-playing line for a minute | <img src="switches/notification_line.jpg" width="320" alt="notification_line"> |
 | `now_playing_card` | Fire TV Stick 4K Max: the paused app's tile with the film's artwork and its title | <img src="switches/now_playing_card.jpg" width="320" alt="now_playing_card"> |
 | `now_playing_art` | Fire TV Stick 4K Max: the paused film's artwork, soft and dark, behind Home | <img src="switches/now_playing_card.jpg" width="320" alt="now_playing_art"> |
 | `header_scrim` | Fire TV Stick 4K Max: the top of the Ruska sky darkened behind the clock and the lines under it | <img src="switches/header_scrim.jpg" width="320" alt="header_scrim"> |
