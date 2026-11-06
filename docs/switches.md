@@ -47,12 +47,12 @@ the rules. Keys from before this rule are on its wanted list; a screenshot for o
 | `settings_menu_on_click` | Fire TV Stick 4K Max: OK on the Settings pill drops the launcher's menu, TV settings as its second row | <img src="switches/settings_menu_on_click.jpg" width="320" alt="settings_menu_on_click"> |
 | `weather_provider` | Fire TV Stick 4K Max with the weather add-on installed: its "12° · Cloudy" line under the date, read from the add-on's content provider | <img src="switches/weather_provider.jpg" width="320" alt="weather_provider"> |
 | `news_provider` | Fire TV Stick 4K Max with the news add-on installed: one BBC headline under the clock, the next every 20 seconds | <img src="switches/news_provider.jpg" width="320" alt="news_provider"> |
-| `news_card` | Fire TV Stick 4K Max with the news add-on: the story picture with the source and headline beside it under the clock | <img src="switches/news_provider.jpg" width="320" alt="news_card"> |
+| `news_card` | Fire TV Stick 4K Max with the news add-on: the story picture with the source and headline beside it under the clock | <img src="switches/news_card.jpg" width="320" alt="news_card"> |
 | `wallpaper_motion` | Fire TV Stick 4K Max: the Sweden picture drawn a few percent in, ready to slide against the focused tile | <img src="switches/wallpaper_motion.jpg" width="320" alt="wallpaper_motion"> |
 | `tile_shape` | Fire TV Stick 4K Max: `pill` tiles, the dock band and focus glass rounded to match | <img src="switches/tile_shape.jpg" width="320" alt="tile_shape"> |
 | `now_playing` | Fire TV Stick 4K Max: "▶ Playing on Stremio" with the title under the weather line while Stremio plays behind Home | <img src="switches/now_playing.jpg" width="320" alt="now_playing"> |
 | `notification_line` | Fire TV Stick 4K Max: the latest notification's title under the now-playing line for a minute | <img src="switches/now_playing.jpg" width="320" alt="notification_line"> |
-| `now_playing_card` | Fire TV Stick 4K Max: the paused app's tile with the film's artwork and its title | <img src="switches/now_playing.jpg" width="320" alt="now_playing_card"> |
-| `now_playing_art` | Fire TV Stick 4K Max: the paused film's artwork, soft and dark, behind Home | <img src="switches/now_playing.jpg" width="320" alt="now_playing_art"> |
+| `now_playing_card` | Fire TV Stick 4K Max: the paused app's tile with the film's artwork and its title | <img src="switches/now_playing_card.jpg" width="320" alt="now_playing_card"> |
+| `now_playing_art` | Fire TV Stick 4K Max: the paused film's artwork, soft and dark, behind Home | <img src="switches/now_playing_card.jpg" width="320" alt="now_playing_art"> |
 | `header_scrim` | Fire TV Stick 4K Max: the top of the Ruska sky darkened behind the clock and the lines under it | <img src="switches/header_scrim.jpg" width="320" alt="header_scrim"> |
 | `header_mood` | Fire TV Stick 4K Max: the weather line in the condition's tint (rain, cool blue) under the clock | <img src="switches/header_mood.jpg" width="320" alt="header_mood"> |

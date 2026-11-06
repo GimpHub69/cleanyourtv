@@ -95,6 +95,11 @@ final class NewsLine {
             }
             line.post(() -> {
                 boolean first = stories.isEmpty();
+                // The story on screen keeps its place when newer ones push it down the list; gone, the rotation
+                // starts the new list from its top.
+                String shown = first ? null : stories.get(next % stories.size())[1];
+                int at = -1;
+                for (int k = 0; shown != null && k < fresh.size() && at < 0; k++) if (fresh.get(k)[1].equals(shown)) at = k;
                 stories = fresh;
                 if (fresh.isEmpty()) {
                     line.setVisibility(View.GONE);
@@ -102,6 +107,8 @@ final class NewsLine {
                 } else if (first) {
                     next = 0;
                     show();
+                } else {
+                    next = at >= 0 ? at : fresh.size() - 1;
                 }
             });
         }, "NewsLine").start();
