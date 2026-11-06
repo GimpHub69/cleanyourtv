@@ -82,7 +82,7 @@ final class Feed {
                 if (n.getNodeType() == Node.ELEMENT_NODE && "channel".equals(n.getNodeName())) head = (Element) n;
             }
         }
-        String source = clean(firstText(head, "title"));
+        String source = shortSource(clean(firstText(head, "title")));
         NodeList entries = root.getElementsByTagName(atom ? "entry" : "item");
         for (int i = 0; i < entries.getLength(); i++) {
             Element e = (Element) entries.item(i);
@@ -240,6 +240,14 @@ final class Feed {
         String saved = ctx.getSharedPreferences(SETTINGS, 0).getString("feeds", null);
         List<String> list = saved == null ? null : parseFeeds(saved);
         return list == null || list.isEmpty() ? ctx.getResources().getStringArray(R.array.feeds) : list.toArray(new String[0]);
+    }
+
+    /** A feed's name for the card: the brand after a "|" ("World News - ... | Sky News" is "Sky News"), at most 32 characters. */
+    static String shortSource(String title) {
+        String s = title == null ? "" : title.trim();
+        if (s.contains("|")) s = s.substring(s.lastIndexOf('|') + 1).trim();
+        if (s.length() > 32 && s.contains(" - ")) s = s.substring(0, s.indexOf(" - ")).trim();
+        return s.length() > 32 ? s.substring(0, 31).trim() + "\u2026" : s;
     }
 
     /** One URL per line, trimmed, blanks and repeats dropped, http(s) only. */

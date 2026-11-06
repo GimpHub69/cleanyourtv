@@ -108,4 +108,11 @@ public class FeedTest {
         assertEquals(2, out.size());
         assertEquals("Same story", out.get(0).title);
     }
+
+    @Test
+    public void sourceIsTheBrandNotTheSlogan() {
+        assertEquals("Sky News", Feed.shortSource("World News - Breaking international news and headlines | Sky News"));
+        assertEquals("BBC News", Feed.shortSource("BBC News"));
+        assertEquals("Some Very Long Feed Name", Feed.shortSource("Some Very Long Feed Name - all the news that fits in here"));
+    }
 }
