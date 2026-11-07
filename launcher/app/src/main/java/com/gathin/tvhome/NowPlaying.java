@@ -34,6 +34,17 @@ public final class NowPlaying extends NotificationListenerService {
     static volatile Runnable onNotice;
     static final long NOTICE_MS = 60_000L;
 
+    /**
+     * restore_key_services: Android binds this listener again after a force stop, the same force stop that took the
+     * accessibility helpers off the enabled list. With home_hook that list is the only way Home comes back (Amazon's
+     * home stays in front, and MainActivity's own repair never runs), so the repair runs from here as well. A memory
+     * pressure kill on Fire OS 8 is such a force stop ("stop <pkg> due to ... checkKillAppGoingIntoBg").
+     */
+    @Override
+    public void onListenerConnected() {
+        if (Config.load(this).restoreKeyServices) ServiceRepair.restore(this);
+    }
+
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         Notification n = sbn.getNotification();
